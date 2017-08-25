@@ -3,10 +3,68 @@
 #include "CommandHandler.h"
 #include "EEPROMStore.h"
 
+#define TIMING_DEBUG
+#ifdef TIMING_DEBUG
+unsigned long timeInCode;
+volatile unsigned long timeInInterrupt;
+unsigned long timeTotal;
+unsigned long to50;
+unsigned long to100;
+unsigned long to150;
+unsigned long to200;
+unsigned long to300;
+unsigned long to400;
+unsigned long to500;
+unsigned long to600;
+unsigned long over600;
+unsigned long readRPM;
+byte timeCounting = 0;
+byte timeCountingStartFlag = 0;
+
+void printTimingResult(){
+  Serial.println(F("Timing results"));
+  Serial.print(F("Time in code: "));
+  Serial.print(timeInCode);
+  Serial.print(F(" us. "));
+  Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
+  Serial.println(F("%"));
+  Serial.print(F("Time in interrupts: "));
+  Serial.print(timeInInterrupt);
+  Serial.print(F(" us. "));
+  Serial.print(100 * (float)timeInInterrupt / (float)timeTotal, 2);
+  Serial.println(F("%"));
+  Serial.print(F("Total time: "));
+  Serial.print(timeTotal);
+  Serial.println(F(" us"));
+  Serial.print(F("rpmCount: "));
+  Serial.print(readRPM);
+  Serial.println(F(" us"));
+  Serial.print(F("<50 - "));
+  Serial.println(to50);
+  Serial.print(F("<100 - "));
+  Serial.println(to100);
+  Serial.print(F("<150 - "));
+  Serial.println(to150);
+  Serial.print(F("<200 - "));
+  Serial.println(to200);
+  Serial.print(F("<300 - "));
+  Serial.println(to300);
+  Serial.print(F("<400 - "));
+  Serial.println(to400);
+  Serial.print(F("<500 - "));
+  Serial.println(to500);
+  Serial.print(F("<600 - "));
+  Serial.println(to600);
+  Serial.print(F(">600 - "));
+  Serial.println(over600);
+}
+#endif
+
 //one iteration microseconds
 #define ITERATION_MICROSECONDS 1000
 //#define ITERATION_MICROSECONDS 2000
-#define DELAY_THRESHOLD 5000
+#define WARN_MICROSECONDS 500
+#define DELAY_THRESHOLD 10000
 
 // voltage to thermistor
 #define VOLTAGETHERMISTOR 3.3
@@ -23,11 +81,12 @@
 // The beta coefficient of the thermistor (usually 3000-4000)
 #define BCOEFFICIENT 3950
 
-//#define VOLTAGEINPUT0 A0
-//#define VOLTAGEINPUT1 A1
-//#define VOLTAGEINPUT2 A2
-//#define VOLTAGEINPUT3 A3
-//#define VOLTAGEINPUT4 A4
+#define VOLTAGEINPUT0 A4
+#define VOLTAGEINPUT1 A3
+#define VOLTAGEINPUT2 A2
+#define VOLTAGEINPUT3 A1
+#define VOLTAGEINPUT4 A0
+
 #define TEMPINPUT0 A6
 #define TEMPINPUT1 A7
 
@@ -37,14 +96,8 @@
 #define RPMSENSOR3 4
 #define RPMSENSOR4 12
 #define RPMSENSOR5 19   // A5
-#define RPMSENSOR_OUT 13
-/*
-#define RPMSENSOR_OUT1 A4
-#define RPMSENSOR_OUT2 A3
-#define RPMSENSOR_OUT3 A2
-#define RPMSENSOR_OUT4 A1
-#define RPMSENSOR_OUT5 A0
-*/
+
+#define LED_OUT 13
 
 #define PWM0 3  //OC2B
 #define PWM1 5  //OB0B
@@ -78,7 +131,7 @@ public:
   {
 //    Serial.println(F("Reset"));    
     pwmDrive = 0;
-    constPwm = 200;
+    constPwm = 150;
     tSelect = 0;
     minPwm = 100;
     maxPwm = 200;
@@ -151,13 +204,13 @@ unsigned long zpozdeni;
 unsigned long RT0koeficient;
 unsigned long RT1koeficient;
 
-// from mainboard
+// ADC values from mainboard
 short sensorValue0Averaged = 0;
 short sensorValue1Averaged = 0;
 short sensorValue2Averaged = 0;
 short sensorValue3Averaged = 0;
 short sensorValue4Averaged = 0;
-// from thermistors
+// ADC values from thermistors
 short sensorValue6Averaged = 0;
 short sensorValue7Averaged = 0;
 
@@ -212,7 +265,7 @@ double Input = 10;
 double Output = 10;
 
 //Specify the links and initial tuning parameters
-PID pid0(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
+//PID pid0(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 /*
 PID pid1(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid2(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
@@ -220,21 +273,18 @@ PID pid3(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid4(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid5(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 */
-CommandHandler<12, 35, 0> SerialCommandHandler; // 10 commands, max length of command 35, 0 variables
+CommandHandler<14, 35, 0> SerialCommandHandler; // 14 commands, max length of command 35, 0 variables
 
 byte i = 0;
 byte j = 0;
-byte fs = 0;   // full status
-byte s = 0;    // status
 byte gui = 0;  // enable gui
 
 void printlnPwmDrive(PWMConfiguration &conf);
-void printStatus(CommandParameter &parameters);
-void printFullStatus(CommandParameter &parameters);
+void printStatus();
+void printFullStatus();
 void setPwmConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged);
 void readRPMsensors();
-
 

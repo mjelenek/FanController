@@ -29,6 +29,12 @@ void guiDisable(){
   gui = 0;  
 }
 
+#ifdef TIMING_DEBUG
+  void timing(){
+    timeCountingStartFlag = 1;
+  }
+#endif
+
 void guiUpdate(){
   Serial.write(25);
   Serial.print(F("guiUpdate"));
@@ -130,6 +136,11 @@ void setRPMToMainboard(CommandParameter &parameters){
   } else {
     rmpToMainboard = 1;
   }
+}
+
+void tempCacheStatus(){
+  cacheT0.printStatus();
+  cacheT1.printStatus();
 }
 
 void Cmd_Unknown()

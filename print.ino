@@ -1,125 +1,58 @@
-void print(){
-  if(s == 1){
-    if(i == 51){
-
-      Serial.print(F(" T0:"));
-      if (T0Connected){
-        Serial.print(T0int / 10, 1);
-      } else {
-        Serial.print(F("N/A"));
-      }
-    }
-    if(i == 59){
-      Serial.print(F(" T1:"));
-      if (T1Connected){
-        Serial.println(T1int / 10, 1);
-      } else {
-        Serial.println(F("N/A"));
-      }
-    }
-    if(fs == 1){
-      if(i == 66){
-        Serial.print(F(" pwm0Drive: "));
-      }
-      if(i == 67){
-        printlnPwmDrive(ConfigurationPWM0.Data);
-      }
-      if(i == 74){
-        Serial.print(F(" pwm1Drive: "));
-      }
-      if(i == 75){
-        printlnPwmDrive(ConfigurationPWM1.Data);
-      }
-      if(i == 82){
-        Serial.print(F(" pwm2Drive: "));
-      }
-      if(i == 83){
-        printlnPwmDrive(ConfigurationPWM2.Data);
-      }
-      if(i == 90){
-        Serial.print(F(" pwm3Drive: "));
-      }
-      if(i == 91){
-        printlnPwmDrive(ConfigurationPWM3.Data);
-      }
-      if(i == 98){
-        Serial.print(F(" pwm4Drive: "));
-      }
-      if(i == 99){
-        printlnPwmDrive(ConfigurationPWM4.Data);
-      }
-      if(i == 106){
-        Serial.print(F(" pwm5Drive: "));
-      }
-      if(i == 107){
-        printlnPwmDrive(ConfigurationPWM5.Data);
-      }
-      if(i == 114){
-        Serial.print(F(" PWM0:"));
-        Serial.print(pwm0);
-      }
-      if(i == 115){
-        Serial.print(F(" PWM1:"));
-        Serial.print(pwm1);
-      }
-      if(i == 138){
-        Serial.print(F(" PWM2:"));
-        Serial.print(pwm2);
-      }
-      if(i == 139){
-        Serial.print(F(" PWM3:"));
-        Serial.print(pwm3);
-      }
-      if(i == 154){
-        Serial.print(F(" PWM4:"));
-        Serial.print(pwm4);
-      }
-      if(i == 155){
-        Serial.print(F(" PWM5:"));
-        Serial.println(pwm5);
-      }
-    }
-    if(i == 170){
-      Serial.print(F(" RPM0:"));
-      Serial.print(rpm0);
-    }
-    if(i == 171){
-      Serial.print(F(" RPM1:"));
-      Serial.print(rpm1);
-    }
-    if(i == 178){
-      Serial.print(F(" RPM2:"));
-      Serial.print(rpm2);
-    }
-    if(i == 179){
-      Serial.print(F(" RPM3:"));
-      Serial.print(rpm3);
-    }
-    if(i == 194){
-      Serial.print(F(" RPM4:"));
-      Serial.print(rpm4);
-    }
-    if(i == 195){
-      Serial.print(F(" RPM5:"));
-      Serial.println(rpm5);
-      s = 0;
-      fs = 0;
-    }
-  }  
-	zpozdeni = micros() - start;
-	if(zpozdeni > 500){
-    if(!gui){
-      Serial.print(i);
-      Serial.print(F("-"));
-      Serial.println(zpozdeni);
-    } else {
-      Serial.write(6);
-      Serial.print(F("!"));
-      Serial.write(i);
-      serialWriteLong(zpozdeni);
-    }
-	}
+void printStatus(){
+  Serial.print(F("T0:"));
+  if (T0Connected){
+    Serial.print(T0int / 10, 1);
+  } else {
+    Serial.print(F("N/A"));
+  }
+  Serial.print(F(" T1:"));
+  if (T1Connected){
+    Serial.println(T1int / 10, 1);
+  } else {
+    Serial.println(F("N/A"));
+  }
+  Serial.print(F("RPM0:"));
+  Serial.print(rpm0);
+  Serial.print(F(" RPM1:"));
+  Serial.print(rpm1);
+  Serial.print(F(" RPM2:"));
+  Serial.print(rpm2);
+  Serial.print(F(" RPM3:"));
+  Serial.print(rpm3);
+  Serial.print(F(" RPM4:"));
+  Serial.print(rpm4);
+  Serial.print(F(" RPM5:"));
+  Serial.println(rpm5);
 }
+
+void printFullStatus(){
+  printStatus();
+  Serial.print(F("PWM0:"));
+  Serial.print(pwm0);
+  Serial.print(F(" PWM1:"));
+  Serial.print(pwm1);
+  Serial.print(F(" PWM2:"));
+  Serial.print(pwm2);
+  Serial.print(F(" PWM3:"));
+  Serial.print(pwm3);
+  Serial.print(F(" PWM4:"));
+  Serial.print(pwm4);
+  Serial.print(F(" PWM5:"));
+  Serial.println(pwm5);
+  Serial.print(F(" pwm0Drive: "));
+  printlnPwmDrive(ConfigurationPWM0.Data);
+  Serial.print(F(" pwm1Drive: "));
+  printlnPwmDrive(ConfigurationPWM1.Data);
+  Serial.print(F(" pwm2Drive: "));
+  printlnPwmDrive(ConfigurationPWM2.Data);
+  Serial.print(F(" pwm3Drive: "));
+  printlnPwmDrive(ConfigurationPWM3.Data);
+  Serial.print(F(" pwm4Drive: "));
+  printlnPwmDrive(ConfigurationPWM4.Data);
+  Serial.print(F(" pwm5Drive: "));
+  printlnPwmDrive(ConfigurationPWM5.Data);
+}  
+  
 
 void printlnPwmDrive(PWMConfiguration &conf){
   // pwmDrive: 0 - const, 1 - analogInput, 2 - T0, 3 - T1, 4  - (T1+T2)/2
@@ -151,26 +84,51 @@ void printlnPwmDrive(PWMConfiguration &conf){
   }
 }
 
-void printStatus(CommandParameter &parameters)
-{
-  s = 1;
-}
-
-void printFullStatus(CommandParameter &parameters)
-{
-  s = 1;
-  fs = 1;
-}
-
 void printDelay(byte i, unsigned long d){
   if(!gui){
     Serial.print(F("!"));
     Serial.println(d);
   } else {
-    Serial.print(F("#"));
-    Serial.write(5);
+    Serial.write(6);
+    Serial.print(F("!"));
     Serial.write(i);
     serialWriteLong(d);
   }
+}
+
+void printDelayThreshold(){
+    if(!gui){
+      Serial.println(F("!delayed"));
+    } else {
+      Serial.write(7);
+      Serial.print(F("delayed"));
+    }
+}
+
+void printHelp(){
+  Serial.println(F("Available commands:"));
+  Serial.println(F("s - print status in human readable format"));
+  Serial.println(F("fs - print full status in human readable format"));
+  Serial.println(F("guiE - enable GUI mode. GUI mode means, that informations about temperatures and fan rotations are sending periodically in binary mode"));
+  Serial.println(F("guiD - disable GUI mode"));
+  Serial.println(F("guistat - send fan configurations in binary mode"));
+  Serial.println(F("guiUpdate - send temperatures and fan rotations in binary mode"));
+  Serial.println(F("setFan param1 param2 param3 param4 param5 param6 param7 param8 - set PWM configuration of fan"));
+  Serial.println(F("    param1 - fan number. Allowed values 0 - 5"));
+  Serial.println(F("    param2 - select the way of driving fan. 0 - constant pwm, 1 - driven by analog input, 2 - driven by temperatures"));
+  Serial.println(F("    param3 - constant power in case of param2 == 0. Allowed values 0 - 255"));
+  Serial.println(F("  next parameters are used in case of param2 == 3"));
+  Serial.println(F("    param4 - select temperature source for driving by temperature. 0 - T0, 1 - T1, 2 - average value of T0 and T1"));
+  Serial.println(F("    param5 - fan power at target temperature and below target temperature. Allowed values 0 - 255"));
+  Serial.println(F("    param6 - fan power at maximum temperature and above maximal temperature. Allowed values 0 - 255"));
+  Serial.println(F("    param7 - target temperature. Allowed values 0 - 60"));
+  Serial.println(F("    param8 - maximal temperature. Allowed values 0 - 60"));
+  Serial.println(F("    param8 should be bigger than param7"));
+  Serial.println(F("load - load fan configurations from internal memory"));
+  Serial.println(F("save - save fan configurations into internal memory"));
+  Serial.println(F("rpm - setRPMToMainboard"));
+  Serial.println(F("disableFan param1 param2 ... paramN - disable rotation of fan [param1, param3, param5...] for [param2, param4, param6...] seconds"));
+  Serial.println(F("tempCacheStatus - print current state of caches with temperature values computed from thermistors"));
+  Serial.println(F("help - this help"));
 }
 

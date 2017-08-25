@@ -6,7 +6,7 @@ void loop(){
   switch (part_8) {
     case 0:
       if(ConfigurationPWM0.Data.pwmDrive == 1){
-//        sensorValue0Averaged = readAnalogValueAndSmooth(sensorValue0Averaged, VOLTAGEINPUT0, readRPMsensors);
+        sensorValue0Averaged = readAnalogValueAndSmooth(sensorValue0Averaged, VOLTAGEINPUT0, readRPMsensors);
         setPwm0();
       } else {
         readRPMsensors();
@@ -14,24 +14,24 @@ void loop(){
       break;
     case 1:
       if(ConfigurationPWM1.Data.pwmDrive == 1){
-//        sensorValue1Averaged = readAnalogValueAndSmooth(sensorValue1Averaged, VOLTAGEINPUT1, readRPMsensors);
-  	    setPwm1();
+        sensorValue1Averaged = readAnalogValueAndSmooth(sensorValue1Averaged, VOLTAGEINPUT1, readRPMsensors);
+        setPwm1();
       } else {
         readRPMsensors();
       }
       break;
     case 2:
       if(ConfigurationPWM2.Data.pwmDrive == 1){
-//        sensorValue2Averaged = readAnalogValueAndSmooth(sensorValue2Averaged, VOLTAGEINPUT2, readRPMsensors);
-  	    setPwm2();
+        sensorValue2Averaged = readAnalogValueAndSmooth(sensorValue2Averaged, VOLTAGEINPUT2, readRPMsensors);
+        setPwm2();
       } else {
         readRPMsensors();
       }
       break;
     case 3:
       if(ConfigurationPWM3.Data.pwmDrive == 1){
-//        sensorValue3Averaged = readAnalogValueAndSmooth(sensorValue3Averaged, VOLTAGEINPUT3, readRPMsensors);
-  	    setPwm3();
+        sensorValue3Averaged = readAnalogValueAndSmooth(sensorValue3Averaged, VOLTAGEINPUT3, readRPMsensors);
+        setPwm3();
       } else {
         readRPMsensors();
       }
@@ -39,18 +39,15 @@ void loop(){
     case 4:
       if(ConfigurationPWM4.Data.pwmDrive == 1){
 //        sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4, readRPMsensors);
-  	    setPwm4();
+        setPwm4();
       } else {
         readRPMsensors();
       }
       break;
     case 5:
+      readRPMsensors();
       if(ConfigurationPWM5.Data.pwmDrive == 1){
-        readRPMsensors();
-//        sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4, readRPMsensors);
-  	    setPwm5();
-      } else {
-        readRPMsensors();
+        setPwm5();
       }
       break;
     case 6:
@@ -88,7 +85,7 @@ void loop(){
           break;
         case 7:
           readRPMsensors();
-          pid0.Compute();
+//          pid0.Compute();
       }
       break;
     case 7:
@@ -96,58 +93,105 @@ void loop(){
       SerialCommandHandler.Process();
   }
 
-  print();
 
   if(i == 255){
-/*    
-    if(gui){
-      guiUpdate();
-    }
-*/
     j++;
     if(j == 2 && gui){
-
       guiUpdate();
     }
     if(j == 4){
       decrementPwmDisabled();
       j = 0;
+      
+      #ifdef TIMING_DEBUG
+      if(timeCounting > 0){
+        timeCounting--;
+        if(timeCounting == 0){
+          now = micros();
+          timeTotal = now - timeTotal;
+          printTimingResult();
+        }
+      }
+      if(timeCountingStartFlag > 0){
+        timeCounting = 1;
+        timeCountingStartFlag = 0;
+        timeInCode = 0;
+        timeInInterrupt = 0;
+        to50 = 0;
+        to100 = 0;
+        to150 = 0;
+        to200 = 0;
+        to300 = 0;
+        to400 = 0;
+        to500 = 0;
+        to600 = 0;
+        over600 = 0;
+        readRPM = 0;
+        timeTotal = micros();
+      }
+      #endif
+       
     }
   }
 
-  i++;
-
-  // enable timer2 overflow interrupt
-  TIMSK2 |= B00000001;
 
   now = micros();
   zpozdeni = now - start;
-  if(zpozdeni >= ITERATION_MICROSECONDS){
 
-    if(!gui){
-      Serial.print(F("!"));
-      Serial.println(zpozdeni);
-    } else {
-      Serial.write(6);
-      Serial.print(F("!"));
-      Serial.write(i - 1);
-      serialWriteLong(zpozdeni);
-    }
+#ifdef TIMING_DEBUG
+  if(zpozdeni < 50){
+    to50++;
+  } else
+  if(zpozdeni < 100){
+    to100++;
+  } else
+  if(zpozdeni < 150){
+    to150++;
+  } else
+  if(zpozdeni < 200){
+    to200++;
+  } else
+  if(zpozdeni < 300){
+    to300++;
+  } else
+  if(zpozdeni < 400){
+    to400++;
+  } else
+  if(zpozdeni < 500){
+    to500++;
+  } else
+  if(zpozdeni < 600){
+    to600++;
+  } else
+  if(zpozdeni >= 600){
+    over600++;
+  }
+
+  timeInCode = timeInCode + zpozdeni;
+#endif
+
+  // enable timer2 overflow interrupt
+//  TIMSK2 |= B00000001;
+  
+/*
+  if(zpozdeni >= WARN_MICROSECONDS){
+    printDelay(i, zpozdeni);
+  }
+*/
+  if(zpozdeni >= ITERATION_MICROSECONDS){
+    printDelay(i, zpozdeni);
   } else {
     delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
   }
 
   if(zpozdeni < DELAY_THRESHOLD){
     start = start + ITERATION_MICROSECONDS;
-  } else {  //too big delay, restart main loop timer
-    if(!gui){
-      Serial.println(F("!delayed"));
-    } else {
-      Serial.write(7);
-      Serial.print(F("delayed"));
-    }
+  } else {
+    printDelayThreshold();
     delay(6);  //wait for empty serial buffer, for 115200 b/s delay 6ms is enough
-    start = micros();
+    start = micros(); //too big delay, restart main loop timer
   }
+
+  i++;
 }
 

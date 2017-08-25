@@ -6,7 +6,8 @@ template <class TData, byte sizeShift> class SlowlyChangingKeyCache
     TData value;
   } record;
 
-  byte mask = (B00000001 << sizeShift) - 1;
+  byte buffSize = B00000001 << sizeShift;
+  byte mask = buffSize - 1;
   Record buffer[B00000001 << sizeShift];
   short lowLimit = 0;
   short highLimit = 0;
@@ -14,36 +15,46 @@ template <class TData, byte sizeShift> class SlowlyChangingKeyCache
 public:
   void put(short key, TData value){
     if(key > highLimit){
-      if(key - highLimit >= B00000001 << sizeShift){
+      if(key - highLimit >= buffSize){
+        clear();
         highLimit = key;
         lowLimit = key;
       } else {
         while(highLimit < key){
-          highLimit = highLimit + 1;
+          highLimit++;
           buffer[highLimit & mask].value = 0;
-          if((highLimit & mask) == (lowLimit & mask)){
-            lowLimit = lowLimit + 1;
-          }
+        }
+        if(highLimit - lowLimit >= buffSize){
+          lowLimit = highLimit - buffSize + 1;
         }
       }
     }
     if(key < lowLimit){
-      if(lowLimit - key >= B00000001 << sizeShift){
+      if(lowLimit - key >= buffSize){
+        clear();
         highLimit = key;
         lowLimit = key;
       } else {
         while(lowLimit > key){
-          lowLimit = lowLimit - 1;
+          lowLimit--;
           buffer[lowLimit & mask].value = 0;
-          if(highLimit & mask == lowLimit & mask){
-            highLimit = highLimit - 1;
-          }
+        }
+        if(highLimit - lowLimit >= buffSize){
+          highLimit = lowLimit + buffSize - 1;
         }
       }
     }
     buffer[key & mask].value = value;
 //    printStatus();
   };
+
+  void clear(){
+    for(byte i = 0; i < B00000001 << sizeShift; i++){
+      buffer[i].value = 0;
+    }
+    highLimit = 0;
+    lowLimit = 0;
+  }
   
   TData get(short key){
     if(key >= lowLimit && key <= highLimit){
@@ -69,7 +80,9 @@ public:
       Serial.println(F(""));
       for(short i = lowLimit; i <= highLimit; i++){
         Serial.print(i);
-        Serial.print(F(" - "));
+        Serial.print(F(" - ["));
+        Serial.print(i & mask);
+        Serial.print(F("] - "));
         Serial.println(get(i));
       }
     }
@@ -77,7 +90,7 @@ public:
   
 };
 
-SlowlyChangingKeyCache<short, 6> cacheT0;
-SlowlyChangingKeyCache<short, 5> cacheT1;
+SlowlyChangingKeyCache<short, 6> cacheT0; // 64 records ~ 6°C
+SlowlyChangingKeyCache<short, 5> cacheT1; // 32 records ~ 3°C
 
 

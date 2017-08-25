@@ -6,12 +6,12 @@ void setup() {
 //  Serial.begin(9600);
 
 
- pinMode(RPMSENSOR0, INPUT);
- pinMode(RPMSENSOR1, INPUT);
- pinMode(RPMSENSOR2, INPUT);
- pinMode(RPMSENSOR3, INPUT);
- pinMode(RPMSENSOR4, INPUT);
- pinMode(RPMSENSOR5, INPUT);
+   pinMode(RPMSENSOR0, INPUT);
+   pinMode(RPMSENSOR1, INPUT);
+   pinMode(RPMSENSOR2, INPUT);
+   pinMode(RPMSENSOR3, INPUT);
+   pinMode(RPMSENSOR4, INPUT);
+   pinMode(RPMSENSOR5, INPUT);
 
   //welcome
   Serial.println(F("Starting..."));
@@ -21,8 +21,12 @@ void setup() {
   analogRead(TEMPINPUT0); //must read once before any other calls.
   //adc_init(ADC, 16000000, 10000*2, 3);
 
-  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
-  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
+//  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
+//  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
+
+  // VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
+  RT0koeficient = (unsigned long)RT0 * 1023;
+  RT1koeficient = (unsigned long)RT1 * 1023;
 
   Serial.print(F("koeficientT0:"));
   Serial.print(RT0koeficient);
@@ -43,26 +47,29 @@ void setup() {
 
 //  wdt_enable(WDTO_4S);
 
-  Serial.println(F("load PWM Configuration"));
   loadConfiguration();
-  Serial.println(F("PWM Configuration loaded"));
 
   setSerialCommandHandler();
   setTimers();
  
-  Serial.println(F("Started"));
+  Serial.println(F("System started. Type !help for more informations."));
+  delay(10);
 
-//  printTempProfile();
 //  printPokus();
+    measureInterrupts();
 
-  pid0.SetMode(AUTOMATIC);
+//  pid0.SetMode(AUTOMATIC);
 
-  //start main loop timer
   start = micros();
-  
+
+#ifdef TIMING_DEBUG
+  timeTotal = micros();
+  timeCounting = 1;
+#endif  
 }
 
 void setSerialCommandHandler(){
+  SerialCommandHandler.AddCommand(F("help"), printHelp);
   SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
   SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
@@ -74,8 +81,11 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
   SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
   SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
+  SerialCommandHandler.AddCommand(F("tempCacheStatus"), tempCacheStatus);
+#ifdef TIMING_DEBUG
+  SerialCommandHandler.AddCommand(F("timing"), timing);
+#endif
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
-
 }
 
 void setTimers(){
@@ -89,8 +99,8 @@ void setTimers(){
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
    
-  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
-  //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
+  //TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
@@ -107,6 +117,8 @@ void setTimers(){
 
   TCCR2A |= B11000000;  //inverted output 2A
   TIMSK2 |= B00000001;  // enable timer2 overflow interrupt
+
+  TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
 }
 
 void readTemperaturesInitial(){
@@ -144,25 +156,45 @@ void printTempProfile(){
   }
 }
 
-void printPokus(){
-  byte toSend[2];
-  toSend[0] = 58;
-  toSend[1] = 58;
-  for(int i = 0; i<50; i++){
-  delay(1);
+void measureInterrupts(){
+  delay(20);
+  // disable timer1 overflow interrupt
+  TIMSK1 &= B11111110;
+  // disable timer2 overflow interrupt
+  TIMSK2 &= B11111110;
   start = micros();
-    for(int j = 0; j<i; j++){
-//      Serial.print(F("ss"));
-      Serial.write(toSend, 2);
-    }
+  unsigned int a = doSomeMath(100);
   now = micros();
-  zpozdeni = now - start;
-  Serial.println("");
-  Serial.print(" i=");
-  Serial.print(i*2);
-  Serial.print(" zpozdeni=");
-  Serial.println(zpozdeni);
-  }
+  unsigned long m1 = now - start;
+
+  TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
+  TIMSK2 |= B00000001;  // enable timer2 overflow interrupt
+  delay(10);
+  start = micros();
+  unsigned int b = doSomeMath(200);
+  now = micros();
+  unsigned long m2 = now - start;
+  float percentage = (1 - (float)m1 / (float)m2 ) * 100;
+  
+  unsigned int c = a + b;
+  Serial.print(F("c="));
+  Serial.println(c);
+  Serial.print(F("m1:"));
+  Serial.print(m1);
+  Serial.println(F("us"));
+  Serial.print(F("m2:"));
+  Serial.print(m2);
+  Serial.println(F("us"));
+  Serial.print(F("Interrupts occupy "));
+  Serial.print(percentage, 1);
+  Serial.println(F("% of processor time"));
 }
 
+unsigned int doSomeMath(unsigned int x){
+  unsigned int result = 0;  
+  for(unsigned int i = x; i <= (x + 1000); i++){
+    result = result + countTemperature(i);
+  }
+  return result;
+}
 

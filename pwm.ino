@@ -1,13 +1,13 @@
 byte countPWM(unsigned int temperature, unsigned int temperatureTarget, unsigned int temperatureMax, byte pwmMin, byte pwmMax){
-	temperatureTarget = temperatureTarget  * 10;
-	if(temperature < temperatureTarget){
-		return pwmMin;
-	}
-	temperatureMax = temperatureMax * 10;
-	if(temperature > temperatureMax){
-		return pwmMax;
-	}
-	return (temperature - temperatureTarget) * (pwmMax - pwmMin) / (temperatureMax - temperatureTarget) + pwmMin;
+  temperatureTarget = temperatureTarget  * 10;
+  if(temperature < temperatureTarget){
+    return pwmMin;
+  }
+  temperatureMax = temperatureMax * 10;
+  if(temperature > temperatureMax){
+    return pwmMax;
+  }
+  return (temperature - temperatureTarget) * (pwmMax - pwmMin) / (temperatureMax - temperatureTarget) + pwmMin;
 }
 
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged){
