@@ -15,13 +15,11 @@ ISR(TIMER2_OVF_vect){
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
   if(fanSensor5Filter == 0){
     fanSensor5Value = 0;
-    // disable timer2 overflow interrupt
-    TIMSK2 &= B11111110;
+    TIMSK2 &= B11111110;    // disable timer2 overflow interrupt
   }
   if(fanSensor5Filter == fanSensor5FilterDefinition){
     fanSensor5Value = 1;
-    // disable timer2 overflow interrupt
-    TIMSK2 &= B11111110;
+    TIMSK2 &= B11111110;    // disable timer2 overflow interrupt
   }
 
 #ifdef TIMING_DEBUG
@@ -31,14 +29,26 @@ ISR(TIMER2_OVF_vect){
 
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
-  // enable timer2 overflow interrupt
-  TIMSK2 |= B00000001;
+  readRPMsensors();
+  TIMSK2 |= B00000001;    // enable timer2 overflow interrupt
 }
 
 void readRPMsensors(){
-#ifdef TIMING_DEBUG
-  unsigned long startrpm = micros();
-#endif
+
+static byte lastSensor0 = 0;
+static byte lastSensor1 = 0;
+static byte lastSensor2 = 0;
+static byte lastSensor3 = 0;
+static byte lastSensor4 = 0;
+static byte lastSensor5 = 0;
+  
+#define sensorFilterMax B00000011
+static byte sensor0Filter = 0;
+static byte sensor1Filter = 0;
+static byte sensor2Filter = 0;
+static byte sensor3Filter = 0;
+static byte sensor4Filter = 0;
+
 /*
   byte sensor0 = digitalRead(RPMSENSOR0);
   byte sensor1 = digitalRead(RPMSENSOR1);
@@ -58,8 +68,6 @@ void readRPMsensors(){
   sensor2 = filterSensor(&sensor2Filter, sensor2, lastSensor2);
   sensor3 = filterSensor(&sensor3Filter, sensor3, lastSensor3);
   sensor4 = filterSensor(&sensor4Filter, sensor4, lastSensor4);
-
-//  Serial.println(sensor0);
 
   writeFanSensorHistory(0, fanSensorSums0, fanSensorPosition, lastSensor0 ^ sensor0);
   writeFanSensorHistory(1, fanSensorSums1, fanSensorPosition, lastSensor1 ^ sensor1);
@@ -84,10 +92,6 @@ void readRPMsensors(){
   lastSensor3 = sensor3;
   lastSensor4 = sensor4;
   lastSensor5 = sensor5;
-
-#ifdef TIMING_DEBUG
-  readRPM = readRPM + micros() - startrpm;
-#endif
 }
 
 byte filterSensor(byte *sensorFilter, byte sensorValue, byte lastSensorValue){
@@ -102,9 +106,10 @@ byte fanSensorCounter[6];
 void writeFanSensorHistory(byte fanSensorNumber, byte fanSensorSums[], unsigned int position, byte value){
   byte sensorCounter = fanSensorCounter[fanSensorNumber];
   sensorCounter = sensorCounter + value;
-  byte positionInByte = position & B00011111;
-  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B00011111)){
-    fanSensorSums[position >> 5] = sensorCounter;
+//  byte positionInByte = position & B01111111;
+  byte positionInByte = position;
+  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B11111111)){
+    fanSensorSums[position >> 8] = sensorCounter;
     sensorCounter = 0;
   }
   fanSensorCounter[fanSensorNumber] = sensorCounter;

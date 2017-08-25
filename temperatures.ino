@@ -1,5 +1,5 @@
 void readT0(){
-  sensorValue6Averaged = readAnalogValueAndSmooth(sensorValue6Averaged, TEMPINPUT0, readRPMsensors);
+  sensorValue6Averaged = readAnalogValueAndSmooth(sensorValue6Averaged, TEMPINPUT0);
   if(sensorValue6Averaged > 10){
     T0Connected = true;
     thermistorResistance0 = RT0koeficient / sensorValue6Averaged - RT0;
@@ -9,7 +9,7 @@ void readT0(){
 }
 
 void readT1(){
-    sensorValue7Averaged = readAnalogValueAndSmooth(sensorValue7Averaged, TEMPINPUT1, readRPMsensors);
+    sensorValue7Averaged = readAnalogValueAndSmooth(sensorValue7Averaged, TEMPINPUT1);
     if(sensorValue7Averaged > 10){
       T1Connected = true;
       thermistorResistance1 = RT1koeficient / sensorValue7Averaged - RT1;

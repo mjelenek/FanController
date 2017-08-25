@@ -219,18 +219,20 @@ unsigned int T1int;
 boolean T0Connected;
 boolean T1Connected;
 
-#define FANSENSOR_HISTORY_SIZE 938
+#define FANSENSOR_HISTORY_SIZE 7353
+//#define FANSENSOR_HISTORY_SIZE 3676
+//#define FANSENSOR_HISTORY_SIZE 938
 //#define FANSENSOR_HISTORY_SIZE 469
-#define FANSENSOR_SHIFT_MULTIPLIER 4
+#define FANSENSOR_SHIFT_MULTIPLIER 3
 //#define FANSENSOR_SUMS_FIELD 59
-#define FANSENSOR_SUMS_FIELD 30
+#define FANSENSOR_SUMS_FIELD 29
 
-byte fanSensorSums0[FANSENSOR_SUMS_FIELD];
-byte fanSensorSums1[FANSENSOR_SUMS_FIELD];
-byte fanSensorSums2[FANSENSOR_SUMS_FIELD];
-byte fanSensorSums3[FANSENSOR_SUMS_FIELD];
-byte fanSensorSums4[FANSENSOR_SUMS_FIELD];
-byte fanSensorSums5[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums0[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums1[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums2[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums3[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums4[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums5[FANSENSOR_SUMS_FIELD];
 unsigned int fanSensorPosition = 0;
 
 unsigned int rpm0 = 0;
@@ -239,20 +241,6 @@ unsigned int rpm2 = 0;
 unsigned int rpm3 = 0;
 unsigned int rpm4 = 0;
 unsigned int rpm5 = 0;
-
-byte lastSensor0 = 0;
-byte lastSensor1 = 0;
-byte lastSensor2 = 0;
-byte lastSensor3 = 0;
-byte lastSensor4 = 0;
-byte lastSensor5 = 0;
-
-#define sensorFilterMax B00000011
-byte sensor0Filter = 0;
-byte sensor1Filter = 0;
-byte sensor2Filter = 0;
-byte sensor3Filter = 0;
-byte sensor4Filter = 0;
 
 volatile byte fanSensor5Value = 0;
 

@@ -6,49 +6,38 @@ void loop(){
   switch (part_8) {
     case 0:
       if(ConfigurationPWM0.Data.pwmDrive == 1){
-        sensorValue0Averaged = readAnalogValueAndSmooth(sensorValue0Averaged, VOLTAGEINPUT0, readRPMsensors);
+        sensorValue0Averaged = readAnalogValueAndSmooth(sensorValue0Averaged, VOLTAGEINPUT0);
         setPwm0();
-      } else {
-        readRPMsensors();
       }
       break;
     case 1:
       if(ConfigurationPWM1.Data.pwmDrive == 1){
-        sensorValue1Averaged = readAnalogValueAndSmooth(sensorValue1Averaged, VOLTAGEINPUT1, readRPMsensors);
+        sensorValue1Averaged = readAnalogValueAndSmooth(sensorValue1Averaged, VOLTAGEINPUT1);
         setPwm1();
-      } else {
-        readRPMsensors();
       }
       break;
     case 2:
       if(ConfigurationPWM2.Data.pwmDrive == 1){
-        sensorValue2Averaged = readAnalogValueAndSmooth(sensorValue2Averaged, VOLTAGEINPUT2, readRPMsensors);
+        sensorValue2Averaged = readAnalogValueAndSmooth(sensorValue2Averaged, VOLTAGEINPUT2);
         setPwm2();
-      } else {
-        readRPMsensors();
       }
       break;
     case 3:
       if(ConfigurationPWM3.Data.pwmDrive == 1){
-        sensorValue3Averaged = readAnalogValueAndSmooth(sensorValue3Averaged, VOLTAGEINPUT3, readRPMsensors);
+        sensorValue3Averaged = readAnalogValueAndSmooth(sensorValue3Averaged, VOLTAGEINPUT3);
         setPwm3();
-      } else {
-        readRPMsensors();
       }
       break;
     case 4:
       if(ConfigurationPWM4.Data.pwmDrive == 1){
-//        sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4, readRPMsensors);
+        sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4);
         setPwm4();
-      } else {
-        readRPMsensors();
       }
-      break;
-    case 5:
-      readRPMsensors();
       if(ConfigurationPWM5.Data.pwmDrive == 1){
         setPwm5();
       }
+      break;
+    case 5:
       break;
     case 6:
       // one case each 64 iterations (64ms)
@@ -57,39 +46,33 @@ void loop(){
           readT0();  
           break;
         case 1:
-          readRPMsensors();  
           countT0();  
           break;
         case 2:
           readT1();  
           break;
         case 3:
-          readRPMsensors();  
           countT1();  
           break;
         case 4:
-          readRPMsensors();  
           rpm0 = countRPM(fanSensorSums0);
           rpm1 = countRPM(fanSensorSums1);
           rpm2 = countRPM(fanSensorSums2);
           break;
         case 5:
-          readRPMsensors();  
           rpm3 = countRPM(fanSensorSums3);
           rpm4 = countRPM(fanSensorSums4);
           rpm5 = countRPM(fanSensorSums5);
           break;
         case 6:
-          readRPMsensors();  
           setPwm();
           break;
         case 7:
-          readRPMsensors();
 //          pid0.Compute();
+        ;
       }
       break;
     case 7:
-      readRPMsensors();  
       SerialCommandHandler.Process();
   }
 
