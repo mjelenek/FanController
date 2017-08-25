@@ -6,7 +6,6 @@
 #define TIMING_DEBUG
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;
-volatile unsigned long timeInInterrupt;
 unsigned long timeTotal;
 unsigned long to50;
 unsigned long to100;
@@ -17,7 +16,6 @@ unsigned long to400;
 unsigned long to500;
 unsigned long to600;
 unsigned long over600;
-unsigned long readRPM;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
@@ -28,16 +26,8 @@ void printTimingResult(){
   Serial.print(F(" us. "));
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
-  Serial.print(F("Time in interrupts: "));
-  Serial.print(timeInInterrupt);
-  Serial.print(F(" us. "));
-  Serial.print(100 * (float)timeInInterrupt / (float)timeTotal, 2);
-  Serial.println(F("%"));
   Serial.print(F("Total time: "));
   Serial.print(timeTotal);
-  Serial.println(F(" us"));
-  Serial.print(F("rpmCount: "));
-  Serial.print(readRPM);
   Serial.println(F(" us"));
   Serial.print(F("<50 - "));
   Serial.println(to50);
@@ -57,6 +47,7 @@ void printTimingResult(){
   Serial.println(to600);
   Serial.print(F(">600 - "));
   Serial.println(over600);
+  delay(2);
 }
 #endif
 
@@ -219,13 +210,11 @@ unsigned int T1int;
 boolean T0Connected;
 boolean T1Connected;
 
-#define FANSENSOR_HISTORY_SIZE 7353
+//#define FANSENSOR_HISTORY_SIZE 7353
 //#define FANSENSOR_HISTORY_SIZE 3676
-//#define FANSENSOR_HISTORY_SIZE 938
-//#define FANSENSOR_HISTORY_SIZE 469
+#define FANSENSOR_HISTORY_SIZE 919
 #define FANSENSOR_SHIFT_MULTIPLIER 3
-//#define FANSENSOR_SUMS_FIELD 59
-#define FANSENSOR_SUMS_FIELD 29
+#define FANSENSOR_SUMS_FIELD 8
 
 volatile byte fanSensorSums0[FANSENSOR_SUMS_FIELD];
 volatile byte fanSensorSums1[FANSENSOR_SUMS_FIELD];
@@ -233,7 +222,6 @@ volatile byte fanSensorSums2[FANSENSOR_SUMS_FIELD];
 volatile byte fanSensorSums3[FANSENSOR_SUMS_FIELD];
 volatile byte fanSensorSums4[FANSENSOR_SUMS_FIELD];
 volatile byte fanSensorSums5[FANSENSOR_SUMS_FIELD];
-unsigned int fanSensorPosition = 0;
 
 unsigned int rpm0 = 0;
 unsigned int rpm1 = 0;
@@ -245,7 +233,7 @@ unsigned int rpm5 = 0;
 volatile byte fanSensor5Value = 0;
 
 // 0 - from sensor4, 1 - from sensor5
-byte rmpToMainboard = 1;
+volatile byte rmpToMainboard = 1;
 
 //Define Variables we'll be connecting to
 double Setpoint = 10;

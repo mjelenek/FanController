@@ -38,8 +38,6 @@ void loop(){
       }
       break;
     case 5:
-      break;
-    case 6:
       // one case each 64 iterations (64ms)
       switch (part_64) {
         case 0:
@@ -72,6 +70,8 @@ void loop(){
         ;
       }
       break;
+    case 6:
+      break;
     case 7:
       SerialCommandHandler.Process();
   }
@@ -99,7 +99,6 @@ void loop(){
         timeCounting = 1;
         timeCountingStartFlag = 0;
         timeInCode = 0;
-        timeInInterrupt = 0;
         to50 = 0;
         to100 = 0;
         to150 = 0;
@@ -109,7 +108,6 @@ void loop(){
         to500 = 0;
         to600 = 0;
         over600 = 0;
-        readRPM = 0;
         timeTotal = micros();
       }
       #endif
@@ -153,14 +151,10 @@ void loop(){
   timeInCode = timeInCode + zpozdeni;
 #endif
 
-  // enable timer2 overflow interrupt
-//  TIMSK2 |= B00000001;
-  
-/*
   if(zpozdeni >= WARN_MICROSECONDS){
     printDelay(i, zpozdeni);
   }
-*/
+
   if(zpozdeni >= ITERATION_MICROSECONDS){
     printDelay(i, zpozdeni);
   } else {

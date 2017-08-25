@@ -1,15 +1,9 @@
 #define fanSensor5FilterDefinition B0000011
 
 volatile byte fanSensor5Filter = 0;
-volatile byte interruptFlag = 0;
 
 // overflow on timer2 interrupt handler
 ISR(TIMER2_OVF_vect){
-
-#ifdef TIMING_DEBUG
-  unsigned long startInterrupt = micros();
-#endif
-
 //  byte fanSensor5 = digitalRead(RPMSENSOR5);
   byte fanSensor5 = (PINC >> 5) & 1;
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
@@ -21,10 +15,6 @@ ISR(TIMER2_OVF_vect){
     fanSensor5Value = 1;
     TIMSK2 &= B11111110;    // disable timer2 overflow interrupt
   }
-
-#ifdef TIMING_DEBUG
-  timeInInterrupt = timeInInterrupt + micros() - startInterrupt;
-#endif
 }
 
 // overflow on timer1 interrupt handler
@@ -34,6 +24,8 @@ ISR(TIMER1_OVF_vect){
 }
 
 void readRPMsensors(){
+
+static unsigned int fanSensorPosition = 0;
 
 static byte lastSensor0 = 0;
 static byte lastSensor1 = 0;
@@ -106,10 +98,9 @@ byte fanSensorCounter[6];
 void writeFanSensorHistory(byte fanSensorNumber, byte fanSensorSums[], unsigned int position, byte value){
   byte sensorCounter = fanSensorCounter[fanSensorNumber];
   sensorCounter = sensorCounter + value;
-//  byte positionInByte = position & B01111111;
-  byte positionInByte = position;
-  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B11111111)){
-    fanSensorSums[position >> 8] = sensorCounter;
+  byte positionInByte = position & B01111111;
+  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B01111111)){
+    fanSensorSums[position >> 7] = sensorCounter;
     sensorCounter = 0;
   }
   fanSensorCounter[fanSensorNumber] = sensorCounter;
