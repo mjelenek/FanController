@@ -210,18 +210,11 @@ unsigned int T1int;
 boolean T0Connected;
 boolean T1Connected;
 
-//#define FANSENSOR_HISTORY_SIZE 7353
-//#define FANSENSOR_HISTORY_SIZE 3676
-#define FANSENSOR_HISTORY_SIZE 919
+#define FANSENSOR_HISTORY_SIZE 1838
+//#define FANSENSOR_HISTORY_SIZE 919
 #define FANSENSOR_SHIFT_MULTIPLIER 3
 #define FANSENSOR_SUMS_FIELD 8
-
-volatile byte fanSensorSums0[FANSENSOR_SUMS_FIELD];
-volatile byte fanSensorSums1[FANSENSOR_SUMS_FIELD];
-volatile byte fanSensorSums2[FANSENSOR_SUMS_FIELD];
-volatile byte fanSensorSums3[FANSENSOR_SUMS_FIELD];
-volatile byte fanSensorSums4[FANSENSOR_SUMS_FIELD];
-volatile byte fanSensorSums5[FANSENSOR_SUMS_FIELD];
+volatile byte fanSensorSums[6][FANSENSOR_SUMS_FIELD];
 
 unsigned int rpm0 = 0;
 unsigned int rpm1 = 0;
@@ -232,8 +225,8 @@ unsigned int rpm5 = 0;
 
 volatile byte fanSensor5Value = 0;
 
-// 0 - from sensor4, 1 - from sensor5
-volatile byte rmpToMainboard = 1;
+// sensor to mainboard
+volatile byte rmpToMainboard = 5;
 
 //Define Variables we'll be connecting to
 double Setpoint = 10;

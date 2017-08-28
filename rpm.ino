@@ -19,88 +19,69 @@ ISR(TIMER2_OVF_vect){
 
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
-  readRPMsensors();
-  TIMSK2 |= B00000001;    // enable timer2 overflow interrupt
+  static byte interruptCounter = 0;
+  static unsigned int fanSensorPosition = 0;
+
+  switch (interruptCounter) {
+    case 0:
+      readRPMsensor(0, fanSensorPosition, PIND >> 7);
+      readRPMsensor(1, fanSensorPosition, PINB & 1);
+      break;
+    case 1:
+      readRPMsensor(2, fanSensorPosition, (PIND >> 2) & 1);
+      readRPMsensor(3, fanSensorPosition, (PIND >> 4) & 1);
+      break;
+    case 2:
+      readRPMsensor(4, fanSensorPosition, (PINB >> 4) & 1);
+      readRPMsensor(5, fanSensorPosition, fanSensor5Value);
+      break;
+    case 3:
+      TIMSK2 |= B00000001;    // enable timer2 overflow interrupt
+      fanSensorPosition++;
+      if(fanSensorPosition >= FANSENSOR_HISTORY_SIZE){
+        fanSensorPosition = 0;
+      }
+      break;
+  }
+  interruptCounter = (interruptCounter + 1) & B00000011;
 }
 
-void readRPMsensors(){
+void readRPMsensor(byte fanNumber, unsigned int fanSensorPosition, byte sensorValue){
+  #define sensorFilterMax B00000011
+  static byte sensorFilters[6];
+  static byte lastSensors[6];
 
-static unsigned int fanSensorPosition = 0;
+  sensorFilters[fanNumber] = ((sensorFilters[fanNumber] << 1) + sensorValue) & sensorFilterMax;
+  sensorValue = lastSensors[fanNumber];
+  if(sensorFilters[fanNumber] == 0) sensorValue = 0;
+  if(sensorFilters[fanNumber] == sensorFilterMax) sensorValue = 1;
 
-static byte lastSensor0 = 0;
-static byte lastSensor1 = 0;
-static byte lastSensor2 = 0;
-static byte lastSensor3 = 0;
-static byte lastSensor4 = 0;
-static byte lastSensor5 = 0;
-  
-#define sensorFilterMax B00000011
-static byte sensor0Filter = 0;
-static byte sensor1Filter = 0;
-static byte sensor2Filter = 0;
-static byte sensor3Filter = 0;
-static byte sensor4Filter = 0;
+//  sensorValue = filterSensor(fanNumber, sensorValue, lastSensors[fanNumber]);
+  writeFanSensorHistory(fanNumber, fanSensorSums[fanNumber], fanSensorPosition, lastSensors[fanNumber] ^ sensorValue);
+  if(rmpToMainboard == fanNumber){
+    digitalWrite(LED_OUT, sensorValue);
+  }
+  lastSensors[fanNumber] = sensorValue;
+}
 
 /*
-  byte sensor0 = digitalRead(RPMSENSOR0);
-  byte sensor1 = digitalRead(RPMSENSOR1);
-  byte sensor2 = digitalRead(RPMSENSOR2);
-  byte sensor3 = digitalRead(RPMSENSOR3);
-  byte sensor4 = digitalRead(RPMSENSOR4);
-*/
-  byte sensor0 = PIND >> 7;
-  byte sensor1 = PINB & 1;
-  byte sensor2 = (PIND >> 2) & 1;
-  byte sensor3 = (PIND >> 4) & 1;
-  byte sensor4 = (PINB >> 4) & 1;
-  byte sensor5 = fanSensor5Value;
-
-  sensor0 = filterSensor(&sensor0Filter, sensor0, lastSensor0);
-  sensor1 = filterSensor(&sensor1Filter, sensor1, lastSensor1);
-  sensor2 = filterSensor(&sensor2Filter, sensor2, lastSensor2);
-  sensor3 = filterSensor(&sensor3Filter, sensor3, lastSensor3);
-  sensor4 = filterSensor(&sensor4Filter, sensor4, lastSensor4);
-
-  writeFanSensorHistory(0, fanSensorSums0, fanSensorPosition, lastSensor0 ^ sensor0);
-  writeFanSensorHistory(1, fanSensorSums1, fanSensorPosition, lastSensor1 ^ sensor1);
-  writeFanSensorHistory(2, fanSensorSums2, fanSensorPosition, lastSensor2 ^ sensor2);
-  writeFanSensorHistory(3, fanSensorSums3, fanSensorPosition, lastSensor3 ^ sensor3);
-  writeFanSensorHistory(4, fanSensorSums4, fanSensorPosition, lastSensor4 ^ sensor4);
-  writeFanSensorHistory(5, fanSensorSums5, fanSensorPosition, lastSensor5 ^ sensor5);
-  fanSensorPosition++;
-  if(fanSensorPosition >= FANSENSOR_HISTORY_SIZE){
-    fanSensorPosition = 0;
-  }
-
-  if(rmpToMainboard){
-    digitalWrite(LED_OUT, sensor5);
-  } else {
-    digitalWrite(LED_OUT, sensor4);
-  }
-
-  lastSensor0 = sensor0;
-  lastSensor1 = sensor1;
-  lastSensor2 = sensor2;
-  lastSensor3 = sensor3;
-  lastSensor4 = sensor4;
-  lastSensor5 = sensor5;
-}
-
-byte filterSensor(byte *sensorFilter, byte sensorValue, byte lastSensorValue){
-  *sensorFilter = ((*sensorFilter << 1) + sensorValue) & sensorFilterMax;
-  if(*sensorFilter == 0) return 0;
-  if(*sensorFilter == sensorFilterMax) return 1;
+byte filterSensor(byte fanNumber, byte sensorValue, byte lastSensorValue){
+  #define sensorFilterMax B00000011
+  static byte sensorFilters[6];
+  sensorFilters[fanNumber] = ((sensorFilters[fanNumber] << 1) + sensorValue) & sensorFilterMax;
+  if(sensorFilters[fanNumber] == 0) return 0;
+  if(sensorFilters[fanNumber] == sensorFilterMax) return 1;
   return lastSensorValue;
 }
+*/
 
-
-byte fanSensorCounter[6];
 void writeFanSensorHistory(byte fanSensorNumber, byte fanSensorSums[], unsigned int position, byte value){
+  static byte fanSensorCounter[6];
   byte sensorCounter = fanSensorCounter[fanSensorNumber];
   sensorCounter = sensorCounter + value;
-  byte positionInByte = position & B01111111;
-  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B01111111)){
-    fanSensorSums[position >> 7] = sensorCounter;
+  byte positionInByte = position & B11111111;
+  if((position == (FANSENSOR_HISTORY_SIZE - 1)) || (positionInByte == B11111111)){
+    fanSensorSums[position >> 8] = sensorCounter;
     sensorCounter = 0;
   }
   fanSensorCounter[fanSensorNumber] = sensorCounter;
@@ -119,11 +100,11 @@ unsigned int countRPM(byte fanSensorSums[]){
 }
 
 word countRPMs(){
-  rpm0 = countRPM(fanSensorSums0);
-  rpm1 = countRPM(fanSensorSums1);
-  rpm2 = countRPM(fanSensorSums2);
-  rpm3 = countRPM(fanSensorSums3);
-  rpm4 = countRPM(fanSensorSums4);
-  rpm5 = countRPM(fanSensorSums5);
+  rpm0 = countRPM(fanSensorSums[0]);
+  rpm1 = countRPM(fanSensorSums[1]);
+  rpm2 = countRPM(fanSensorSums[2]);
+  rpm3 = countRPM(fanSensorSums[3]);
+  rpm4 = countRPM(fanSensorSums[4]);
+  rpm5 = countRPM(fanSensorSums[5]);
 }
 

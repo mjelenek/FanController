@@ -53,14 +53,14 @@ void loop(){
           countT1();  
           break;
         case 4:
-          rpm0 = countRPM(fanSensorSums0);
-          rpm1 = countRPM(fanSensorSums1);
-          rpm2 = countRPM(fanSensorSums2);
+          rpm0 = countRPM(fanSensorSums[0]);
+          rpm1 = countRPM(fanSensorSums[1]);
+          rpm2 = countRPM(fanSensorSums[2]);
           break;
         case 5:
-          rpm3 = countRPM(fanSensorSums3);
-          rpm4 = countRPM(fanSensorSums4);
-          rpm5 = countRPM(fanSensorSums5);
+          rpm3 = countRPM(fanSensorSums[3]);
+          rpm4 = countRPM(fanSensorSums[4]);
+          rpm5 = countRPM(fanSensorSums[5]);
           break;
         case 6:
           setPwm();
