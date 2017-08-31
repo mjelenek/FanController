@@ -7,15 +7,15 @@
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;
 unsigned long timeTotal;
-unsigned long to50;
-unsigned long to100;
-unsigned long to150;
-unsigned long to200;
-unsigned long to300;
-unsigned long to400;
-unsigned long to500;
-unsigned long to600;
-unsigned long over600;
+unsigned int to50;
+unsigned int to100;
+unsigned int to150;
+unsigned int to200;
+unsigned int to300;
+unsigned int to400;
+unsigned int to500;
+unsigned int to600;
+unsigned int over600;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
@@ -215,6 +215,10 @@ boolean T1Connected;
 #define FANSENSOR_SHIFT_MULTIPLIER 3
 #define FANSENSOR_SUMS_FIELD 8
 volatile byte fanSensorSums[6][FANSENSOR_SUMS_FIELD];
+
+#define FAN_RPM_SENSOR_TIMES_FIELD 3
+volatile unsigned long fanRpmSensorTimes[5][FAN_RPM_SENSOR_TIMES_FIELD];
+volatile byte lastFanRpmSensorTime[5];
 
 unsigned int rpm0 = 0;
 unsigned int rpm1 = 0;

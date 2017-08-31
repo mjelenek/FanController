@@ -53,13 +53,13 @@ void loop(){
           countT1();  
           break;
         case 4:
-          rpm0 = countRPM(fanSensorSums[0]);
-          rpm1 = countRPM(fanSensorSums[1]);
-          rpm2 = countRPM(fanSensorSums[2]);
+          rpm0 = countRPM1(0);
+          rpm1 = countRPM1(1);
+          rpm2 = countRPM1(2);
           break;
         case 5:
-          rpm3 = countRPM(fanSensorSums[3]);
-          rpm4 = countRPM(fanSensorSums[4]);
+          rpm3 = countRPM1(3);
+          rpm4 = countRPM1(4);
           rpm5 = countRPM(fanSensorSums[5]);
           break;
         case 6:

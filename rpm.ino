@@ -1,6 +1,53 @@
 #define fanSensor5FilterDefinition B0000011
-
 volatile byte fanSensor5Filter = 0;
+
+// change pin PB0, PB4
+ISR(PCINT0_vect){
+  static byte lastState;
+  unsigned long now = micros();
+  byte state = PINB;
+  byte changed = state ^ lastState;
+
+  if(changed & state & (1 << PINB0)){
+    writeLastFanRpmSensorTime(1, now);
+  }
+
+  if(changed & state & (1 << PINB4)){
+    writeLastFanRpmSensorTime(4, now);
+  }
+
+  lastState = state;
+}
+
+// change pin PD2, PD4, PD7
+ISR(PCINT2_vect){
+  static byte lastState;
+  unsigned long now = micros();
+  byte state = PIND;
+  byte changed = state ^ lastState;
+
+  if(changed & state & (1 << PIND2)){
+    writeLastFanRpmSensorTime(2, now);
+  }
+
+  if(changed & state & (1 << PIND4)){
+    writeLastFanRpmSensorTime(3, now);
+  }
+
+  if(changed & state & (1 << PIND7)){
+    writeLastFanRpmSensorTime(0, now);
+  }
+
+  lastState = state;
+}
+
+void writeLastFanRpmSensorTime(byte fanNumber, unsigned long now){
+  lastFanRpmSensorTime[fanNumber]++;
+  if(lastFanRpmSensorTime[fanNumber] >= FAN_RPM_SENSOR_TIMES_FIELD){
+    lastFanRpmSensorTime[fanNumber] = 0;
+  }
+  fanRpmSensorTimes[fanNumber][lastFanRpmSensorTime[fanNumber]] = now;
+}
 
 // overflow on timer2 interrupt handler
 ISR(TIMER2_OVF_vect){
@@ -24,15 +71,10 @@ ISR(TIMER1_OVF_vect){
 
   switch (interruptCounter) {
     case 0:
-      readRPMsensor(0, fanSensorPosition, PIND >> 7);
-      readRPMsensor(1, fanSensorPosition, PINB & 1);
       break;
     case 1:
-      readRPMsensor(2, fanSensorPosition, (PIND >> 2) & 1);
-      readRPMsensor(3, fanSensorPosition, (PIND >> 4) & 1);
       break;
     case 2:
-      readRPMsensor(4, fanSensorPosition, (PINB >> 4) & 1);
       readRPMsensor(5, fanSensorPosition, fanSensor5Value);
       break;
     case 3:
@@ -94,9 +136,22 @@ unsigned int countRPM(byte fanSensorSums[]){
   }
   result = result << FANSENSOR_SHIFT_MULTIPLIER;
   //  result = result / 10;
-  result = ((unsigned long)result * 205) >> 11;  //divide by 10 - accuracy better than 0.1% and 2x faster than x / 10
-  result = result * 10;
+  //result = ((unsigned long)result * 205) >> 11;  //divide by 10 - accuracy better than 0.1% and 2x faster than x / 10
+  //result = result * 10;
   return result;
+}
+
+unsigned int countRPM1(byte fanNumber){
+  byte time1Pointer = lastFanRpmSensorTime[fanNumber] + 1;
+  if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
+    time1Pointer = 0;
+  }
+  PCICR = 0;  // disable pin change interrupts
+  unsigned long time0 = fanRpmSensorTimes[fanNumber][lastFanRpmSensorTime[fanNumber]];
+  unsigned long time1 = fanRpmSensorTimes[fanNumber][time1Pointer];
+  PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
+  unsigned int rpm = 60000000 / (time0 - time1);
+  return rpm;
 }
 
 word countRPMs(){

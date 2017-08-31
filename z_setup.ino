@@ -51,6 +51,7 @@ void setup() {
 
   setSerialCommandHandler();
   setTimers();
+  init_pcint();
  
   Serial.println(F("System started. Type !help for more informations."));
   delay(10);
@@ -121,6 +122,18 @@ void setTimers(){
   TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
 }
 
+void init_pcint()
+{
+    // PB0, PB4
+    PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
+
+    // PD2, PD4, PD7
+    PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
+
+    // PORTB, PORTD
+    PCICR = (1 << PCIE0) | (1 << PCIE2);
+}
+
 void readTemperaturesInitial(){
     sensorValue6Averaged = analogRead(A6);
     if(sensorValue6Averaged > 10){
@@ -159,7 +172,8 @@ void printTempProfile(){
 void measureInterrupts(){
   delay(20);
   TIMSK1 &= B11111110;  // disable timer1 overflow interrupt
-  TIMSK2 &= B11111110;
+  TIMSK2 &= B11111110;  // disable timer2 overflow interrupt
+  PCICR = 0;  // disable pin change interrupts
   start = micros();
   unsigned int a = doSomeMath(100);
   now = micros();
@@ -167,6 +181,7 @@ void measureInterrupts(){
 
   TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
   TIMSK2 |= B00000001;  // enable timer2 overflow interrupt
+  PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
   delay(10);
   start = micros();
   unsigned int b = doSomeMath(200);
