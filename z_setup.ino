@@ -85,6 +85,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("tempCacheStatus"), tempCacheStatus);
 #ifdef TIMING_DEBUG
   SerialCommandHandler.AddCommand(F("timing"), timing);
+  SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
 #endif
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }
@@ -117,7 +118,6 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
 
   TCCR2A |= B11000000;  //inverted output 2A
-  TIMSK2 |= B00000001;  // enable timer2 overflow interrupt
 
   TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
 }
@@ -172,7 +172,6 @@ void printTempProfile(){
 void measureInterrupts(){
   delay(20);
   TIMSK1 &= B11111110;  // disable timer1 overflow interrupt
-  TIMSK2 &= B11111110;  // disable timer2 overflow interrupt
   PCICR = 0;  // disable pin change interrupts
   start = micros();
   unsigned int a = doSomeMath(100);
@@ -180,7 +179,6 @@ void measureInterrupts(){
   unsigned long m1 = now - start;
 
   TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
-  TIMSK2 |= B00000001;  // enable timer2 overflow interrupt
   PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
   delay(10);
   start = micros();

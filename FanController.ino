@@ -1,4 +1,4 @@
-#include <PID_v1.h>
+//#include <PID_v1.h>
 #include <avr/interrupt.h>
 #include "CommandHandler.h"
 #include "EEPROMStore.h"
@@ -14,8 +14,7 @@ unsigned int to200;
 unsigned int to300;
 unsigned int to400;
 unsigned int to500;
-unsigned int to600;
-unsigned int over600;
+unsigned int over500;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
@@ -43,10 +42,8 @@ void printTimingResult(){
   Serial.println(to400);
   Serial.print(F("<500 - "));
   Serial.println(to500);
-  Serial.print(F("<600 - "));
-  Serial.println(to600);
-  Serial.print(F(">600 - "));
-  Serial.println(over600);
+  Serial.print(F(">500 - "));
+  Serial.println(over500);
   delay(2);
 }
 #endif
@@ -210,15 +207,9 @@ unsigned int T1int;
 boolean T0Connected;
 boolean T1Connected;
 
-#define FANSENSOR_HISTORY_SIZE 1838
-//#define FANSENSOR_HISTORY_SIZE 919
-#define FANSENSOR_SHIFT_MULTIPLIER 3
-#define FANSENSOR_SUMS_FIELD 8
-volatile byte fanSensorSums[6][FANSENSOR_SUMS_FIELD];
-
 #define FAN_RPM_SENSOR_TIMES_FIELD 3
-volatile unsigned long fanRpmSensorTimes[5][FAN_RPM_SENSOR_TIMES_FIELD];
-volatile byte lastFanRpmSensorTime[5];
+volatile unsigned long fanRpmSensorTimes[6][FAN_RPM_SENSOR_TIMES_FIELD];
+volatile byte lastFanRpmSensorTime[6];
 
 unsigned int rpm0 = 0;
 unsigned int rpm1 = 0;
@@ -226,8 +217,6 @@ unsigned int rpm2 = 0;
 unsigned int rpm3 = 0;
 unsigned int rpm4 = 0;
 unsigned int rpm5 = 0;
-
-volatile byte fanSensor5Value = 0;
 
 // sensor to mainboard
 volatile byte rmpToMainboard = 5;
@@ -246,7 +235,7 @@ PID pid3(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid4(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid5(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 */
-CommandHandler<14, 35, 0> SerialCommandHandler; // 14 commands, max length of command 35, 0 variables
+CommandHandler<16, 35, 0> SerialCommandHandler; // 16 commands, max length of command 35, 0 variables
 
 byte i = 0;
 byte j = 0;

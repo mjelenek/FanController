@@ -53,14 +53,14 @@ void loop(){
           countT1();  
           break;
         case 4:
-          rpm0 = countRPM1(0);
-          rpm1 = countRPM1(1);
-          rpm2 = countRPM1(2);
+          rpm0 = countRPM(0);
+          rpm1 = countRPM(1);
+          rpm2 = countRPM(2);
           break;
         case 5:
-          rpm3 = countRPM1(3);
-          rpm4 = countRPM1(4);
-          rpm5 = countRPM(fanSensorSums[5]);
+          rpm3 = countRPM(3);
+          rpm4 = countRPM(4);
+          rpm5 = countRPM(5);
           break;
         case 6:
           setPwm();
@@ -106,8 +106,7 @@ void loop(){
         to300 = 0;
         to400 = 0;
         to500 = 0;
-        to600 = 0;
-        over600 = 0;
+        over500 = 0;
         timeTotal = micros();
       }
       #endif
@@ -141,11 +140,8 @@ void loop(){
   if(zpozdeni < 500){
     to500++;
   } else
-  if(zpozdeni < 600){
-    to600++;
-  } else
-  if(zpozdeni >= 600){
-    over600++;
+  if(zpozdeni >= 500){
+    over500++;
   }
 
   timeInCode = timeInCode + zpozdeni;
