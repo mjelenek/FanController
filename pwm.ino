@@ -94,19 +94,11 @@ void setPwm4(){
 
 void setPwm5(){
   if(pwm5Disabled > 0){
-    pwm5 = 1;
+    pwm5 = 0;
   } else {
     pwm5 = getNewPwm(ConfigurationPWM5.Data, pwm5, sensorValue4Averaged);
-    if(pwm5 == 0){
-      analogWrite(PWM5, 1);
-      return;
-    }
-    if(pwm5 == 255){
-      analogWrite(PWM5, 254);
-      return;
-    }
   }
-  analogWrite(PWM5, pwm5);
+  analogWrite(PWM5, 255 - pwm5);
 }
 
 void setPwm(){

@@ -1,10 +1,12 @@
 #define fanSensor5FilterDefinition B0000011
-volatile byte fanSensor5Filter = 0;
+
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
   static byte lastState;
-  unsigned long now = micros();
+  static byte fanSensor5Filter = 0;
+ // while (TCNT2 < 250){}
   byte fanSensor5 = (PINC >> 5) & 1;
+  unsigned long now = micros();
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
   byte fanSensor5Value = lastState;
   if(fanSensor5Filter == 0){
@@ -13,8 +15,14 @@ ISR(TIMER1_OVF_vect){
   if(fanSensor5Filter == fanSensor5FilterDefinition){
     fanSensor5Value = 1;
   }
-  if((lastState ^ fanSensor5Value) & fanSensor5Value){
-    writeLastFanRpmSensorTime(5, now);
+
+  if(lastState ^ fanSensor5Value){
+    if(rmpToMainboard == 5){
+      digitalWrite(LED_OUT, fanSensor5Value);
+    }
+    if(fanSensor5Value){
+      writeLastFanRpmSensorTime(5, now);
+    }
   }
   lastState = fanSensor5Value;
 }
@@ -26,12 +34,22 @@ ISR(PCINT0_vect){
   byte state = PINB;
   byte changed = state ^ lastState;
 
-  if(changed & state & (1 << PINB0)){
-    writeLastFanRpmSensorTime(1, now);
+  if(changed & (1 << PINB0)){
+    if(rmpToMainboard == 1){
+      digitalWrite(LED_OUT, state & (1 << PINB0));
+    }
+    if(state & (1 << PINB0)){
+      writeLastFanRpmSensorTime(1, now);
+    }
   }
 
-  if(changed & state & (1 << PINB4)){
-    writeLastFanRpmSensorTime(4, now);
+  if(changed & (1 << PINB4)){
+    if(rmpToMainboard == 4){
+      digitalWrite(LED_OUT, state & (1 << PINB4));
+    }
+    if(state & (1 << PINB4)){
+      writeLastFanRpmSensorTime(4, now);
+    }
   }
 
   lastState = state;
@@ -44,16 +62,31 @@ ISR(PCINT2_vect){
   byte state = PIND;
   byte changed = state ^ lastState;
 
-  if(changed & state & (1 << PIND2)){
-    writeLastFanRpmSensorTime(2, now);
+  if(changed & (1 << PIND2)){
+    if(rmpToMainboard == 2){
+      digitalWrite(LED_OUT, state & (1 << PIND2));
+    }
+    if(state & (1 << PIND2)){
+      writeLastFanRpmSensorTime(2, now);
+    }
   }
 
-  if(changed & state & (1 << PIND4)){
-    writeLastFanRpmSensorTime(3, now);
+  if(changed & (1 << PIND4)){
+    if(rmpToMainboard == 3){
+      digitalWrite(LED_OUT, state & (1 << PIND4));
+    }
+    if(state & (1 << PIND4)){
+      writeLastFanRpmSensorTime(3, now);
+    }
   }
 
-  if(changed & state & (1 << PIND7)){
-    writeLastFanRpmSensorTime(0, now);
+  if(changed & (1 << PIND7)){
+    if(rmpToMainboard == 0){
+      digitalWrite(LED_OUT, state & (1 << PIND7));
+    }
+    if(state & (1 << PIND7)){
+      writeLastFanRpmSensorTime(0, now);
+    }
   }
 
   lastState = state;

@@ -91,6 +91,7 @@ void setSerialCommandHandler(){
 }
 
 void setTimers(){
+
   //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
   //TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
@@ -117,9 +118,38 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
 
-  TCCR2A |= B11000000;  //inverted output 2A
+  cli();
+  // synchronize timers 1 and 2
+  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
+  TCNT1 = 0;
+  TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
+  GTCCR = 0;                                 // start timers
+  delayMicroseconds(5);
+  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC);  // stop timers
+  TCNT2 = 255;
+  GTCCR = 0;                                  // start timers
+  sei();
 
-  TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
+  Serial.println(F("Timers configuration"));
+  Serial.print(F("TCCR0A: "));
+  Serial.println(TCCR0A, BIN);
+  Serial.print(F("TCCR0B: "));
+  Serial.println(TCCR0B, BIN);
+  Serial.print(F("TIMSK0: "));
+  Serial.println(TIMSK0, BIN);
+  Serial.print(F("TCCR1A: "));
+  Serial.println(TCCR1A, BIN);
+  Serial.print(F("TCCR1B: "));
+  Serial.println(TCCR1B, BIN);
+  Serial.print(F("TIMSK1: "));
+  Serial.println(TIMSK1, BIN);
+  Serial.print(F("TCCR2A: "));
+  Serial.println(TCCR2A, BIN);
+  Serial.print(F("TCCR2B: "));
+  Serial.println(TCCR2B, BIN);
+  Serial.print(F("TIMSK2: "));
+  Serial.println(TIMSK2, BIN);
+
 }
 
 void init_pcint()
