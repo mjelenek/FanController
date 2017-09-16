@@ -128,6 +128,10 @@ void printHelp(){
   Serial.println(F("rpm - setRPMToMainboard"));
   Serial.println(F("disableFan param1 param2 ... paramN - disable rotation of fan [param1, param3, param5...] for [param2, param4, param6...] seconds"));
   Serial.println(F("tempCacheStatus - print current state of caches with temperature values computed from thermistors"));
+#ifdef TIMING_DEBUG
+  Serial.println(F("timing -  - print measured processor time occupied by program"));
+  Serial.println(F("mi - print measured processor time occupied by interrupt services"));
+#endif
   Serial.println(F("help - this help"));
 }
 
