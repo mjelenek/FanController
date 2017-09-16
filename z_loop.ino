@@ -29,8 +29,10 @@ void loop(){
       }
       break;
     case 4:
-      if(ConfigurationPWM4.Data.pwmDrive == 1){
+      if(ConfigurationPWM4.Data.pwmDrive == 1 || ConfigurationPWM5.Data.pwmDrive == 1){
         sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4);
+      }
+      if(ConfigurationPWM4.Data.pwmDrive == 1){
         setPwm4();
       }
       if(ConfigurationPWM5.Data.pwmDrive == 1){
@@ -41,13 +43,11 @@ void loop(){
       // one case each 64 iterations (64ms)
       switch (part_64) {
         case 0:
-          readT0();  
           break;
         case 1:
           countT0();  
           break;
         case 2:
-          readT1();  
           break;
         case 3:
           countT1();  
@@ -85,10 +85,10 @@ void loop(){
 
   if(i == 255){
     j++;
-    if(j == 2 && gui){
+    if(j == 1 && gui){
       guiUpdate();
     }
-    if(j == 4){
+    if(j == 2){
       decrementPwmDisabled();
       j = 0;
       
@@ -153,10 +153,11 @@ void loop(){
   timeInCode = timeInCode + zpozdeni;
 #endif
 
+/*
   if(zpozdeni >= WARN_MICROSECONDS){
     printDelay(i, zpozdeni);
   }
-
+*/
   if(zpozdeni >= ITERATION_MICROSECONDS){
     printDelay(i, zpozdeni);
   } else {

@@ -90,7 +90,7 @@ public:
   
 };
 
-SlowlyChangingKeyCache<short, 6> cacheT0; // 64 records ~ 6°C
-SlowlyChangingKeyCache<short, 5> cacheT1; // 32 records ~ 3°C
+SlowlyChangingKeyCache<int, 6> cacheT0; // 64 records ~ 6°C
+SlowlyChangingKeyCache<int, 5> cacheT1; // 32 records ~ 3°C
 
 

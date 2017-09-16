@@ -117,13 +117,12 @@ void printHelp(){
   Serial.println(F("    param1 - fan number. Allowed values 0 - 5"));
   Serial.println(F("    param2 - select the way of driving fan. 0 - constant pwm, 1 - driven by analog input, 2 - driven by temperatures"));
   Serial.println(F("    param3 - constant power in case of param2 == 0. Allowed values 0 - 255"));
-  Serial.println(F("  next parameters are used in case of param2 == 3"));
+  Serial.println(F("  next parameters are used in case of param2 == 2"));
   Serial.println(F("    param4 - select temperature source for driving by temperature. 0 - T0, 1 - T1, 2 - average value of T0 and T1"));
   Serial.println(F("    param5 - fan power at target temperature and below target temperature. Allowed values 0 - 255"));
   Serial.println(F("    param6 - fan power at maximum temperature and above maximal temperature. Allowed values 0 - 255"));
   Serial.println(F("    param7 - target temperature. Allowed values 0 - 60"));
-  Serial.println(F("    param8 - maximal temperature. Allowed values 0 - 60"));
-  Serial.println(F("    param8 should be bigger than param7"));
+  Serial.println(F("    param8 - maximal temperature. Allowed values 0 - 60. Param8 should be bigger than param7"));
   Serial.println(F("load - load fan configurations from internal memory"));
   Serial.println(F("save - save fan configurations into internal memory"));
   Serial.println(F("rpm - setRPMToMainboard"));

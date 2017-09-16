@@ -76,10 +76,6 @@ int analogReadAsynchronous(uint8_t pin, void (*function)())
   return (high << 8) | low;
 }
 
-void asynchronousFunction(){
-  
-}
-
 unsigned int readAnalogValueAndSmooth(unsigned int previousValue, byte analogInput){
 	unsigned int sensorValue = analogRead(analogInput);
 //  return sensorValue;
@@ -92,3 +88,20 @@ unsigned int readAnalogValueAndSmooth(unsigned int previousValue, byte analogInp
 	return ((3 * previousValue + sensorValue) >> 2);
 }
 
+// ADC conversion complete interrupt handler
+/*
+ISR(ADC_vect)
+{
+    //clear timer compare match flag
+    TIFR0=(1<<OCF0A);
+    //toggle pin PD2 to track the end of ADC conversion
+    PIND = (1<<PD2);
+    wave[ii++]=ADCH;
+    if (ii==ADCINDEX)
+    {
+        StopTimer();
+        DisableADC();
+        flag = 1;
+    }
+}
+*/

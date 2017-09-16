@@ -4,7 +4,6 @@
 ISR(TIMER1_OVF_vect){
   static byte lastState;
   static byte fanSensor5Filter = 0;
- // while (TCNT2 < 250){}
   byte fanSensor5 = (PINC >> 5) & 1;
   unsigned long now = micros();
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
@@ -35,11 +34,11 @@ ISR(PCINT0_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PINB0)){
-    if(rmpToMainboard == 1){
+    if(rmpToMainboard == 3){
       digitalWrite(LED_OUT, state & (1 << PINB0));
     }
     if(state & (1 << PINB0)){
-      writeLastFanRpmSensorTime(1, now);
+      writeLastFanRpmSensorTime(3, now);
     }
   }
 
@@ -63,29 +62,29 @@ ISR(PCINT2_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PIND2)){
-    if(rmpToMainboard == 2){
+    if(rmpToMainboard == 0){
       digitalWrite(LED_OUT, state & (1 << PIND2));
     }
     if(state & (1 << PIND2)){
-      writeLastFanRpmSensorTime(2, now);
+      writeLastFanRpmSensorTime(0, now);
     }
   }
 
   if(changed & (1 << PIND4)){
-    if(rmpToMainboard == 3){
+    if(rmpToMainboard == 1){
       digitalWrite(LED_OUT, state & (1 << PIND4));
     }
     if(state & (1 << PIND4)){
-      writeLastFanRpmSensorTime(3, now);
+      writeLastFanRpmSensorTime(1, now);
     }
   }
 
   if(changed & (1 << PIND7)){
-    if(rmpToMainboard == 0){
+    if(rmpToMainboard == 2){
       digitalWrite(LED_OUT, state & (1 << PIND7));
     }
     if(state & (1 << PIND7)){
-      writeLastFanRpmSensorTime(0, now);
+      writeLastFanRpmSensorTime(2, now);
     }
   }
 
@@ -101,7 +100,6 @@ void writeLastFanRpmSensorTime(byte fanNumber, unsigned long now){
 }
 
 unsigned int countRPM(byte fanNumber){
-  unsigned int rpm = 0;
   byte time1Pointer = lastFanRpmSensorTime[fanNumber] + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;
@@ -113,8 +111,7 @@ unsigned int countRPM(byte fanNumber){
   if((micros() - time0) > 240000 || (micros() - time1) > 840000){
     return 0;
   }
-  rpm = 60000000 / (time0 - time1);
-  return rpm;
+  return 60000000 / (time0 - time1);
 }
 
 void countRPMs(){

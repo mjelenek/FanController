@@ -3,15 +3,15 @@ void setup() {
 //  wdt_disable();
  //serial port configuration
   Serial.begin(115200);
-//  Serial.begin(9600);
 
+  pinMode(RPMSENSOR0, INPUT);
+  pinMode(RPMSENSOR1, INPUT);
+  pinMode(RPMSENSOR2, INPUT);
+  pinMode(RPMSENSOR3, INPUT);
+  pinMode(RPMSENSOR4, INPUT);
+  pinMode(RPMSENSOR5, INPUT);
 
-   pinMode(RPMSENSOR0, INPUT);
-   pinMode(RPMSENSOR1, INPUT);
-   pinMode(RPMSENSOR2, INPUT);
-   pinMode(RPMSENSOR3, INPUT);
-   pinMode(RPMSENSOR4, INPUT);
-   pinMode(RPMSENSOR5, INPUT);
+  pinMode(LED_OUT, OUTPUT);
 
   //welcome
   Serial.println(F("Starting..."));
@@ -21,10 +21,11 @@ void setup() {
   analogRead(TEMPINPUT0); //must read once before any other calls.
   //adc_init(ADC, 16000000, 10000*2, 3);
 
+// VOLTAGETHERMISTOR != ANALOGREFERENCEVOLTAGE
 //  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
 //  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
 
-  // VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
+// VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
   RT0koeficient = (unsigned long)RT0 * 1023;
   RT1koeficient = (unsigned long)RT1 * 1023;
 
@@ -166,25 +167,15 @@ void init_pcint()
 
 void readTemperaturesInitial(){
     sensorValue6Averaged = analogRead(A6);
-    if(sensorValue6Averaged > 10){
-      T0Connected = true;
-      thermistorResistance0 = RT0koeficient / sensorValue6Averaged - RT0;
-    } else {
-      T0Connected = false;
-    }
+    T0Connected = (sensorValue6Averaged > 10);
     if(T0Connected == true){
-      T0int = countTemperature(thermistorResistance0);
+      T0int = countTemperature(RT0koeficient / sensorValue6Averaged - RT0);
     }
 
     sensorValue7Averaged = analogRead(A7);
-    if(sensorValue7Averaged > 10){
-      T1Connected = true;
-      thermistorResistance1 = RT1koeficient / sensorValue7Averaged - RT1;
-    } else {
-      T1Connected = false;
-    }
+    T1Connected = (sensorValue7Averaged > 10);
     if(T1Connected == true){
-      T1int = countTemperature(thermistorResistance1);
+      T1int = countTemperature(RT1koeficient / sensorValue7Averaged - RT1);
     }
 }
 

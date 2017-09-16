@@ -22,23 +22,23 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAverage
       switch (conf.tSelect) {
         case 0:
           if(T0Connected){
-            return countPWM(T0int, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+            return countPWM(T0WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
           }
           return conf.maxPwm;
         case 1:
           if(T1Connected){
-            return countPWM(T1int, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+            return countPWM(T1WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
           }
           return conf.maxPwm;
         case 2:
           if(T0Connected && T1Connected){
-            return countPWM(T0int + T1int, conf.tempTarget << 1, conf.tempMax << 1, conf.minPwm, conf.maxPwm);
+            return countPWM(T0WithHysteresisInt + T1WithHysteresisInt, conf.tempTarget << 1, conf.tempMax << 1, conf.minPwm, conf.maxPwm);
           }
           if(T0Connected){
-            return countPWM(T0int, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+            return countPWM(T0WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
           }
           if(T1Connected){
-            return countPWM(T1int, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+            return countPWM(T1WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
           }
         return conf.maxPwm;
       }

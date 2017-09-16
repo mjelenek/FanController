@@ -54,18 +54,18 @@ void printTimingResult(){
 #define WARN_MICROSECONDS 500
 #define DELAY_THRESHOLD 10000
 
+//by multimeter
+#define ANALOGREFERENCEVOLTAGE 3.3
 // voltage to thermistor
 #define VOLTAGETHERMISTOR 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-#define RT0 9960
-#define RT1 9960
-//by multimeter
-#define ANALOGREFERENCEVOLTAGE 3.3
+#define RT0 9990
+#define RT1 9990
 
-// resistance at 25 degrees C
-#define THERMISTORNOMINAL 10000      
 // temp. for nominal resistance (almost always 25 C)
 #define TEMPERATURENOMINAL 25   
+// resistance at nominal temperature
+#define THERMISTORNOMINAL 10000      
 // The beta coefficient of the thermistor (usually 3000-4000)
 #define BCOEFFICIENT 3950
 
@@ -88,7 +88,7 @@ void printTimingResult(){
 #define LED_OUT 13
 
 #define PWM0 3  //OC2B
-#define PWM1 5  //OB0B
+#define PWM1 5  //OC0B
 #define PWM2 6  //OC0A
 #define PWM3 9  //OC1A
 #define PWM4 10 //OC1B
@@ -108,13 +108,13 @@ public:
   byte maxPwm;
   byte tempTarget;
   byte tempMax;
-
+/*
   // pid parameters
   double kp;
   double ki;
   double kd;
   unsigned int constRPM;
-
+*/
   void Reset()
   {
 //    Serial.println(F("Reset"));    
@@ -125,10 +125,12 @@ public:
     maxPwm = 200;
     tempTarget = 20;
     tempMax = 40;
+    /*
     kp = 1;
     ki = 1;
     kd = 0.5;
     constRPM = 1000;
+  */
   }
 
   void Set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
@@ -202,10 +204,14 @@ short sensorValue4Averaged = 0;
 short sensorValue6Averaged = 0;
 short sensorValue7Averaged = 0;
 
-unsigned int T0int;
-unsigned int T1int;
 boolean T0Connected;
 boolean T1Connected;
+int T0int;
+int T1int;
+// hysteresis * 10°C -> value 10 means +- 1°C
+#define HYSTERESIS 10
+int T0WithHysteresisInt;
+int T1WithHysteresisInt;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 3
 volatile unsigned long fanRpmSensorTimes[6][FAN_RPM_SENSOR_TIMES_FIELD];
@@ -220,12 +226,12 @@ unsigned int rpm5 = 0;
 
 // sensor to mainboard
 volatile byte rmpToMainboard = 5;
-
+/*
 //Define Variables we'll be connecting to
 double Setpoint = 10;
 double Input = 10;
 double Output = 10;
-
+*/
 //Specify the links and initial tuning parameters
 //PID pid0(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 /*
@@ -235,7 +241,11 @@ PID pid3(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid4(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 PID pid5(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
 */
+#ifdef TIMING_DEBUG
 CommandHandler<16, 35, 0> SerialCommandHandler; // 16 commands, max length of command 35, 0 variables
+#else
+CommandHandler<16, 35, 0> SerialCommandHandler; // 14 commands, max length of command 35, 0 variables
+#endif
 
 byte i = 0;
 byte j = 0;
