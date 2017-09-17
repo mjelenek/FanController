@@ -123,12 +123,12 @@ void setTimers(){
   // synchronize timers 1 and 2
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
   TCNT1 = 0;
-  TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
   GTCCR = 0;                                 // start timers
-  delayMicroseconds(5);
+  delayMicroseconds(4);
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC);  // stop timers
   TCNT2 = 255;
   GTCCR = 0;                                  // start timers
+  TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
   sei();
 
   Serial.println(F("Timers configuration"));
