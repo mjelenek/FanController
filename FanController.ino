@@ -119,12 +119,12 @@ public:
   {
 //    Serial.println(F("Reset"));    
     pwmDrive = 0;
-    constPwm = 150;
+    constPwm = 120;
     tSelect = 0;
     minPwm = 100;
     maxPwm = 200;
-    tempTarget = 20;
-    tempMax = 40;
+    tempTarget = 30;
+    tempMax = 50;
     /*
     kp = 1;
     ki = 1;
@@ -214,8 +214,18 @@ int T0WithHysteresisInt;
 int T1WithHysteresisInt;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 3
-volatile unsigned long fanRpmSensorTimes[6][FAN_RPM_SENSOR_TIMES_FIELD];
-volatile byte lastFanRpmSensorTime[6];
+volatile unsigned long fanRpmSensorTimes0[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile unsigned long fanRpmSensorTimes1[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile unsigned long fanRpmSensorTimes2[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile unsigned long fanRpmSensorTimes3[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile unsigned long fanRpmSensorTimes4[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile unsigned long fanRpmSensorTimes5[FAN_RPM_SENSOR_TIMES_FIELD];
+volatile byte lastFanRpmSensorTime0;
+volatile byte lastFanRpmSensorTime1;
+volatile byte lastFanRpmSensorTime2;
+volatile byte lastFanRpmSensorTime3;
+volatile byte lastFanRpmSensorTime4;
+volatile byte lastFanRpmSensorTime5;
 
 unsigned int rpm0 = 0;
 unsigned int rpm1 = 0;
@@ -223,6 +233,9 @@ unsigned int rpm2 = 0;
 unsigned int rpm3 = 0;
 unsigned int rpm4 = 0;
 unsigned int rpm5 = 0;
+
+volatile byte cnt2;
+volatile byte cnt2Fail;
 
 // sensor to mainboard
 volatile byte rmpToMainboard = 5;

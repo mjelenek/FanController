@@ -1,10 +1,16 @@
-#define fanSensor5FilterDefinition B0000011
+#define fanSensor5FilterDefinition B0000111
 
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
   static byte lastState;
   static byte fanSensor5Filter = 0;
-  byte fanSensor5 = (PINC >> 5) & 1;
+  cnt2 = TCNT2;
+  if(cnt2 < 240){
+    cnt2Fail++;
+    return;
+  }
+  byte state = PINC;
+  byte fanSensor5 = (state >> 5) & 1;
   unsigned long now = micros();
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
   byte fanSensor5Value = lastState;
@@ -20,10 +26,10 @@ ISR(TIMER1_OVF_vect){
       digitalWrite(LED_OUT, fanSensor5Value);
     }
     if(fanSensor5Value){
-      writeLastFanRpmSensorTime(5, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5, now);
     }
+    lastState = fanSensor5Value;
   }
-  lastState = fanSensor5Value;
 }
 
 // change pin PB0, PB4
@@ -38,7 +44,7 @@ ISR(PCINT0_vect){
       digitalWrite(LED_OUT, state & (1 << PINB0));
     }
     if(state & (1 << PINB0)){
-      writeLastFanRpmSensorTime(3, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime3, fanRpmSensorTimes3, now);
     }
   }
 
@@ -47,7 +53,7 @@ ISR(PCINT0_vect){
       digitalWrite(LED_OUT, state & (1 << PINB4));
     }
     if(state & (1 << PINB4)){
-      writeLastFanRpmSensorTime(4, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime4, fanRpmSensorTimes4, now);
     }
   }
 
@@ -66,7 +72,7 @@ ISR(PCINT2_vect){
       digitalWrite(LED_OUT, state & (1 << PIND2));
     }
     if(state & (1 << PIND2)){
-      writeLastFanRpmSensorTime(0, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime0, fanRpmSensorTimes0, now);
     }
   }
 
@@ -75,7 +81,7 @@ ISR(PCINT2_vect){
       digitalWrite(LED_OUT, state & (1 << PIND4));
     }
     if(state & (1 << PIND4)){
-      writeLastFanRpmSensorTime(1, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime1, fanRpmSensorTimes1, now);
     }
   }
 
@@ -84,29 +90,30 @@ ISR(PCINT2_vect){
       digitalWrite(LED_OUT, state & (1 << PIND7));
     }
     if(state & (1 << PIND7)){
-      writeLastFanRpmSensorTime(2, now);
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime2, fanRpmSensorTimes2, now);
     }
   }
 
   lastState = state;
 }
 
-void writeLastFanRpmSensorTime(byte fanNumber, unsigned long now){
-  lastFanRpmSensorTime[fanNumber]++;
-  if(lastFanRpmSensorTime[fanNumber] >= FAN_RPM_SENSOR_TIMES_FIELD){
-    lastFanRpmSensorTime[fanNumber] = 0;
+inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[], unsigned long now){
+//void writeLastFanRpmSensorTime(byte fanNumber, unsigned long now){
+  (*lastFanRpmSensorTime)++;
+  if(*lastFanRpmSensorTime >= FAN_RPM_SENSOR_TIMES_FIELD){
+    *lastFanRpmSensorTime = 0;
   }
-  fanRpmSensorTimes[fanNumber][lastFanRpmSensorTime[fanNumber]] = now;
+  fanRpmSensorTimes[*lastFanRpmSensorTime] = now;
 }
 
-unsigned int countRPM(byte fanNumber){
-  byte time1Pointer = lastFanRpmSensorTime[fanNumber] + 1;
+unsigned int countRPM(byte lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[]){
+  byte time1Pointer = lastFanRpmSensorTime + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;
   }
   PCICR = 0;  // disable pin change interrupts
-  unsigned long time0 = fanRpmSensorTimes[fanNumber][lastFanRpmSensorTime[fanNumber]];
-  unsigned long time1 = fanRpmSensorTimes[fanNumber][time1Pointer];
+  unsigned long time0 = fanRpmSensorTimes[lastFanRpmSensorTime];
+  unsigned long time1 = fanRpmSensorTimes[time1Pointer];
   PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
   if((micros() - time0) > 240000 || (micros() - time1) > 840000){
     return 0;
@@ -115,11 +122,11 @@ unsigned int countRPM(byte fanNumber){
 }
 
 void countRPMs(){
-  rpm0 = countRPM(0);
-  rpm1 = countRPM(1);
-  rpm2 = countRPM(2);
-  rpm3 = countRPM(3);
-  rpm4 = countRPM(4);
-  rpm5 = countRPM(5);
+  rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
+  rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
+  rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
+  rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
+  rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
+  rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
 }
 

@@ -124,7 +124,7 @@ void setTimers(){
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
   TCNT1 = 0;
   GTCCR = 0;                                 // start timers
-  delayMicroseconds(4);
+  delayMicroseconds(5);
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC);  // stop timers
   TCNT2 = 255;
   GTCCR = 0;                                  // start timers
@@ -218,7 +218,7 @@ void measureInterrupts(){
   Serial.print(m2);
   Serial.println(F("us"));
   Serial.print(F("Interrupts occupy "));
-  Serial.print(percentage, 1);
+  Serial.print(percentage, 2);
   Serial.println(F("% of processor time"));
 }
 

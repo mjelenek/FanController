@@ -46,6 +46,9 @@ void guiUpdate(){
   serialWriteInt(rpm5);
   serialWriteInt(T0int);
   serialWriteInt(T1int);
+
+//  serialWriteInt(cnt2);
+//  serialWriteInt(cnt2Fail);
 }
 
 void setPwmConfiguration(CommandParameter &parameters){
@@ -129,12 +132,9 @@ void disableFan(CommandParameter &parameters){
 }
 
 void setRPMToMainboard(CommandParameter &parameters){
-  // 0 - from sensor4, 1 - from sensor5
   byte select = parameters.NextParameterAsInteger();
-  if(select == 0){
-    rmpToMainboard = 0;
-  } else {
-    rmpToMainboard = 1;
+  if(select >= 0 && select <= 5){
+    rmpToMainboard = select;
   }
 }
 

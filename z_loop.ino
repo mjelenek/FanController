@@ -53,19 +53,19 @@ void loop(){
           countT1();  
           break;
         case 4:
-          rpm0 = countRPM(0) / 10;
+          rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0) / 10;
           rpm0 = rpm0 * 10;
-          rpm1 = countRPM(1) / 10;
+          rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1) / 10;
           rpm1 = rpm1 * 10;
-          rpm2 = countRPM(2) / 10;
+          rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2) / 10;
           rpm2 = rpm2 * 10;
           break;
         case 5:
-          rpm3 = countRPM(3) / 10;
+          rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3) / 10;
           rpm3 = rpm3 * 10;
-          rpm4 = countRPM(4) / 10;
+          rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4) / 10;
           rpm4 = rpm4 * 10;
-          rpm5 = countRPM(5) / 10;
+          rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5) / 10;
           rpm5 = rpm5 * 10;
           break;
         case 6:
