@@ -9,8 +9,7 @@ ISR(TIMER1_OVF_vect){
     cnt2Fail++;
     return;
   }
-  byte state = PINC;
-  byte fanSensor5 = (state >> 5) & 1;
+  byte fanSensor5 = (PINC >> 5) & 1;
   unsigned long now = micros();
   fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
   byte fanSensor5Value = lastState;
