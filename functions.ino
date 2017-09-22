@@ -46,6 +46,8 @@ void guiUpdate(){
   serialWriteInt(rpm5);
   serialWriteInt(T0int);
   serialWriteInt(T1int);
+//  serialWriteInt(sensorValue6Averaged);
+//  serialWriteInt(sensorValue7Averaged);
 
 //  serialWriteInt(cnt2);
 //  serialWriteInt(cnt2Fail);

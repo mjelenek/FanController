@@ -1,107 +1,51 @@
-#include "wiring_private.h"
-
-uint8_t analog_reference_asynchronous = DEFAULT;
-
-void analogReferenceAsynchronous(uint8_t mode)
-{
-  // can't actually set the register here because the default setting
-  // will connect AVCC and the AREF pin, which would cause a short if
-  // there's something connected to AREF.
-  analog_reference_asynchronous = mode;
-  analogReference(mode);
-}
-
-int analogReadAsynchronous(uint8_t pin, void (*function)())
-{
-  uint8_t low, high;
-
-#if defined(analogPinToChannel)
-#if defined(__AVR_ATmega32U4__)
-  if (pin >= 18) pin -= 18; // allow for channel or pin numbers
-#endif
-  pin = analogPinToChannel(pin);
-#elif defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-  if (pin >= 54) pin -= 54; // allow for channel or pin numbers
-#elif defined(__AVR_ATmega32U4__)
-  if (pin >= 18) pin -= 18; // allow for channel or pin numbers
-#elif defined(__AVR_ATmega1284__) || defined(__AVR_ATmega1284P__) || defined(__AVR_ATmega644__) || defined(__AVR_ATmega644A__) || defined(__AVR_ATmega644P__) || defined(__AVR_ATmega644PA__)
-  if (pin >= 24) pin -= 24; // allow for channel or pin numbers
-#else
-  if (pin >= 14) pin -= 14; // allow for channel or pin numbers
-#endif
-
-#if defined(ADCSRB) && defined(MUX5)
-  // the MUX5 bit of ADCSRB selects whether we're reading from channels
-  // 0 to 7 (MUX5 low) or 8 to 15 (MUX5 high).
-  ADCSRB = (ADCSRB & ~(1 << MUX5)) | (((pin >> 3) & 0x01) << MUX5);
-#endif
-  
-  // set the analog reference (high two bits of ADMUX) and select the
-  // channel (low 4 bits).  this also sets ADLAR (left-adjust result)
-  // to 0 (the default).
-#if defined(ADMUX)
-#if defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-  ADMUX = (analog_reference_asynchronous << 4) | (pin & 0x07);
-#else
-  ADMUX = (analog_reference_asynchronous << 6) | (pin & 0x07);
-#endif
-#endif
-
-  // without a delay, we seem to read from the wrong channel
-  //delay(1);
-
-#if defined(ADCSRA) && defined(ADCL)
-  // start the conversion
-  sbi(ADCSRA, ADSC);
-
-  //do asynchronous work
-  (*function)();
-  
-  // ADSC is cleared when the conversion finishes
-  while (bit_is_set(ADCSRA, ADSC));
-
-  // we have to read ADCL first; doing so locks both ADCL
-  // and ADCH until ADCH is read.  reading ADCL second would
-  // cause the results of each conversion to be discarded,
-  // as ADCL and ADCH would be locked when it completed.
-  low  = ADCL;
-  high = ADCH;
-#else
-  // we dont have an ADC, return 0
-  low  = 0;
-  high = 0;
-#endif
-
-  // combine the two bytes
-  return (high << 8) | low;
-}
-
-unsigned int readAnalogValueAndSmooth(unsigned int previousValue, byte analogInput){
-	unsigned int sensorValue = analogRead(analogInput);
-//  return sensorValue;
-	return ((3 * previousValue + sensorValue) >> 2);
-}
-
-unsigned int readAnalogValueAndSmooth(unsigned int previousValue, byte analogInput, void (*function)()){
-	unsigned int sensorValue = analogReadAsynchronous(analogInput, *function);
-//  return sensorValue;
-	return ((3 * previousValue + sensorValue) >> 2);
-}
-
 // ADC conversion complete interrupt handler
-/*
 ISR(ADC_vect)
 {
-    //clear timer compare match flag
-    TIFR0=(1<<OCF0A);
-    //toggle pin PD2 to track the end of ADC conversion
-    PIND = (1<<PD2);
-    wave[ii++]=ADCH;
-    if (ii==ADCINDEX)
-    {
-        StopTimer();
-        DisableADC();
-        flag = 1;
-    }
+  static byte adcIndex = 0;
+
+  byte low = ADCL;
+  byte high = ADCH;
+  
+  // Read the AD conversion result
+  unsigned short sensorValue = (high << 8) | low;
+  
+  // Process value and select next ADC input
+  switch (adcIndex) {
+    case 0:
+      sensorValue0Averaged = ((sensorValue0Averaged + sensorValue) >> 1);
+      adcIndex = 1;
+      break;
+    case 1:
+      sensorValue1Averaged = ((sensorValue1Averaged + sensorValue) >> 1);
+      adcIndex = 2;
+      break;
+    case 2:
+      sensorValue2Averaged = ((sensorValue2Averaged + sensorValue) >> 1);
+      adcIndex = 3;
+      break;
+    case 3:
+      sensorValue3Averaged = ((sensorValue3Averaged + sensorValue) >> 1);
+      adcIndex = 4;
+      break;
+    case 4:
+      sensorValue4Averaged = ((sensorValue4Averaged + sensorValue) >> 1);
+      adcIndex = 6;
+      break;
+    case 6:
+      sensorValue6Averaged = ((3 * sensorValue6Averaged + sensorValue) >> 2);
+      adcIndex = 7;
+      break;
+    case 7:
+      sensorValue7Averaged = ((3 * sensorValue7Averaged + sensorValue) >> 2);
+      adcIndex = 0;
+      break;
+    default:
+      adcIndex = 0;
+  }
+
+  ADMUX = adcIndex;             // select next ADC channel, VREF is EXTERNAL
+
+// Start next conversion - triggered by Timer1
+//  ADCSRA |= (1 << ADSC); 
 }
-*/
+

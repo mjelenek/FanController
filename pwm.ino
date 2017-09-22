@@ -51,7 +51,10 @@ void setPwm0(){
   if(pwm0Disabled > 0){
     pwm0 = 0;
   } else {
-    pwm0 = getNewPwm(ConfigurationPWM0.Data, pwm0, sensorValue0Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue4Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm0 = getNewPwm(ConfigurationPWM0.Data, pwm0, sensorValue);
   }
   analogWrite(PWM0, 255 - pwm0);
 }
@@ -60,7 +63,10 @@ void setPwm1(){
   if(pwm1Disabled > 0){
     pwm1 = 0;
   } else {
-    pwm1 = getNewPwm(ConfigurationPWM1.Data, pwm1, sensorValue1Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue3Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm1 = getNewPwm(ConfigurationPWM1.Data, pwm1, sensorValue);
   }
   analogWrite(PWM1, 255 - pwm1);
 }
@@ -69,7 +75,10 @@ void setPwm2(){
   if(pwm2Disabled > 0){
     pwm2 = 0;
   } else {
-    pwm2 = getNewPwm(ConfigurationPWM2.Data, pwm2, sensorValue2Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue2Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm2 = getNewPwm(ConfigurationPWM2.Data, pwm2, sensorValue);
   }
   analogWrite(PWM2, 255 - pwm2);
 }
@@ -78,7 +87,10 @@ void setPwm3(){
   if(pwm3Disabled > 0){
     pwm3 = 0;
   } else {
-    pwm3 = getNewPwm(ConfigurationPWM3.Data, pwm3, sensorValue3Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue1Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm3 = getNewPwm(ConfigurationPWM3.Data, pwm3, sensorValue);
   }
   analogWrite(PWM3, 255 - pwm3);
 }
@@ -87,7 +99,10 @@ void setPwm4(){
   if(pwm4Disabled > 0){
     pwm4 = 0;
   } else {
-    pwm4 = getNewPwm(ConfigurationPWM4.Data, pwm4, sensorValue4Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue0Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm4 = getNewPwm(ConfigurationPWM4.Data, pwm4, sensorValue);
   }
   analogWrite(PWM4, 255 - pwm4);
 }
@@ -96,7 +111,10 @@ void setPwm5(){
   if(pwm5Disabled > 0){
     pwm5 = 0;
   } else {
-    pwm5 = getNewPwm(ConfigurationPWM5.Data, pwm5, sensorValue4Averaged);
+    ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+    unsigned short sensorValue = sensorValue0Averaged;
+    ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+    pwm5 = getNewPwm(ConfigurationPWM5.Data, pwm5, sensorValue);
   }
   analogWrite(PWM5, 255 - pwm5);
 }

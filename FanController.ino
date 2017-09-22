@@ -7,51 +7,35 @@
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;
 unsigned long timeTotal;
-unsigned int to50;
-unsigned int to100;
-unsigned int to150;
-unsigned int to200;
-unsigned int to300;
-unsigned int to400;
 unsigned int to500;
-unsigned int over500;
+unsigned int to800;
+unsigned int to900;
+unsigned int to1000;
+unsigned int over1000;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
 void printTimingResult(){
   Serial.println(F("Timing results"));
   Serial.print(F("Time in code: "));
-  Serial.print(timeInCode);
-  Serial.print(F(" us. "));
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
-  Serial.print(F("Total time: "));
-  Serial.print(timeTotal);
-  Serial.println(F(" us"));
-  Serial.print(F("<50 - "));
-  Serial.println(to50);
-  Serial.print(F("<100 - "));
-  Serial.println(to100);
-  Serial.print(F("<150 - "));
-  Serial.println(to150);
-  Serial.print(F("<200 - "));
-  Serial.println(to200);
-  Serial.print(F("<300 - "));
-  Serial.println(to300);
-  Serial.print(F("<400 - "));
-  Serial.println(to400);
   Serial.print(F("<500 - "));
   Serial.println(to500);
-  Serial.print(F(">500 - "));
-  Serial.println(over500);
-  delay(2);
+  Serial.print(F("<800 - "));
+  Serial.println(to800);
+  Serial.print(F("<900 - "));
+  Serial.println(to900);
+  Serial.print(F("<1000 - "));
+  Serial.println(to1000);
+  Serial.print(F(">1000 - "));
+  Serial.println(over1000);
 }
 #endif
 
 //one iteration microseconds
-#define ITERATION_MICROSECONDS 1000
-//#define ITERATION_MICROSECONDS 2000
-#define WARN_MICROSECONDS 500
+#define ITERATION_MICROSECONDS 5000
+#define WARN_MICROSECONDS 4000
 #define DELAY_THRESHOLD 10000
 
 //by multimeter
@@ -68,15 +52,6 @@ void printTimingResult(){
 #define THERMISTORNOMINAL 10000      
 // The beta coefficient of the thermistor (usually 3000-4000)
 #define BCOEFFICIENT 3950
-
-#define VOLTAGEINPUT0 A4
-#define VOLTAGEINPUT1 A3
-#define VOLTAGEINPUT2 A2
-#define VOLTAGEINPUT3 A1
-#define VOLTAGEINPUT4 A0
-
-#define TEMPINPUT0 A6
-#define TEMPINPUT1 A7
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -184,8 +159,8 @@ byte pwm3Disabled = 0;
 byte pwm4Disabled = 0;
 byte pwm5Disabled = 0;
 
-unsigned long thermistorResistance0 = 0;
-unsigned long thermistorResistance1 = 0;
+//unsigned long thermistorResistance0 = 0;
+//unsigned long thermistorResistance1 = 0;
 
 unsigned long start;
 unsigned long now;
@@ -195,14 +170,14 @@ unsigned long RT0koeficient;
 unsigned long RT1koeficient;
 
 // ADC values from mainboard
-short sensorValue0Averaged = 0;
-short sensorValue1Averaged = 0;
-short sensorValue2Averaged = 0;
-short sensorValue3Averaged = 0;
-short sensorValue4Averaged = 0;
+volatile unsigned short sensorValue0Averaged = 0;
+volatile unsigned short sensorValue1Averaged = 0;
+volatile unsigned short sensorValue2Averaged = 0;
+volatile unsigned short sensorValue3Averaged = 0;
+volatile unsigned short sensorValue4Averaged = 0;
 // ADC values from thermistors
-short sensorValue6Averaged = 0;
-short sensorValue7Averaged = 0;
+volatile unsigned short sensorValue6Averaged = 0;
+volatile unsigned short sensorValue7Averaged = 0;
 
 boolean T0Connected;
 boolean T1Connected;

@@ -17,10 +17,12 @@ void setup() {
   Serial.println(F("Starting..."));
 
   //set reference voltage (external 3.3V)
-  analogReferenceAsynchronous(EXTERNAL);
-  analogRead(TEMPINPUT0); //must read once before any other calls.
-  //adc_init(ADC, 16000000, 10000*2, 3);
-
+//  analogReferenceAsynchronous(EXTERNAL);
+//  analogRead(TEMPINPUT0); //must read once before any other calls.
+ 
+  setTimers();
+  init_adc();
+  
 // VOLTAGETHERMISTOR != ANALOGREFERENCEVOLTAGE
 //  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
 //  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
@@ -34,7 +36,9 @@ void setup() {
   Serial.print(F(", koeficientT1:"));
   Serial.println(RT1koeficient);
 
-  readTemperaturesInitial();
+  delay(5);  //wait for read values from ADC;
+  countT0();
+  countT1();
   if(T0Connected){
     Serial.print(F("T0 connected"));
   } else {
@@ -50,15 +54,17 @@ void setup() {
 
   loadConfiguration();
 
-  setSerialCommandHandler();
-  setTimers();
   init_pcint();
+  setSerialCommandHandler();
  
   Serial.println(F("System started. Type !help for more informations."));
   delay(10);
 
 //  printPokus();
     measureInterrupts();
+
+  Serial.print(F("ADCSRA: "));
+  Serial.println(ADCSRA, BIN);
 
 //  pid0.SetMode(AUTOMATIC);
 
@@ -165,18 +171,17 @@ void init_pcint()
     PCICR = (1 << PCIE0) | (1 << PCIE2);
 }
 
-void readTemperaturesInitial(){
-    sensorValue6Averaged = analogRead(A6);
-    T0Connected = (sensorValue6Averaged > 10);
-    if(T0Connected == true){
-      T0int = countTemperature(RT0koeficient / sensorValue6Averaged - RT0);
-    }
-
-    sensorValue7Averaged = analogRead(A7);
-    T1Connected = (sensorValue7Averaged > 10);
-    if(T1Connected == true){
-      T1int = countTemperature(RT1koeficient / sensorValue7Averaged - RT1);
-    }
+void init_adc()
+{
+  ADMUX = 0;                                           // VREF is EXTERNAL, channel 0
+  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler to 128
+  //ADCSRB = (1 << ADTS2);                             // ADC Auto Trigger Source - Timer0 Overflow
+  ADCSRB = (1 << ADTS2) | (1 << ADTS1);                // ADC Auto Trigger Source - Timer1 Overflow
+  //ADCSRB = 0;                                          // ADC Free conversion mode
+  ADCSRA |= (1 << ADATE);                              // ADC Auto Trigger Enable
+  ADCSRA |= (1 << ADIE);                               // Enable ADC conversion complete interrupt
+  ADCSRA |= (1 << ADEN);                               // Enable ADC
+//  ADCSRA |= (1 << ADSC);  // Start conversion - triggered by Timer1
 }
 
 void printTempProfile(){
@@ -192,15 +197,17 @@ void printTempProfile(){
 
 void measureInterrupts(){
   delay(20);
-  TIMSK1 &= B11111110;  // disable timer1 overflow interrupt
-  PCICR = 0;  // disable pin change interrupts
+  TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
+  PCICR = 0;                            // disable pin change interrupts
+  ADCSRA &= ~(1 << ADIE);               // disable ADC conversion complete interrupt
   start = micros();
   unsigned int a = doSomeMath(100);
   now = micros();
   unsigned long m1 = now - start;
 
-  TIMSK1 |= B00000001;  // enable timer1 overflow interrupt
+  TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
   PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
+  ADCSRA |= (1 << ADIE);                // enable ADC conversion complete interrupt
   delay(10);
   start = micros();
   unsigned int b = doSomeMath(200);

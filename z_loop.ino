@@ -1,91 +1,37 @@
 void loop(){
-  byte part_8 = i & B00000111; // cycles from 0 to 7;
-  byte part_64 = (i & B00111111) >> 3; // cycles from 0 to 8 with step i = 8;
+  byte part_4 = i & B00000011; // cycles from 0 to 3;
+  byte part_2 = i & B00000001; // cycles from 0 to 3;
 
   // one case each 8 iterations (8ms)
-  switch (part_8) {
+  switch (part_4) {
     case 0:
-      if(ConfigurationPWM0.Data.pwmDrive == 1){
-        sensorValue0Averaged = readAnalogValueAndSmooth(sensorValue0Averaged, VOLTAGEINPUT0);
-        setPwm0();
-      }
+      countT0();  
+      countT1();  
       break;
     case 1:
-      if(ConfigurationPWM1.Data.pwmDrive == 1){
-        sensorValue1Averaged = readAnalogValueAndSmooth(sensorValue1Averaged, VOLTAGEINPUT1);
-        setPwm1();
-      }
+      rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0) / 10;
+      rpm0 = rpm0 * 10;
+      rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1) / 10;
+      rpm1 = rpm1 * 10;
+      rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2) / 10;
+      rpm2 = rpm2 * 10;
       break;
     case 2:
-      if(ConfigurationPWM2.Data.pwmDrive == 1){
-        sensorValue2Averaged = readAnalogValueAndSmooth(sensorValue2Averaged, VOLTAGEINPUT2);
-        setPwm2();
-      }
-      break;
+      rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3) / 10;
+      rpm3 = rpm3 * 10;
+      rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4) / 10;
+      rpm4 = rpm4 * 10;
+      rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5) / 10;
+      rpm5 = rpm5 * 10;
     case 3:
-      if(ConfigurationPWM3.Data.pwmDrive == 1){
-        sensorValue3Averaged = readAnalogValueAndSmooth(sensorValue3Averaged, VOLTAGEINPUT3);
-        setPwm3();
-      }
-      break;
-    case 4:
-      if(ConfigurationPWM4.Data.pwmDrive == 1 || ConfigurationPWM5.Data.pwmDrive == 1){
-        sensorValue4Averaged = readAnalogValueAndSmooth(sensorValue4Averaged, VOLTAGEINPUT4);
-      }
-      if(ConfigurationPWM4.Data.pwmDrive == 1){
-        setPwm4();
-      }
-      if(ConfigurationPWM5.Data.pwmDrive == 1){
-        setPwm5();
-      }
-      break;
-    case 5:
-      // one case each 64 iterations (64ms)
-      switch (part_64) {
-        case 0:
-          break;
-        case 1:
-          countT0();  
-          break;
-        case 2:
-          break;
-        case 3:
-          countT1();  
-          break;
-        case 4:
-          rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0) / 10;
-          rpm0 = rpm0 * 10;
-          rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1) / 10;
-          rpm1 = rpm1 * 10;
-          rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2) / 10;
-          rpm2 = rpm2 * 10;
-          break;
-        case 5:
-          rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3) / 10;
-          rpm3 = rpm3 * 10;
-          rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4) / 10;
-          rpm4 = rpm4 * 10;
-          rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5) / 10;
-          rpm5 = rpm5 * 10;
-          break;
-        case 6:
-          setPwm();
-          break;
-        case 7:
-//          pid0.Compute();
-        ;
-      }
-      break;
-    case 6:
-      break;
-    case 7:
       SerialCommandHandler.Process();
   }
+//  pid0.Compute();
+  setPwm();
 
-
-  if(i == 255){
+  if(i == 0){
     j++;
-    if(j == 1 && gui){
+    if(gui){
       guiUpdate();
     }
     if(j == 2){
@@ -105,14 +51,11 @@ void loop(){
         timeCounting = 1;
         timeCountingStartFlag = 0;
         timeInCode = 0;
-        to50 = 0;
-        to100 = 0;
-        to150 = 0;
-        to200 = 0;
-        to300 = 0;
-        to400 = 0;
         to500 = 0;
-        over500 = 0;
+        to800 = 0;
+        to900 = 0;
+        to1000 = 0;
+        over1000 = 0;
         timeTotal = micros();
       }
       #endif
@@ -125,39 +68,28 @@ void loop(){
   zpozdeni = now - start;
 
 #ifdef TIMING_DEBUG
-  if(zpozdeni < 50){
-    to50++;
-  } else
-  if(zpozdeni < 100){
-    to100++;
-  } else
-  if(zpozdeni < 150){
-    to150++;
-  } else
-  if(zpozdeni < 200){
-    to200++;
-  } else
-  if(zpozdeni < 300){
-    to300++;
-  } else
-  if(zpozdeni < 400){
-    to400++;
-  } else
   if(zpozdeni < 500){
     to500++;
   } else
-  if(zpozdeni >= 500){
-    over500++;
+  if(zpozdeni < 800){
+    to800++;
+  } else
+  if(zpozdeni < 900){
+    to900++;
+  } else
+  if(zpozdeni < 1000){
+    to1000++;
+  } else
+  if(zpozdeni >= 1000){
+    over1000++;
   }
 
   timeInCode = timeInCode + zpozdeni;
 #endif
 
-/*
   if(zpozdeni >= WARN_MICROSECONDS){
     printDelay(i, zpozdeni);
   }
-*/
   if(zpozdeni >= ITERATION_MICROSECONDS){
     printDelay(i, zpozdeni);
   } else {
@@ -173,5 +105,8 @@ void loop(){
   }
 
   i++;
+  if(i == 100){
+    i = 0;
+  }
 }
 

@@ -1,11 +1,14 @@
 void countT0(){
-  sensorValue6Averaged = readAnalogValueAndSmooth(sensorValue6Averaged, TEMPINPUT0);
-  T0Connected = (sensorValue6Averaged > 10);
+  ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+  unsigned short sensorValueAveraged = sensorValue6Averaged;
+  ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+
+  T0Connected = (sensorValueAveraged > 10);
   if(T0Connected == true){
-    T0int = cacheT0.get(sensorValue6Averaged);
+    T0int = cacheT0.get(sensorValueAveraged);
     if(T0int == 0){
-      T0int = countTemperature(RT0koeficient / sensorValue6Averaged - RT0);
-      cacheT0.put(sensorValue6Averaged, T0int);
+      T0int = countTemperature(RT0koeficient / sensorValueAveraged - RT0);
+      cacheT0.put(sensorValueAveraged, T0int);
     }
     T0WithHysteresisInt = countHysteresisTemperature(T0WithHysteresisInt, T0int);
   } else {
@@ -14,13 +17,16 @@ void countT0(){
 }
 
 void countT1(){
-  sensorValue7Averaged = readAnalogValueAndSmooth(sensorValue7Averaged, TEMPINPUT1);
-  T1Connected = (sensorValue7Averaged > 10);
+  ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+  unsigned short sensorValueAveraged = sensorValue7Averaged;
+  ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
+
+  T1Connected = (sensorValueAveraged > 10);
   if(T1Connected == true){
-    T1int = cacheT1.get(sensorValue7Averaged);
+    T1int = cacheT1.get(sensorValueAveraged);
     if(T1int == 0){
-      T1int = countTemperature(RT1koeficient / sensorValue7Averaged - RT1);
-      cacheT1.put(sensorValue7Averaged, T1int);
+      T1int = countTemperature(RT1koeficient / sensorValueAveraged - RT1);
+      cacheT1.put(sensorValueAveraged, T1int);
     }
     T1WithHysteresisInt = countHysteresisTemperature(T1WithHysteresisInt, T1int);
   } else {
