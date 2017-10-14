@@ -1,5 +1,5 @@
-//#include <PID_v1.h>
-#include <avr/interrupt.h>
+#include <PID_v1.h>
+//#include <avr/interrupt.h>
 #include "CommandHandler.h"
 #include "EEPROMStore.h"
 
@@ -9,9 +9,9 @@ unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to500;
 unsigned int to800;
-unsigned int to900;
 unsigned int to1000;
-unsigned int over1000;
+unsigned int to1200;
+unsigned int over1200;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
@@ -24,18 +24,18 @@ void printTimingResult(){
   Serial.println(to500);
   Serial.print(F("<800 - "));
   Serial.println(to800);
-  Serial.print(F("<900 - "));
-  Serial.println(to900);
   Serial.print(F("<1000 - "));
   Serial.println(to1000);
-  Serial.print(F(">1000 - "));
-  Serial.println(over1000);
+  Serial.print(F("<1200 - "));
+  Serial.println(to1200);
+  Serial.print(F(">1200 - "));
+  Serial.println(over1200);
 }
 #endif
 
 //one iteration microseconds
-#define ITERATION_MICROSECONDS 5000
-#define WARN_MICROSECONDS 4000
+#define ITERATION_MICROSECONDS 2000
+#define WARN_MICROSECONDS 1600
 #define DELAY_THRESHOLD 10000
 
 //by multimeter
@@ -72,45 +72,52 @@ void printTimingResult(){
 class PWMConfiguration
 {
 public:
-
-  // 0 - const, 1 - analogInput, 2 - temperatures, 4 - constRPM
+  // 0 - constPWM, 1 - analogInput, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   byte pwmDrive;
   // pwm when pwmDrive == 0
   byte constPwm;
-  // settings when pwmDrive == 2
+  // settings when pwmDrive == 2 or pwmDrive == 4
   byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
+  // settings when pwmDrive == 2
   byte minPwm;
   byte maxPwm;
   byte tempTarget;
   byte tempMax;
-/*
-  // pid parameters
-  double kp;
-  double ki;
-  double kd;
-  unsigned int constRPM;
-*/
+  // settings when pwmDrive == 3
+  unsigned short constRpm;
+  // settings when pwmDrive == 4
+  unsigned short minRpm;
+  unsigned short maxRpm;
+  byte tempTargetRpm;
+  byte tempMaxRpm;
+  // pid parameters, real value is parameter / 100
+  byte kp;
+  byte ki;
+  byte kd;
+
   void Reset()
   {
-//    Serial.println(F("Reset"));    
     pwmDrive = 0;
     constPwm = 120;
     tSelect = 0;
-    minPwm = 100;
+    minPwm = 90;
     maxPwm = 200;
-    tempTarget = 30;
+    tempTarget = 32;
     tempMax = 50;
-    /*
-    kp = 1;
-    ki = 1;
-    kd = 0.5;
-    constRPM = 1000;
-  */
+    constRpm = 900;
+    minRpm = 600;
+    maxRpm = 1400;
+    tempTargetRpm = 32;
+    tempMaxRpm = 50;
+    // PID parameters (real value is parameter value / 100)
+    kp = 20;
+    ki = 15;
+    kd = 3;
   }
 
-  void Set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
+  void set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
   {
-    if(pwmDrive1 >= 0 && pwmDrive1 <= 2){
+    if(pwmDrive1 >= 0 && pwmDrive1 <= 4){
       pwmDrive = pwmDrive1;
     }
     constPwm = constPwm1;
@@ -119,12 +126,29 @@ public:
     }
     minPwm = minPwm1;
     maxPwm = maxPwm1;
-    if(tempTarget1 <= 60){
+    if(tempTarget1 <= 60 && tempTarget1 < tempMax1){
       tempTarget = tempTarget1;
     }
-    if(tempMax1 <= 60){
+    if(tempMax1 <= 60 && tempTarget1 < tempMax1){
       tempMax = tempMax1;
     }
+  }
+
+  void setPid(unsigned short constRpm1, unsigned short minRpm1, unsigned short maxRpm1,
+    byte tempTargetRpm1, byte tempMaxRpm1, byte kp1, byte ki1, byte kd1)
+  {
+    constRpm = constRpm1;
+    minRpm = minRpm1;
+    maxRpm = maxRpm1;
+    if(tempTargetRpm1 <= 60 && tempTargetRpm1 < tempMaxRpm1){
+      tempTargetRpm = tempTargetRpm1;
+    }
+    if(tempMaxRpm1 <= 60 && tempTargetRpm1 < tempMaxRpm1){
+      tempMaxRpm = tempMaxRpm1;
+    }
+    kp = kp1;
+    ki = ki1;
+    kd = kd1;
   }
 
   void guiStat(){
@@ -135,6 +159,14 @@ public:
     Serial.write(maxPwm);
     Serial.write(tempTarget);
     Serial.write(tempMax);
+    serialWriteInt(constRpm);
+    serialWriteInt(minRpm);
+    serialWriteInt(maxRpm);
+    Serial.write(tempTargetRpm);
+    Serial.write(tempMaxRpm);
+    Serial.write(kp);
+    Serial.write(ki);
+    Serial.write(kd);
   }
 };
 
@@ -144,6 +176,7 @@ EEPROMStore<PWMConfiguration> ConfigurationPWM2;
 EEPROMStore<PWMConfiguration> ConfigurationPWM3;
 EEPROMStore<PWMConfiguration> ConfigurationPWM4;
 EEPROMStore<PWMConfiguration> ConfigurationPWM5;
+PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data, &ConfigurationPWM1.Data, &ConfigurationPWM2.Data, &ConfigurationPWM3.Data, &ConfigurationPWM4.Data, &ConfigurationPWM5.Data};
 
 byte pwm0 = 0;
 byte pwm1 = 0;
@@ -158,9 +191,6 @@ byte pwm2Disabled = 0;
 byte pwm3Disabled = 0;
 byte pwm4Disabled = 0;
 byte pwm5Disabled = 0;
-
-//unsigned long thermistorResistance0 = 0;
-//unsigned long thermistorResistance1 = 0;
 
 unsigned long start;
 unsigned long now;
@@ -202,37 +232,38 @@ volatile byte lastFanRpmSensorTime3;
 volatile byte lastFanRpmSensorTime4;
 volatile byte lastFanRpmSensorTime5;
 
-unsigned int rpm0 = 0;
-unsigned int rpm1 = 0;
-unsigned int rpm2 = 0;
-unsigned int rpm3 = 0;
-unsigned int rpm4 = 0;
-unsigned int rpm5 = 0;
+double rpm0 = 0;
+double rpm1 = 0;
+double rpm2 = 0;
+double rpm3 = 0;
+double rpm4 = 0;
+double rpm5 = 0;
 
+#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 240
 volatile byte cnt2;
-volatile byte cnt2Fail;
 
 // sensor to mainboard
 volatile byte rmpToMainboard = 5;
-/*
-//Define Variables we'll be connecting to
-double Setpoint = 10;
-double Input = 10;
-double Output = 10;
-*/
+
+//Define Variables PIDs will be connecting to
+double setpointPid[6];
+double outputPid[6];
+double inputPid[6];
+
 //Specify the links and initial tuning parameters
-//PID pid0(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-/*
-PID pid1(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-PID pid2(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-PID pid3(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-PID pid4(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-PID pid5(&Input, &Output, &Setpoint, 2, 5, 1, DIRECT);
-*/
+PID pid[] = {
+  PID(&rpm0, &outputPid[0], &setpointPid[0], (double)ConfigurationPWM0.Data.kp / 100, (double)ConfigurationPWM0.Data.ki / 100, (double)ConfigurationPWM0.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&rpm1, &outputPid[1], &setpointPid[1], (double)ConfigurationPWM1.Data.kp / 100, (double)ConfigurationPWM1.Data.ki / 100, (double)ConfigurationPWM1.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&rpm2, &outputPid[2], &setpointPid[2], (double)ConfigurationPWM2.Data.kp / 100, (double)ConfigurationPWM2.Data.ki / 100, (double)ConfigurationPWM2.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&rpm3, &outputPid[3], &setpointPid[3], (double)ConfigurationPWM3.Data.kp / 100, (double)ConfigurationPWM3.Data.ki / 100, (double)ConfigurationPWM3.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&rpm4, &outputPid[4], &setpointPid[4], (double)ConfigurationPWM4.Data.kp / 100, (double)ConfigurationPWM4.Data.ki / 100, (double)ConfigurationPWM4.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&rpm5, &outputPid[5], &setpointPid[5], (double)ConfigurationPWM5.Data.kp / 100, (double)ConfigurationPWM5.Data.ki / 100, (double)ConfigurationPWM5.Data.kd / 100, P_ON_E, DIRECT)
+};
+
 #ifdef TIMING_DEBUG
-CommandHandler<16, 35, 0> SerialCommandHandler; // 16 commands, max length of command 35, 0 variables
+CommandHandler<18, 42, 0> SerialCommandHandler; // 18 commands, max length of command 42, 0 variables
 #else
-CommandHandler<16, 35, 0> SerialCommandHandler; // 14 commands, max length of command 35, 0 variables
+CommandHandler<16, 42, 0> SerialCommandHandler; // 16 commands, max length of command 42, 0 variables
 #endif
 
 byte i = 0;
@@ -245,6 +276,6 @@ void printFullStatus();
 void setPwmConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
-byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged);
+byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged, byte pidIndex);
 void readRPMsensors();
-
+void init_pid();

@@ -64,7 +64,7 @@ public:
   };
 
   void printStatus(){
-    Serial.print(F("cache"));
+    Serial.print(F("!cache"));
     if(gui){
       for(short i = lowLimit; i <= highLimit; i++){
         byte buff[4];

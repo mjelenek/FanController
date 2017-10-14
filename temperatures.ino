@@ -46,12 +46,12 @@ int countTemperature(unsigned long thermistorResistance){
 }
 
 int countHysteresisTemperature(int tWithHysteresisInt, int tInt){
-  if((tWithHysteresisInt - tInt) < HYSTERESIS && (tInt - tWithHysteresisInt) < HYSTERESIS){
-    return tWithHysteresisInt;
-  }
-  if(tInt > tWithHysteresisInt){
+  if((tInt - tWithHysteresisInt) > HYSTERESIS){
     return(tInt - HYSTERESIS);
   }
-  return(tInt + HYSTERESIS);
+  if((tWithHysteresisInt - tInt) > HYSTERESIS){
+    return(tInt + HYSTERESIS);
+  }
+  return tWithHysteresisInt;
 }
 

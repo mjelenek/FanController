@@ -16,13 +16,10 @@ void setup() {
   //welcome
   Serial.println(F("Starting..."));
 
-  //set reference voltage (external 3.3V)
-//  analogReferenceAsynchronous(EXTERNAL);
-//  analogRead(TEMPINPUT0); //must read once before any other calls.
- 
   setTimers();
+
   init_adc();
-  
+
 // VOLTAGETHERMISTOR != ANALOGREFERENCEVOLTAGE
 //  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
 //  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
@@ -55,18 +52,16 @@ void setup() {
   loadConfiguration();
 
   init_pcint();
+
+  init_pid();
+
   setSerialCommandHandler();
  
   Serial.println(F("System started. Type !help for more informations."));
   delay(10);
 
-//  printPokus();
-    measureInterrupts();
-
-  Serial.print(F("ADCSRA: "));
-  Serial.println(ADCSRA, BIN);
-
-//  pid0.SetMode(AUTOMATIC);
+//printPokus();
+  measureInterrupts();
 
   start = micros();
 
@@ -81,9 +76,11 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
   SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
+  SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
-  SerialCommandHandler.AddCommand(F("guistat"), guistat);
+  SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
+  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
   SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
@@ -182,6 +179,25 @@ void init_adc()
   ADCSRA |= (1 << ADIE);                               // Enable ADC conversion complete interrupt
   ADCSRA |= (1 << ADEN);                               // Enable ADC
 //  ADCSRA |= (1 << ADSC);  // Start conversion - triggered by Timer1
+}
+
+void init_pid(){
+  for(int i = 0; i <= 5; i++){
+    pid[i].SetOutputLimits(15, 255);
+    pid[i].SetSampleTime(200);
+
+    switch (ConfigurationPWM[i] -> pwmDrive) {
+    case 0:
+    case 1:
+    case 2:
+      pid[i].SetMode(MANUAL);
+      break;
+    case 3:
+    case 4:
+      pid[i].SetMode(AUTOMATIC);
+    }
+    delay(10);
+  }
 }
 
 void printTempProfile(){

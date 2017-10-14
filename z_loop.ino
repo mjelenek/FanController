@@ -1,33 +1,50 @@
 void loop(){
+  byte part_8 = i & B00001111; // cycles from 0 to 7;
   byte part_4 = i & B00000011; // cycles from 0 to 3;
-  byte part_2 = i & B00000001; // cycles from 0 to 3;
+  byte part_2 = i & B00000001; // cycles from 0 to 2;
 
-  // one case each 8 iterations (8ms)
-  switch (part_4) {
+  // one case each 8 iterations (16ms)
+  switch (part_8) {
     case 0:
       countT0();  
-      countT1();  
       break;
     case 1:
-      rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0) / 10;
-      rpm0 = rpm0 * 10;
-      rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1) / 10;
-      rpm1 = rpm1 * 10;
-      rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2) / 10;
-      rpm2 = rpm2 * 10;
+      countT1();  
       break;
     case 2:
-      rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3) / 10;
-      rpm3 = rpm3 * 10;
-      rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4) / 10;
-      rpm4 = rpm4 * 10;
-      rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5) / 10;
-      rpm5 = rpm5 * 10;
+      rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
+      inputPid[0] = rpm0;
+      break;
     case 3:
-      SerialCommandHandler.Process();
+      rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
+      inputPid[1] = rpm1;
+      break;
+    case 4:
+      rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
+      inputPid[2] = rpm2;
+      break;
+    case 5:
+      rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
+      inputPid[3] = rpm3;
+      break;
+    case 6:
+      rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
+      inputPid[4] = rpm4;
+      break;
+    case 7:
+      rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
+      inputPid[5] = rpm5;
   }
-//  pid0.Compute();
+  
   setPwm();
+
+  SerialCommandHandler.Process();
+
+  if(i == 50){
+    if(gui){
+      guiUpdate();
+    }
+  }
 
   if(i == 0){
     j++;
@@ -53,9 +70,9 @@ void loop(){
         timeInCode = 0;
         to500 = 0;
         to800 = 0;
-        to900 = 0;
         to1000 = 0;
-        over1000 = 0;
+        to1200 = 0;
+        over1200 = 0;
         timeTotal = micros();
       }
       #endif
@@ -74,14 +91,14 @@ void loop(){
   if(zpozdeni < 800){
     to800++;
   } else
-  if(zpozdeni < 900){
-    to900++;
-  } else
   if(zpozdeni < 1000){
     to1000++;
   } else
-  if(zpozdeni >= 1000){
-    over1000++;
+  if(zpozdeni < 1200){
+    to1200++;
+  } else
+  if(zpozdeni >= 1200){
+    over1200++;
   }
 
   timeInCode = timeInCode + zpozdeni;
@@ -105,8 +122,8 @@ void loop(){
   }
 
   i++;
-  if(i == 100){
-    i = 0;
-  }
+//  if(i == 100){
+//    i = 0;
+//  }
 }
 

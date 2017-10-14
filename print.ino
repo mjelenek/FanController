@@ -58,7 +58,8 @@ void printlnPwmDrive(PWMConfiguration &conf){
   // pwmDrive: 0 - const, 1 - analogInput, 2 - T0, 3 - T1, 4  - (T1+T2)/2
   switch (conf.pwmDrive) {
     case 0:
-      Serial.println(F("constant speed"));
+      Serial.print(F("constant speed, PWM="));
+      Serial.println(conf.constPwm);
       break;
     case 1:
       Serial.println(F("analog input"));

@@ -5,8 +5,7 @@ ISR(TIMER1_OVF_vect){
   static byte lastState;
   static byte fanSensor5Filter = 0;
   cnt2 = TCNT2;
-  if(cnt2 < 240){
-    cnt2Fail++;
+  if(cnt2 < CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5){
     return;
   }
   byte fanSensor5 = (PINC >> 5) & 1;
@@ -105,13 +104,13 @@ inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastF
   fanRpmSensorTimes[*lastFanRpmSensorTime] = now;
 }
 
-unsigned int countRPM(byte lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[]){
-  byte time1Pointer = lastFanRpmSensorTime + 1;
+double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[]){
+  PCICR = 0;  // disable pin change interrupts
+  byte time1Pointer = lastFanRpmSensorTimeIndex + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;
   }
-  PCICR = 0;  // disable pin change interrupts
-  unsigned long time0 = fanRpmSensorTimes[lastFanRpmSensorTime];
+  unsigned long time0 = fanRpmSensorTimes[lastFanRpmSensorTimeIndex];
   unsigned long time1 = fanRpmSensorTimes[time1Pointer];
   PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
   if((micros() - time0) > 240000 || (micros() - time1) > 840000){
@@ -119,7 +118,7 @@ unsigned int countRPM(byte lastFanRpmSensorTime, unsigned long fanRpmSensorTimes
   }
   return 60000000 / (time0 - time1);
 }
-/*
+
 void countRPMs(){
   rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
   rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
@@ -127,20 +126,5 @@ void countRPMs(){
   rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
   rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
   rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
-}
-*/
-void countRPMs(){
-  rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0) / 10;
-  rpm0 = rpm0 * 10;
-  rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1) / 10;
-  rpm1 = rpm1 * 10;
-  rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2) / 10;
-  rpm2 = rpm2 * 10;
-  rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3) / 10;
-  rpm3 = rpm3 * 10;
-  rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4) / 10;
-  rpm4 = rpm4 * 10;
-  rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5) / 10;
-  rpm5 = rpm5 * 10;
 }
 
