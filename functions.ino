@@ -47,20 +47,12 @@ void guiUpdate(){
   Serial.write(25);
   Serial.print(F("guiUpdate"));
 
-  serialWriteInt(roundRPM(rpm0));
-  serialWriteInt(roundRPM(rpm1));
-  serialWriteInt(roundRPM(rpm2));
-  serialWriteInt(roundRPM(rpm3));
-  serialWriteInt(roundRPM(rpm4));
-  serialWriteInt(roundRPM(rpm5));
-/*
-  serialWriteInt(rpm0);
-  serialWriteInt(rpm1);
-  serialWriteInt(rpm2);
-  serialWriteInt(rpm3);
-  serialWriteInt(rpm4);
-  serialWriteInt(rpm5);
-*/
+  serialWriteInt(roundRPM(rpm[0]));
+  serialWriteInt(roundRPM(rpm[1]));
+  serialWriteInt(roundRPM(rpm[2]));
+  serialWriteInt(roundRPM(rpm[3]));
+  serialWriteInt(roundRPM(rpm[4]));
+  serialWriteInt(roundRPM(rpm[5]));
   serialWriteInt(T0int);
   serialWriteInt(T1int);
 //  serialWriteInt(T0WithHysteresisInt);
@@ -73,14 +65,27 @@ void guiUpdate(){
 //  serialWriteInt(OutputInt);
 }
 
-void pidUpdate(byte fan, unsigned short desiredRpm, unsigned short rpm, byte pwm){
-  Serial.print(F("!!"));
-  Serial.write(15);
-  Serial.print(F("pidUpdate"));
-  Serial.write(fan);
-  serialWriteInt(desiredRpm);
-  serialWriteInt(rpm);
-  Serial.write(pwm);
+// call directly after getNewPwm(...) because of getting value setpointPid
+byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
+  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 3) + i) & B00111111) == 0){
+    unsigned short desiredRpm = rpm[fanNumber];
+    if(pwmDisabled[fanNumber] == 0){
+      if(conf.pwmDrive == 3){
+        desiredRpm = conf.constRpm;
+      }
+      if(conf.pwmDrive == 4){
+        desiredRpm = setpointPid;
+      }
+    }
+    Serial.print(F("!!"));
+    Serial.write(8);
+    Serial.print(F("pU"));
+    Serial.write(fanNumber);
+    serialWriteInt(desiredRpm);
+    serialWriteInt(rpm[fanNumber]);
+    Serial.write(pwm[fanNumber]);
+    updatesRTToSend[fanNumber]--;
+  }
 }
 
 unsigned int roundRPM(double rpm){
@@ -193,25 +198,23 @@ void disableFan(CommandParameter &parameters){
 
     if(pwmChannel == 255 || delayParam == 255)
       return;
-    
-    switch (pwmChannel) {
-    case 0:
-      pwm0Disabled = delayParam;
-      break;
-    case 1:
-      pwm1Disabled = delayParam;
-      break;
-    case 2:
-      pwm2Disabled = delayParam;
-      break;
-    case 3:
-      pwm3Disabled = delayParam;
-      break;
-    case 4:
-      pwm4Disabled = delayParam;
-      break;
-    case 5:
-      pwm5Disabled = delayParam;
+
+    if(pwmChannel >= 0 && pwmChannel <= 5){
+      pwmDisabled[pwmChannel] = delayParam;
+    }
+  }
+}
+
+void sendPidUpates(CommandParameter &parameters){
+  while(1){
+    byte pwmChannel = parameters.NextParameterAsInteger( 255 );
+    byte numberOfUpdates = parameters.NextParameterAsInteger( 255 );
+
+    if(pwmChannel == 255 || numberOfUpdates == 255)
+      return;
+
+    if(pwmChannel >= 0 && pwmChannel <= 5){
+      updatesRTToSend[pwmChannel] = numberOfUpdates;
     }
   }
 }

@@ -13,6 +13,8 @@ void setup() {
 
   pinMode(LED_OUT, OUTPUT);
 
+
+
   //welcome
   Serial.println(F("Starting..."));
 
@@ -86,6 +88,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
   SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
   SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
+  SerialCommandHandler.AddCommand(F("sendPidUpates"), sendPidUpates);
   SerialCommandHandler.AddCommand(F("tempCacheStatus"), tempCacheStatus);
 #ifdef TIMING_DEBUG
   SerialCommandHandler.AddCommand(F("timing"), timing);
@@ -172,13 +175,14 @@ void init_adc()
 {
   ADMUX = 0;                                           // VREF is EXTERNAL, channel 0
   ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler to 128
+//  ADCSRA = (1 << ADPS2) | (1 << ADPS1);                // prescaler to 64
   //ADCSRB = (1 << ADTS2);                             // ADC Auto Trigger Source - Timer0 Overflow
   ADCSRB = (1 << ADTS2) | (1 << ADTS1);                // ADC Auto Trigger Source - Timer1 Overflow
   //ADCSRB = 0;                                          // ADC Free conversion mode
   ADCSRA |= (1 << ADATE);                              // ADC Auto Trigger Enable
   ADCSRA |= (1 << ADIE);                               // Enable ADC conversion complete interrupt
   ADCSRA |= (1 << ADEN);                               // Enable ADC
-//  ADCSRA |= (1 << ADSC);  // Start conversion - triggered by Timer1
+//  ADCSRA |= (1 << ADSC);                               // Start conversion - triggered by Timer1
 }
 
 void init_pid(){

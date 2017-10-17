@@ -12,33 +12,33 @@ void printStatus(){
     Serial.println(F("N/A"));
   }
   Serial.print(F("RPM0:"));
-  Serial.print(rpm0);
+  Serial.print(rpm[0]);
   Serial.print(F(" RPM1:"));
-  Serial.print(rpm1);
+  Serial.print(rpm[1]);
   Serial.print(F(" RPM2:"));
-  Serial.print(rpm2);
+  Serial.print(rpm[2]);
   Serial.print(F(" RPM3:"));
-  Serial.print(rpm3);
+  Serial.print(rpm[3]);
   Serial.print(F(" RPM4:"));
-  Serial.print(rpm4);
+  Serial.print(rpm[4]);
   Serial.print(F(" RPM5:"));
-  Serial.println(rpm5);
+  Serial.println(rpm[5]);
 }
 
 void printFullStatus(){
   printStatus();
   Serial.print(F("PWM0:"));
-  Serial.print(pwm0);
+  Serial.print(pwm[0]);
   Serial.print(F(" PWM1:"));
-  Serial.print(pwm1);
+  Serial.print(pwm[1]);
   Serial.print(F(" PWM2:"));
-  Serial.print(pwm2);
+  Serial.print(pwm[2]);
   Serial.print(F(" PWM3:"));
-  Serial.print(pwm3);
+  Serial.print(pwm[3]);
   Serial.print(F(" PWM4:"));
-  Serial.print(pwm4);
+  Serial.print(pwm[4]);
   Serial.print(F(" PWM5:"));
-  Serial.println(pwm5);
+  Serial.println(pwm[5]);
   Serial.print(F(" pwm0Drive: "));
   printlnPwmDrive(ConfigurationPWM0.Data);
   Serial.print(F(" pwm1Drive: "));

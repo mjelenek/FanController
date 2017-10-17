@@ -12,28 +12,22 @@ void loop(){
       countT1();  
       break;
     case 2:
-      rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
-      inputPid[0] = rpm0;
+      rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
       break;
     case 3:
-      rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
-      inputPid[1] = rpm1;
+      rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
       break;
     case 4:
-      rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
-      inputPid[2] = rpm2;
+      rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
       break;
     case 5:
-      rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
-      inputPid[3] = rpm3;
+      rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
       break;
     case 6:
-      rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
-      inputPid[4] = rpm4;
+      rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
       break;
     case 7:
-      rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
-      inputPid[5] = rpm5;
+      rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
   }
   
   setPwm();

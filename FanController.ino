@@ -178,19 +178,8 @@ EEPROMStore<PWMConfiguration> ConfigurationPWM4;
 EEPROMStore<PWMConfiguration> ConfigurationPWM5;
 PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data, &ConfigurationPWM1.Data, &ConfigurationPWM2.Data, &ConfigurationPWM3.Data, &ConfigurationPWM4.Data, &ConfigurationPWM5.Data};
 
-byte pwm0 = 0;
-byte pwm1 = 0;
-byte pwm2 = 0;
-byte pwm3 = 0;
-byte pwm4 = 0;
-byte pwm5 = 0;
-
-byte pwm0Disabled = 0;
-byte pwm1Disabled = 0;
-byte pwm2Disabled = 0;
-byte pwm3Disabled = 0;
-byte pwm4Disabled = 0;
-byte pwm5Disabled = 0;
+byte pwm[] = {0, 0, 0, 0, 0, 0};
+byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
 
 unsigned long start;
 unsigned long now;
@@ -200,14 +189,14 @@ unsigned long RT0koeficient;
 unsigned long RT1koeficient;
 
 // ADC values from mainboard
-volatile unsigned short sensorValue0Averaged = 0;
-volatile unsigned short sensorValue1Averaged = 0;
-volatile unsigned short sensorValue2Averaged = 0;
-volatile unsigned short sensorValue3Averaged = 0;
-volatile unsigned short sensorValue4Averaged = 0;
+volatile uint16_t sensorValue0Averaged = 0;
+volatile uint16_t sensorValue1Averaged = 0;
+volatile uint16_t sensorValue2Averaged = 0;
+volatile uint16_t sensorValue3Averaged = 0;
+volatile uint16_t sensorValue4Averaged = 0;
 // ADC values from thermistors
-volatile unsigned short sensorValue6Averaged = 0;
-volatile unsigned short sensorValue7Averaged = 0;
+volatile uint16_t sensorValue6Averaged = 0;
+volatile uint16_t sensorValue7Averaged = 0;
 
 boolean T0Connected;
 boolean T1Connected;
@@ -231,13 +220,7 @@ volatile byte lastFanRpmSensorTime2;
 volatile byte lastFanRpmSensorTime3;
 volatile byte lastFanRpmSensorTime4;
 volatile byte lastFanRpmSensorTime5;
-
-double rpm0 = 0;
-double rpm1 = 0;
-double rpm2 = 0;
-double rpm3 = 0;
-double rpm4 = 0;
-double rpm5 = 0;
+unsigned short rpm[6];
 
 #define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 240
 volatile byte cnt2;
@@ -246,18 +229,19 @@ volatile byte cnt2;
 volatile byte rmpToMainboard = 5;
 
 //Define Variables PIDs will be connecting to
-double setpointPid[6];
-double outputPid[6];
-double inputPid[6];
+double outputPid;
+double inputPid;
+double setpointPid;
 
 //Specify the links and initial tuning parameters
 PID pid[] = {
-  PID(&rpm0, &outputPid[0], &setpointPid[0], (double)ConfigurationPWM0.Data.kp / 100, (double)ConfigurationPWM0.Data.ki / 100, (double)ConfigurationPWM0.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&rpm1, &outputPid[1], &setpointPid[1], (double)ConfigurationPWM1.Data.kp / 100, (double)ConfigurationPWM1.Data.ki / 100, (double)ConfigurationPWM1.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&rpm2, &outputPid[2], &setpointPid[2], (double)ConfigurationPWM2.Data.kp / 100, (double)ConfigurationPWM2.Data.ki / 100, (double)ConfigurationPWM2.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&rpm3, &outputPid[3], &setpointPid[3], (double)ConfigurationPWM3.Data.kp / 100, (double)ConfigurationPWM3.Data.ki / 100, (double)ConfigurationPWM3.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&rpm4, &outputPid[4], &setpointPid[4], (double)ConfigurationPWM4.Data.kp / 100, (double)ConfigurationPWM4.Data.ki / 100, (double)ConfigurationPWM4.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&rpm5, &outputPid[5], &setpointPid[5], (double)ConfigurationPWM5.Data.kp / 100, (double)ConfigurationPWM5.Data.ki / 100, (double)ConfigurationPWM5.Data.kd / 100, P_ON_E, DIRECT)
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM0.Data.kp / 100, (double)ConfigurationPWM0.Data.ki / 100, (double)ConfigurationPWM0.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM1.Data.kp / 100, (double)ConfigurationPWM1.Data.ki / 100, (double)ConfigurationPWM1.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM2.Data.kp / 100, (double)ConfigurationPWM2.Data.ki / 100, (double)ConfigurationPWM2.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM3.Data.kp / 100, (double)ConfigurationPWM3.Data.ki / 100, (double)ConfigurationPWM3.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM4.Data.kp / 100, (double)ConfigurationPWM4.Data.ki / 100, (double)ConfigurationPWM4.Data.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM5.Data.kp / 100, (double)ConfigurationPWM5.Data.ki / 100, (double)ConfigurationPWM5.Data.kd / 100, P_ON_E, DIRECT)
+
 };
 
 #ifdef TIMING_DEBUG
@@ -269,13 +253,16 @@ CommandHandler<16, 42, 0> SerialCommandHandler; // 16 commands, max length of co
 byte i = 0;
 byte j = 0;
 byte gui = 0;  // enable gui
+byte updatesRTToSend[] = {0, 0, 0, 0, 0, 0};
 
 void printlnPwmDrive(PWMConfiguration &conf);
 void printStatus();
 void printFullStatus();
 void setPwmConfiguration(CommandParameter &parameters);
+void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
-byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged, byte pidIndex);
+byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged, byte fanNumber);
+byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();

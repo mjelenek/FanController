@@ -1,4 +1,4 @@
-#define fanSensor5FilterDefinition B0000111
+#define fanSensor5FilterDefinition B00000111
 
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
@@ -120,11 +120,11 @@ double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[
 }
 
 void countRPMs(){
-  rpm0 = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
-  rpm1 = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
-  rpm2 = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
-  rpm3 = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
-  rpm4 = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
-  rpm5 = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
+  rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
+  rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
+  rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
+  rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
+  rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
+  rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
 }
 
