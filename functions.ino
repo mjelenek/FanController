@@ -106,43 +106,9 @@ void setPwmConfiguration(CommandParameter &parameters){
   byte maxPwm = parameters.NextParameterAsInteger();
   byte tempTarget = parameters.NextParameterAsInteger();
   byte tempMax = parameters.NextParameterAsInteger();
-/*
-  Serial.print(F("channel: "));
-  Serial.println(pwmChannel);
-  Serial.print(F("drive: "));
-  Serial.println(pwmDrive);
-  Serial.print(F("const: "));
-  Serial.println(constPwm);
-  Serial.print(F("min: "));
-  Serial.println(minPwm);
-  Serial.print(F("max: "));
-  Serial.println(maxPwm);
-  Serial.print(F("tTarget: "));
-  Serial.println(tempTarget);
-  Serial.print(F("tMax: "));
-  Serial.println(tempMax);
-*/
+
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    switch (pwmChannel) {
-    case 0:
-      ConfigurationPWM0.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-      break;
-    case 1:
-      ConfigurationPWM1.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-      break;
-    case 2:
-      ConfigurationPWM2.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-      break;
-    case 3:
-      ConfigurationPWM3.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-      break;
-    case 4:
-      ConfigurationPWM4.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-      break;
-    case 5:
-      ConfigurationPWM5.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-    }
-    //ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
+    ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
   
     switch (pwmDrive) {
     case 0:
@@ -171,26 +137,7 @@ void setPidConfiguration(CommandParameter &parameters){
   byte kd = parameters.NextParameterAsInteger();
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    switch (pwmChannel) {
-    case 0:
-      ConfigurationPWM0.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-      break;
-    case 1:
-      ConfigurationPWM1.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-      break;
-    case 2:
-      ConfigurationPWM2.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-      break;
-    case 3:
-      ConfigurationPWM3.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-      break;
-    case 4:
-      ConfigurationPWM4.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-      break;
-    case 5:
-      ConfigurationPWM5.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-    }
-    //ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
+    ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
     pid[pwmChannel].SetTunings((double) kp / 100, (double) ki / 100, (double) kd / 100);
   }
 }
