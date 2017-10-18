@@ -94,6 +94,7 @@ unsigned int roundRPM(double rpm){
 }
 
 void setPwmConfiguration(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
 //  Serial.println(F("setPwmConfiguration"));
 
@@ -141,6 +142,7 @@ void setPwmConfiguration(CommandParameter &parameters){
     case 5:
       ConfigurationPWM5.Data.set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
     }
+    //ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
   
     switch (pwmDrive) {
     case 0:
@@ -156,6 +158,7 @@ void setPwmConfiguration(CommandParameter &parameters){
 }
 
 void setPidConfiguration(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
   byte pwmChannel = parameters.NextParameterAsInteger();
   unsigned short constRPM = parameters.NextParameterAsInteger();
@@ -187,7 +190,8 @@ void setPidConfiguration(CommandParameter &parameters){
     case 5:
       ConfigurationPWM5.Data.setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
     }
-//    pid[pwmChannel].SetTunings((double) kp / 100, (double) ki / 100, (double) kd / 100);
+    //ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
+    pid[pwmChannel].SetTunings((double) kp / 100, (double) ki / 100, (double) kd / 100);
   }
 }
 

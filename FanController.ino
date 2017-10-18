@@ -1,7 +1,7 @@
 #include <PID_v1.h>
 //#include <avr/interrupt.h>
 #include "CommandHandler.h"
-#include "EEPROMStore.h"
+#include "EEPROMStoreISR.h"
 
 #define TIMING_DEBUG
 #ifdef TIMING_DEBUG
@@ -262,6 +262,7 @@ void setPwmConfiguration(CommandParameter &parameters);
 void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
+void sendPidUpates(CommandParameter &parameters);
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged, byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();

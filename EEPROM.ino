@@ -14,5 +14,6 @@ void saveConfiguration(){
   ConfigurationPWM3.Save();
   ConfigurationPWM4.Save();
   ConfigurationPWM5.Save();
+  startWritingBufferByISR();
 }
 
