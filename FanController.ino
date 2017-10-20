@@ -4,6 +4,8 @@
 #include "EEPROMStoreISR.h"
 
 #define TIMING_DEBUG
+#define SAVE_DEBUG
+
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;
 unsigned long timeTotal;
@@ -68,6 +70,10 @@ void printTimingResult(){
 #define PWM3 9  //OC1A
 #define PWM4 10 //OC1B
 #define PWM5 11 //OC2A
+
+#define LED_OUT_1 PORTB |= _BV(PB5)
+#define LED_OUT_0 PORTB &= ~_BV(PB5)
+#define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
 
 class PWMConfiguration
 {
@@ -176,7 +182,9 @@ EEPROMStore<PWMConfiguration> ConfigurationPWM2;
 EEPROMStore<PWMConfiguration> ConfigurationPWM3;
 EEPROMStore<PWMConfiguration> ConfigurationPWM4;
 EEPROMStore<PWMConfiguration> ConfigurationPWM5;
-PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data, &ConfigurationPWM1.Data, &ConfigurationPWM2.Data, &ConfigurationPWM3.Data, &ConfigurationPWM4.Data, &ConfigurationPWM5.Data};
+PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data.m_UserData, &ConfigurationPWM1.Data.m_UserData,
+                                        &ConfigurationPWM2.Data.m_UserData, &ConfigurationPWM3.Data.m_UserData,
+                                        &ConfigurationPWM4.Data.m_UserData, &ConfigurationPWM5.Data.m_UserData};
 
 byte pwm[] = {0, 0, 0, 0, 0, 0};
 byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
@@ -228,20 +236,18 @@ volatile byte cnt2;
 // sensor to mainboard
 volatile byte rmpToMainboard = 5;
 
-//Define Variables PIDs will be connecting to
+// Define Variables PIDs will be connecting to
 double outputPid;
 double inputPid;
-double setpointPid;
-
+double setpointPid[6];
 //Specify the links and initial tuning parameters
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM0.Data.kp / 100, (double)ConfigurationPWM0.Data.ki / 100, (double)ConfigurationPWM0.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM1.Data.kp / 100, (double)ConfigurationPWM1.Data.ki / 100, (double)ConfigurationPWM1.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM2.Data.kp / 100, (double)ConfigurationPWM2.Data.ki / 100, (double)ConfigurationPWM2.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM3.Data.kp / 100, (double)ConfigurationPWM3.Data.ki / 100, (double)ConfigurationPWM3.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM4.Data.kp / 100, (double)ConfigurationPWM4.Data.ki / 100, (double)ConfigurationPWM4.Data.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid, (double)ConfigurationPWM5.Data.kp / 100, (double)ConfigurationPWM5.Data.ki / 100, (double)ConfigurationPWM5.Data.kd / 100, P_ON_E, DIRECT)
-
+  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM0.Data.m_UserData.kp / 100, (double)ConfigurationPWM0.Data.m_UserData.ki / 100, (double)ConfigurationPWM0.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM1.Data.m_UserData.kp / 100, (double)ConfigurationPWM1.Data.m_UserData.ki / 100, (double)ConfigurationPWM1.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM2.Data.m_UserData.kp / 100, (double)ConfigurationPWM2.Data.m_UserData.ki / 100, (double)ConfigurationPWM2.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM3.Data.m_UserData.kp / 100, (double)ConfigurationPWM3.Data.m_UserData.ki / 100, (double)ConfigurationPWM3.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM4.Data.m_UserData.kp / 100, (double)ConfigurationPWM4.Data.m_UserData.ki / 100, (double)ConfigurationPWM4.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM5.Data.m_UserData.kp / 100, (double)ConfigurationPWM5.Data.m_UserData.ki / 100, (double)ConfigurationPWM5.Data.m_UserData.kd / 100, P_ON_E, DIRECT)
 };
 
 #ifdef TIMING_DEBUG
@@ -263,7 +269,7 @@ void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
-byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned int sensorValueAveraged, byte fanNumber);
+byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();

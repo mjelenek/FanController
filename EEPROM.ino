@@ -8,12 +8,49 @@ void loadConfiguration(){
 }
 
 void saveConfiguration(){
+  #ifdef SAVE_DEBUG
+  Serial.print(F("Before save - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM0.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 0 - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM1.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 1 - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM2.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 2 - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM3.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 3 - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM4.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 4 - "));
+  printBufferToStoreDebug();
+  #endif
   ConfigurationPWM5.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save 5 - "));
+  printBufferToStoreDebug();
+  #endif
   startWritingBufferByISR();
+}
+
+void printBufferToStoreDebug(){
+  Serial.print(F(" pointerActual:"));
+  Serial.print(bufferToStoreActual);
+  Serial.print(F(", pointeLast:"));
+  Serial.print(bufferToStoreLast);
+  Serial.print(F(", bufferFull:"));
+  Serial.println(eeprom_buffer_full);
 }
 

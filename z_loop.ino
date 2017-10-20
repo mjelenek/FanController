@@ -1,10 +1,11 @@
 void loop(){
-  byte part_8 = i & B00001111; // cycles from 0 to 7;
+  byte part_16 = i & B00001111; // cycles from 0 to 15;
+  byte part_8 = i & B00000111; // cycles from 0 to 7;
   byte part_4 = i & B00000011; // cycles from 0 to 3;
   byte part_2 = i & B00000001; // cycles from 0 to 2;
 
-  // one case each 8 iterations (16ms)
-  switch (part_8) {
+  // one case each 16 iterations (32ms)
+  switch (part_16) {
     case 0:
       countT0();  
       break;
@@ -12,34 +13,45 @@ void loop(){
       countT1();  
       break;
     case 2:
+    case 10:
       rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
       break;
     case 3:
+    case 11:
       rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
       break;
     case 4:
+    case 12:
       rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
       break;
     case 5:
+    case 13:
       rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
       break;
     case 6:
+    case 14:
       rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
       break;
     case 7:
+    case 15:
       rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
+      break;
+    case 8:
+      SerialCommandHandler.Process();
+      break;
+    default:
+      ;
   }
   
   setPwm();
 
-  SerialCommandHandler.Process();
-
+/*
   if(i == 50){
     if(gui){
       guiUpdate();
     }
   }
-
+*/
   if(i == 0){
     j++;
     if(gui){

@@ -9,7 +9,7 @@
 
 template <class TData> class EEPROMStore
 {
-  // The data stored in the eprom. The EEMEM complier attribute instructs
+  // The Data stored in the eprom. The EEMEM complier attribute instructs
   // the complier to locate this variable in the eeprom. 
   struct EEMEM CEEPROMData
   {
@@ -18,11 +18,10 @@ template <class TData> class EEPROMStore
 
   } m_EEPROMData;
 
-  uint16_t uChecksum;
-
 public:
 
-  TData Data;
+  CEEPROMData Data;
+//  TData Data;
 
   EEPROMStore()
   {
@@ -36,7 +35,7 @@ public:
     CEEPROMData WorkingCopy;
     if (Load(WorkingCopy))
     {
-      memcpy(&Data, &WorkingCopy.m_UserData, sizeof(TData));
+      memcpy(&Data, &WorkingCopy, sizeof(CEEPROMData));
       return true;
     }
 
@@ -45,16 +44,16 @@ public:
 
   byte Save()
   {
-    // We only save if the current version in the eeprom doesn't match the data we plan to save. 
+    // We only save if the current version in the eeprom doesn't match the Data we plan to save. 
     // This helps protect the eeprom against save called many times within the arduino loop,
     // though it makes things a little slower. 
-    uChecksum = CalculateChecksum(Data);
+    Data.m_uChecksum = CalculateChecksum(Data.m_UserData);
     CEEPROMData StoredVersion;
-    if (!Load(StoredVersion) || StoredVersion.m_uChecksum != uChecksum || memcmp(&StoredVersion.m_UserData, &Data, sizeof(Data)) != 0)
+    if (!Load(StoredVersion) || StoredVersion.m_uChecksum != Data.m_uChecksum || memcmp(&StoredVersion.m_UserData, &Data.m_UserData, sizeof(TData)) != 0)
     {
-      int i = eeprom_interrupt_write_block(&uChecksum, &m_EEPROMData.m_uChecksum, sizeof(uChecksum));
-      if(i != 0) return i;
-      i = eeprom_interrupt_write_block(&Data, &m_EEPROMData.m_UserData, sizeof(Data));
+//      int i = eeprom_interrupt_write_block(&Data.m_uChecksum, &m_EEPROMData.m_uChecksum, sizeof(Data.m_uChecksum));
+//      if(i != 0) return i;
+      int i = eeprom_interrupt_write_block(&Data, &m_EEPROMData, sizeof(CEEPROMData));
       if(i != 0) return i;
       return 0; 
     }
@@ -63,7 +62,7 @@ public:
 
   void Reset()
   {
-    Data.Reset();
+    Data.m_UserData.Reset();
   }
 
 private:
@@ -80,8 +79,7 @@ private:
     const uint8_t *pRawData = reinterpret_cast<const uint8_t *>(&TestData);
     size_t szData = sizeof(TestData);
 
-    while (szData--)
-    {
+    while (szData--){
       uChecksum = _crc16_update(uChecksum, *pRawData++);
     }
 
@@ -90,7 +88,7 @@ private:
 };
 
 
-#define BUFF_STORE_SIZE 12
+#define BUFF_STORE_SIZE 6
 struct DataToStore
   {
     volatile void* eeprom_data;
@@ -107,48 +105,8 @@ volatile void* eeprom_data;
 volatile byte eeprom_data_size;
 volatile char eeprom_busy = 0;
 
-
-//example test program
-/*
-unsigned char data_buffer[32];    //arbitrary size is 32 bytes of data.  This ought to do for this purpose
-unsigned char e_log[50] [32]__attribute__((section(".eeprom"))) ; //no initialization,  size is 32*50 = 1600 bytes out of 4096 in the atmega128
-#include <avr/eeprom.h>
-
-void test_eeprom_write(void)
-{
-  unsigned char counter;
-  
-  //fill the data buffer with an arbitrary number
-  for (counter = 0; counter<sizeof(data_buffer); counter++) //fill the buffer with an arbitrary number
-  {
-    data_buffer[counter] = counter+1;
-  }
-  
-  //write to the eeprom
-  
-  
-  //write the 32 bytes to the first block in the eeprom array
-  while(eeprom_busy||(EECR & (1<<EEWE)));   //explicitly wait for eeprom to be free & idle (hopefully rarely necessary)
-  eeprom_interrupt_write_block(data_buffer, &e_log[0], sizeof(data_buffer));
-  while(eeprom_busy); //wait for the eeprom to not be busy
-  
-  //refill the buffer with something else
-  for (counter = 0; counter<sizeof(data_buffer); counter++) //fill the buffer with zeros
-  {
-    data_buffer[counter] = 0;
-  }
-  
-  // read back the data
-  eeprom_read_block(data_buffer, &e_log[0], sizeof(data_buffer)); //read back the data
-  // that is it
-*/
-
-
-
-
-
-//this initializes the eeprom writing data, and enables the eeprom interrupt.
-//the eeprom interrupt fires continuously while it is ready to accept data
+// this initializes the eeprom writing data, and enables the eeprom interrupt.
+// the eeprom interrupt fires continuously while it is ready to accept data
 // after that the eeprom interrupt clicks thru the data as fast as the HW allows, then shuts off
 
 //"source" is a pointer to the data buffer in SRAM
@@ -156,9 +114,6 @@ void test_eeprom_write(void)
 //"num_bytes" is sizeof() the data buffer
 
 //returns a (-1) if the buffer is full
-//returns a (-2) if the eeprom is busy with a write function (e.g. something else is using the eprom,
-//     or the last write command is still in process just after the "eeprom_busy" flag is cleared
-
 
 //another potential usage of this command is:
 //while(eeprom_interrupt_write_block (void* source, void* dest, char num_bytes));
@@ -179,7 +134,6 @@ char eeprom_interrupt_write_block (void* source, void* dest, byte num_bytes)
 {
 
   if(eeprom_buffer_full) return (-1);     //check bufferToStore is not full
-//  if (EECR & (1<<EEPE)) return (-2);    //check if something else might have the eeprom busy
   
   bufferToStore[bufferToStoreLast].eeprom_data = source;
   bufferToStore[bufferToStoreLast].eeprom_dest = dest;
@@ -199,9 +153,9 @@ char eeprom_interrupt_write_block (void* source, void* dest, byte num_bytes)
   return(0);
 }
 
-// start ISR and writing itself
+// enable interrupt and start writing bufferToStore
 void startWritingBufferByISR(){
-  EECR |= (1<<EERIE);   //enable the eeprom ready interrupt.  It will now take over all the data shifting
+  EECR |= (1<<EERIE);   //enable the eeprom ready interrupt.  It will now take over all the data
 }
 
 //-------------------------------------------------------------------------------------------------------------------------

@@ -14,18 +14,18 @@ void guistat1(){
   Serial.print(F("!!"));
   Serial.write(62);
   Serial.print(F("guistat1"));
-  ConfigurationPWM0.Data.guiStat();
-  ConfigurationPWM1.Data.guiStat();
-  ConfigurationPWM2.Data.guiStat();
+  ConfigurationPWM0.Data.m_UserData.guiStat();
+  ConfigurationPWM1.Data.m_UserData.guiStat();
+  ConfigurationPWM2.Data.m_UserData.guiStat();
 }
 
 void guistat2(){
   Serial.print(F("!!"));
   Serial.write(62);
   Serial.print(F("guistat2"));
-  ConfigurationPWM3.Data.guiStat();
-  ConfigurationPWM4.Data.guiStat();
-  ConfigurationPWM5.Data.guiStat();
+  ConfigurationPWM3.Data.m_UserData.guiStat();
+  ConfigurationPWM4.Data.m_UserData.guiStat();
+  ConfigurationPWM5.Data.m_UserData.guiStat();
 }
 
 void guiEnable(){
@@ -65,23 +65,22 @@ void guiUpdate(){
 //  serialWriteInt(OutputInt);
 }
 
-// call directly after getNewPwm(...) because of getting value setpointPid
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
   if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 3) + i) & B00111111) == 0){
-    unsigned short desiredRpm = rpm[fanNumber];
+    unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
       if(conf.pwmDrive == 3){
-        desiredRpm = conf.constRpm;
+        expectedRpm = conf.constRpm;
       }
       if(conf.pwmDrive == 4){
-        desiredRpm = setpointPid;
+        expectedRpm = setpointPid[fanNumber];
       }
     }
     Serial.print(F("!!"));
     Serial.write(8);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
-    serialWriteInt(desiredRpm);
+    serialWriteInt(expectedRpm);
     serialWriteInt(rpm[fanNumber]);
     Serial.write(pwm[fanNumber]);
     updatesRTToSend[fanNumber]--;

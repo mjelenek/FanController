@@ -21,7 +21,7 @@ ISR(TIMER1_OVF_vect){
 
   if(lastState ^ fanSensor5Value){
     if(rmpToMainboard == 5){
-      digitalWrite(LED_OUT, fanSensor5Value);
+      if(fanSensor5Value) LED_OUT_SET;
     }
     if(fanSensor5Value){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5, now);
@@ -39,7 +39,7 @@ ISR(PCINT0_vect){
 
   if(changed & (1 << PINB0)){
     if(rmpToMainboard == 3){
-      digitalWrite(LED_OUT, state & (1 << PINB0));
+      if(state & (1 << PINB0)) LED_OUT_SET;
     }
     if(state & (1 << PINB0)){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime3, fanRpmSensorTimes3, now);
@@ -48,7 +48,7 @@ ISR(PCINT0_vect){
 
   if(changed & (1 << PINB4)){
     if(rmpToMainboard == 4){
-      digitalWrite(LED_OUT, state & (1 << PINB4));
+      if(state & (1 << PINB4)) LED_OUT_SET;
     }
     if(state & (1 << PINB4)){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime4, fanRpmSensorTimes4, now);
@@ -67,7 +67,7 @@ ISR(PCINT2_vect){
 
   if(changed & (1 << PIND2)){
     if(rmpToMainboard == 0){
-      digitalWrite(LED_OUT, state & (1 << PIND2));
+      if(state & (1 << PIND2)) LED_OUT_SET;
     }
     if(state & (1 << PIND2)){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime0, fanRpmSensorTimes0, now);
@@ -76,7 +76,7 @@ ISR(PCINT2_vect){
 
   if(changed & (1 << PIND4)){
     if(rmpToMainboard == 1){
-      digitalWrite(LED_OUT, state & (1 << PIND4));
+      if(state & (1 << PIND4)) LED_OUT_SET;
     }
     if(state & (1 << PIND4)){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime1, fanRpmSensorTimes1, now);
@@ -85,7 +85,7 @@ ISR(PCINT2_vect){
 
   if(changed & (1 << PIND7)){
     if(rmpToMainboard == 2){
-      digitalWrite(LED_OUT, state & (1 << PIND7));
+      if(state & (1 << PIND7)) LED_OUT_SET;
     }
     if(state & (1 << PIND7)){
       writeLastFanRpmSensorTime(&lastFanRpmSensorTime2, fanRpmSensorTimes2, now);
@@ -96,7 +96,6 @@ ISR(PCINT2_vect){
 }
 
 inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[], unsigned long now){
-//void writeLastFanRpmSensorTime(byte fanNumber, unsigned long now){
   (*lastFanRpmSensorTime)++;
   if(*lastFanRpmSensorTime >= FAN_RPM_SENSOR_TIMES_FIELD){
     *lastFanRpmSensorTime = 0;

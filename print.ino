@@ -40,47 +40,45 @@ void printFullStatus(){
   Serial.print(F(" PWM5:"));
   Serial.println(pwm[5]);
   Serial.print(F(" pwm0Drive: "));
-  printlnPwmDrive(ConfigurationPWM0.Data);
+  printlnPwmDrive(ConfigurationPWM0.Data.m_UserData);
   Serial.print(F(" pwm1Drive: "));
-  printlnPwmDrive(ConfigurationPWM1.Data);
+  printlnPwmDrive(ConfigurationPWM1.Data.m_UserData);
   Serial.print(F(" pwm2Drive: "));
-  printlnPwmDrive(ConfigurationPWM2.Data);
+  printlnPwmDrive(ConfigurationPWM2.Data.m_UserData);
   Serial.print(F(" pwm3Drive: "));
-  printlnPwmDrive(ConfigurationPWM3.Data);
+  printlnPwmDrive(ConfigurationPWM3.Data.m_UserData);
   Serial.print(F(" pwm4Drive: "));
-  printlnPwmDrive(ConfigurationPWM4.Data);
+  printlnPwmDrive(ConfigurationPWM4.Data.m_UserData);
   Serial.print(F(" pwm5Drive: "));
-  printlnPwmDrive(ConfigurationPWM5.Data);
+  printlnPwmDrive(ConfigurationPWM5.Data.m_UserData);
 }  
   
 
 void printlnPwmDrive(PWMConfiguration &conf){
-  // pwmDrive: 0 - const, 1 - analogInput, 2 - T0, 3 - T1, 4  - (T1+T2)/2
+  // 0 - constPWM, 1 - analogInput, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   switch (conf.pwmDrive) {
     case 0:
-      Serial.print(F("constant speed, PWM="));
+      Serial.print(F("constant power, PWM="));
       Serial.println(conf.constPwm);
       break;
     case 1:
       Serial.println(F("analog input"));
       break;
     case 2:
-      Serial.print(F("temperature 0, minPWM="));
+      Serial.print(F("PWM by temperature, minPWM="));
       Serial.print(conf.minPwm);
       Serial.print(F(", maxPWM="));
       Serial.println(conf.maxPwm);
       break;
     case 3:
-      Serial.print(F("temperature 1, minPWM="));
-      Serial.print(conf.minPwm);
-      Serial.print(F(", maxPWM="));
-      Serial.println(conf.maxPwm);
+      Serial.print(F("constant speed, expected RPM="));
+      Serial.print(conf.constRpm);
       break;
     case 4:
-      Serial.print(F("temperature 0 and 1, minPWM="));
-      Serial.print(conf.minPwm);
-      Serial.print(F(", maxPWM="));
-      Serial.println(conf.maxPwm);
+      Serial.print(F("speed by temperature, minRPM="));
+      Serial.print(conf.minRpm);
+      Serial.print(F(", maxRPM="));
+      Serial.println(conf.maxRpm);
       break;
   }
 }
