@@ -78,9 +78,9 @@ void printTimingResult(){
 class PWMConfiguration
 {
 public:
-  // 0 - constPWM, 1 - analogInput, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
+  // 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   byte pwmDrive;
-  // pwm when pwmDrive == 0
+  // pwm when pwmDrive == 1
   byte constPwm;
   // settings when pwmDrive == 2 or pwmDrive == 4
   byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
