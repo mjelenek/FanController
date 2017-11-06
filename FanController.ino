@@ -4,7 +4,7 @@
 #include "EEPROMStoreISR.h"
 
 #define TIMING_DEBUG
-#define SAVE_DEBUG
+//#define SAVE_DEBUG
 
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;

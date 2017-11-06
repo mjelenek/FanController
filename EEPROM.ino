@@ -48,7 +48,7 @@ void saveConfiguration(){
 void printBufferToStoreDebug(){
   Serial.print(F(" pointerActual:"));
   Serial.print(bufferToStoreActual);
-  Serial.print(F(", pointeLast:"));
+  Serial.print(F(", pointerLast:"));
   Serial.print(bufferToStoreLast);
   Serial.print(F(", bufferFull:"));
   Serial.println(eeprom_buffer_full);

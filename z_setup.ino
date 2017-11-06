@@ -173,7 +173,7 @@ void init_adc()
 void init_pid(){
   for(int i = 0; i <= 5; i++){
     pid[i].SetOutputLimits(15, 255);
-    pid[i].SetSampleTime(200);
+    pid[i].SetSampleTime(100);
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:
@@ -185,7 +185,7 @@ void init_pid(){
     case 4:
       pid[i].SetMode(AUTOMATIC);
     }
-    delay(20);
+    delay(15);
   }
 }
 
