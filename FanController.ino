@@ -9,7 +9,8 @@
 #ifdef TIMING_DEBUG
 unsigned long timeInCode;
 unsigned long timeTotal;
-unsigned int to500;
+unsigned int to400;
+unsigned int to600;
 unsigned int to800;
 unsigned int to1000;
 unsigned int to1200;
@@ -22,16 +23,22 @@ void printTimingResult(){
   Serial.print(F("Time in code: "));
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
-  Serial.print(F("<500 - "));
-  Serial.println(to500);
+  Serial.print(F("<400 - "));
+  Serial.println(to400);
+  Serial.print(F("<600 - "));
+  Serial.println(to600);
   Serial.print(F("<800 - "));
   Serial.println(to800);
   Serial.print(F("<1000 - "));
   Serial.println(to1000);
-  Serial.print(F("<1200 - "));
-  Serial.println(to1200);
-  Serial.print(F(">1200 - "));
-  Serial.println(over1200);
+  if(to1200 > 0){
+    Serial.print(F("<1200 - "));
+    Serial.println(to1200);
+  }
+  if(over1200 > 0){
+    Serial.print(F(">1200 - "));
+    Serial.println(over1200);
+  }
 }
 #endif
 
@@ -103,7 +110,7 @@ public:
 
   void Reset()
   {
-    pwmDrive = 0;
+    pwmDrive = 1;
     constPwm = 120;
     tSelect = 0;
     minPwm = 90;
@@ -191,7 +198,7 @@ byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
 
 unsigned long start;
 unsigned long now;
-unsigned long zpozdeni;
+unsigned short zpozdeni;
 
 unsigned long RT0koeficient;
 unsigned long RT1koeficient;
@@ -228,6 +235,7 @@ volatile byte lastFanRpmSensorTime2;
 volatile byte lastFanRpmSensorTime3;
 volatile byte lastFanRpmSensorTime4;
 volatile byte lastFanRpmSensorTime5;
+volatile byte lastFanRpmSensorTimeUpdated;
 unsigned short rpm[6];
 
 #define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 240

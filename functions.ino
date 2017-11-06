@@ -66,7 +66,7 @@ void guiUpdate(){
 }
 
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
-  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 3) + i) & B00111111) == 0){
+  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 2) + i) & B00011111) == 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
       if(conf.pwmDrive == 3){
@@ -95,8 +95,6 @@ unsigned int roundRPM(double rpm){
 void setPwmConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
-//  Serial.println(F("setPwmConfiguration"));
-
   byte pwmChannel = parameters.NextParameterAsInteger();
   byte pwmDrive = parameters.NextParameterAsInteger();
   byte constPwm = parameters.NextParameterAsInteger();

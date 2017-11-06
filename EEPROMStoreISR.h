@@ -21,7 +21,6 @@ template <class TData> class EEPROMStore
 public:
 
   CEEPROMData Data;
-//  TData Data;
 
   EEPROMStore()
   {
@@ -51,8 +50,6 @@ public:
     CEEPROMData StoredVersion;
     if (!Load(StoredVersion) || StoredVersion.m_uChecksum != Data.m_uChecksum || memcmp(&StoredVersion.m_UserData, &Data.m_UserData, sizeof(TData)) != 0)
     {
-//      int i = eeprom_interrupt_write_block(&Data.m_uChecksum, &m_EEPROMData.m_uChecksum, sizeof(Data.m_uChecksum));
-//      if(i != 0) return i;
       int i = eeprom_interrupt_write_block(&Data, &m_EEPROMData, sizeof(CEEPROMData));
       if(i != 0) return i;
       return 0; 

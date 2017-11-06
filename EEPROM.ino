@@ -45,6 +45,7 @@ void saveConfiguration(){
   startWritingBufferByISR();
 }
 
+#ifdef SAVE_DEBUG
 void printBufferToStoreDebug(){
   Serial.print(F(" pointerActual:"));
   Serial.print(bufferToStoreActual);
@@ -53,4 +54,5 @@ void printBufferToStoreDebug(){
   Serial.print(F(", bufferFull:"));
   Serial.println(eeprom_buffer_full);
 }
+#endif
 

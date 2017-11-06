@@ -19,17 +19,15 @@ void setup() {
 
   init_pcint();
 
+  setSerialCommandHandler();
+
   init_pid();
 
-  setSerialCommandHandler();
- 
 //  printTempProfile();
 //  measureInterrupts();
 
-//  wdt_enable(WDTO_4S);
-
   Serial.println(F("System started. Type !help for more informations."));
-  delay(10);
+  delay(1);
 
   start = micros();
 
@@ -87,9 +85,9 @@ void setTimers(){
   TCNT1 = 0;
   GTCCR = 0;                                 // start timers
   delayMicroseconds(5);
-  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC);  // stop timers
+  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
   TCNT2 = 255;
-  GTCCR = 0;                                  // start timers
+  GTCCR = 0;                                 // start timers
   TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
   sei();
 
@@ -172,8 +170,10 @@ void init_adc()
 
 void init_pid(){
   for(int i = 0; i <= 5; i++){
+    delay(8);
+
     pid[i].SetOutputLimits(15, 255);
-    pid[i].SetSampleTime(100);
+    pid[i].SetSampleTime(64);
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:
@@ -185,8 +185,8 @@ void init_pid(){
     case 4:
       pid[i].SetMode(AUTOMATIC);
     }
-    delay(15);
   }
+  pid[5].SetOutputLimits(50, 255);
 }
 
 void printTempProfile(){
@@ -205,7 +205,7 @@ void measureInterrupts(){
   TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
   PCICR = 0;                            // disable pin change interrupts
   ADCSRA &= ~(1 << ADIE);               // disable ADC conversion complete interrupt
-  start = micros();
+  unsigned long start = micros();
   unsigned int a = doSomeMath(100);
   now = micros();
   unsigned long m1 = now - start;

@@ -2,56 +2,27 @@ void loop(){
   byte part_16 = i & B00001111; // cycles from 0 to 15;
   byte part_8 = i & B00000111; // cycles from 0 to 7;
   byte part_4 = i & B00000011; // cycles from 0 to 3;
-  byte part_2 = i & B00000001; // cycles from 0 to 2;
+
+  // tasks executed every iteration (2ms)
+  countRPMs();
+  setPwm();
 
   // one case each 16 iterations (32ms)
   switch (part_16) {
     case 0:
       countT0();  
       break;
-    case 1:
-      countT1();  
-      break;
     case 2:
-    case 10:
-      rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
-      break;
-    case 3:
-    case 11:
-      rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
+      countT1();  
       break;
     case 4:
     case 12:
-      rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
-      break;
-    case 5:
-    case 13:
-      rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
-      break;
-    case 6:
-    case 14:
-      rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
-      break;
-    case 7:
-    case 15:
-      rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
-      break;
-    case 8:
       SerialCommandHandler.Process();
       break;
     default:
       ;
   }
-  
-  setPwm();
 
-/*
-  if(i == 50){
-    if(gui){
-      guiUpdate();
-    }
-  }
-*/
   if(i == 0){
     j++;
     if(gui){
@@ -74,7 +45,8 @@ void loop(){
         timeCounting = 1;
         timeCountingStartFlag = 0;
         timeInCode = 0;
-        to500 = 0;
+        to400 = 0;
+        to600 = 0;
         to800 = 0;
         to1000 = 0;
         to1200 = 0;
@@ -91,8 +63,11 @@ void loop(){
   zpozdeni = now - start;
 
 #ifdef TIMING_DEBUG
-  if(zpozdeni < 500){
-    to500++;
+  if(zpozdeni < 400){
+    to400++;
+  } else
+  if(zpozdeni < 600){
+    to600++;
   } else
   if(zpozdeni < 800){
     to800++;
@@ -113,9 +88,14 @@ void loop(){
   if(zpozdeni >= WARN_MICROSECONDS){
     printDelay(i, zpozdeni);
   }
+/*
   if(zpozdeni >= ITERATION_MICROSECONDS){
     printDelay(i, zpozdeni);
   } else {
+    delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
+  }
+*/
+  if(zpozdeni < ITERATION_MICROSECONDS){
     delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
   }
 
