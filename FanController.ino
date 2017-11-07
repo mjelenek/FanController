@@ -238,7 +238,7 @@ volatile byte lastFanRpmSensorTime5;
 volatile byte lastFanRpmSensorTimeUpdated;
 unsigned short rpm[6];
 
-#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 240
+#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 250
 volatile byte cnt2;
 
 // sensor to mainboard

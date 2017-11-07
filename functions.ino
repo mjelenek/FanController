@@ -55,6 +55,7 @@ void guiUpdate(){
   serialWriteInt(roundRPM(rpm[5]));
   serialWriteInt(T0int);
   serialWriteInt(T1int);
+//  serialWriteInt(cnt2);
 //  serialWriteInt(T0WithHysteresisInt);
 //  serialWriteInt(T1WithHysteresisInt);
 //  serialWriteInt(sensorValue6Averaged);

@@ -82,11 +82,11 @@ void setTimers(){
   cli();
   // synchronize timers 1 and 2
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
-  TCNT1 = 0;
+  TCNT2 = 0;
   GTCCR = 0;                                 // start timers
-  delayMicroseconds(5);
+  delayMicroseconds(14);
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
-  TCNT2 = 255;
+  TCNT1 = 0;
   GTCCR = 0;                                 // start timers
   TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
   sei();
@@ -186,7 +186,7 @@ void init_pid(){
       pid[i].SetMode(AUTOMATIC);
     }
   }
-  pid[5].SetOutputLimits(50, 255);
+  pid[5].SetOutputLimits(45, 255);
 }
 
 void printTempProfile(){
