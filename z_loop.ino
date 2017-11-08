@@ -82,7 +82,18 @@ void loop(){
     over1200++;
   }
 
+  if(timeCounting > 0){
+    if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
+      Serial.print(F("!"));
+      Serial.print(i);
+      Serial.print(F("-"));
+      Serial.println(zpozdeni);
+    }
+  }
+
   timeInCode = timeInCode + zpozdeni;
+  now = micros();
+  zpozdeni = now - start;
 #endif
 
   if(zpozdeni >= WARN_MICROSECONDS){

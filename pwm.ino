@@ -26,7 +26,7 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
   if(pwmDisabled[fanNumber] > 0){
     return 0;
   }
-  // pwmDrive: 0 - const PWM, 1 - analogInput, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
+  // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   switch (conf.pwmDrive) {
     case 0:
       return map(sensorValueAveraged, 0, 1023, 0, 255);

@@ -7,6 +7,7 @@
 //#define SAVE_DEBUG
 
 #ifdef TIMING_DEBUG
+#define WARN_MICROSECONDS_DEBUG 600
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;

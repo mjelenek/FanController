@@ -86,6 +86,8 @@ void printlnPwmDrive(PWMConfiguration &conf){
 void printDelay(byte i, unsigned long d){
   if(!gui){
     Serial.print(F("!"));
+    Serial.print(i);
+    Serial.print(F("-"));
     Serial.println(d);
   } else {
     Serial.write(6);
