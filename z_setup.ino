@@ -147,14 +147,14 @@ void init_thermistors(){
 
 void init_pcint()
 {
-    // PB0, PB4
-    PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
+  // PB0, PB4
+  PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
 
-    // PD2, PD4, PD7
-    PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
+  // PD2, PD4, PD7
+  PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
 
-    // PORTB, PORTD
-    PCICR = (1 << PCIE0) | (1 << PCIE2);
+  // PORTB, PORTD
+  PCICR = (1 << PCIE0) | (1 << PCIE2);
 }
 
 void init_adc()
@@ -172,10 +172,8 @@ void init_adc()
 
 void init_pid(){
   for(int i = 0; i <= 5; i++){
-    delay(8);
-
     pid[i].SetOutputLimits(15, 255);
-    pid[i].SetSampleTime(64);
+    pid[i].SetSampleTime(60);        // will be computed every 64ms
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:

@@ -22,6 +22,11 @@ unsigned short countExpectedRPM(unsigned short temperature, unsigned short tempe
   return (((unsigned long)(temperature - temperatureTarget)) * (rpmMax - rpmMin)) / (temperatureMax - temperatureTarget) + rpmMin;
 }
 
+// 3, 7, 11, 15, 19, 23
+#define TIME_TO_COMPUTE_PWM part_32 == ((fanNumber << 2) + 3)
+// 4, 8, 12, 16, 20, 24
+#define TIME_TO_COMPUTE_PID part_32 == ((fanNumber << 2) + 4)
+
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber){
   if(pwmDisabled[fanNumber] > 0){
     return 0;
@@ -33,8 +38,8 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
     case 1:
       return conf.constPwm;
     case 2:
-      // compute once every 8 cycles is enough
-      if(((i + fanNumber) & B00000111) == 0){
+      // compute once every 32 cycles (64ms)
+      if(TIME_TO_COMPUTE_PWM){
     
       // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
         switch (conf.tSelect) {
@@ -64,15 +69,20 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
         return pwm;
       }
     case 3:
-      setpointPid[fanNumber] = conf.constRpm;
-      if(pidCompute(fanNumber)){
-        return (byte)outputPid;
+      // compute once every 32 cycles (64ms)
+      if(TIME_TO_COMPUTE_PID){
+        setpointPid[fanNumber] = conf.constRpm;
+        if(pidCompute(fanNumber)){
+          return (byte)outputPid;
+        } else {
+          return pwm;
+        }
       } else {
         return pwm;
       }
     case 4:
-      // compute once every 64 cycles (128ms)
-      if(((i + fanNumber) & B00111111) == 0){
+      // compute once every 32 cycles (64ms)
+      if(TIME_TO_COMPUTE_PWM){
   
         // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
         switch (conf.tSelect) {
@@ -109,8 +119,14 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
             setpointPid[fanNumber] = conf.tempMaxRpm;
         }
       }
-      if(pidCompute(fanNumber)){
-        return (byte)outputPid;
+      if(TIME_TO_COMPUTE_PID){
+        if(pidCompute(fanNumber)){
+          return (byte)outputPid;
+        } else {
+          return pwm;
+        }
+      } else {
+        return pwm;
       }
     default:
       return pwm;

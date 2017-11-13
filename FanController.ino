@@ -1,5 +1,4 @@
 #include <PID_v1.h>
-//#include <avr/interrupt.h>
 #include "CommandHandler.h"
 #include "EEPROMStoreISR.h"
 
@@ -21,9 +20,15 @@ byte timeCountingStartFlag = 0;
 
 void printTimingResult(){
   Serial.println(F("Timing results"));
+//  Serial.print(F("Time in code: "));
+//  Serial.println(timeInCode);
+//  Serial.print(F("Time total: "));
+//  Serial.println(timeTotal);
   Serial.print(F("Time in code: "));
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
+  Serial.print(F("Average delay: "));
+  Serial.println(timeInCode / 512);
   Serial.print(F("<400 - "));
   Serial.println(to400);
   Serial.print(F("<600 - "));
@@ -70,8 +75,6 @@ void printTimingResult(){
 #define RPMSENSOR4 12
 #define RPMSENSOR5 19   // A5
 
-#define LED_OUT 13
-
 #define PWM0 3  //OC2B
 #define PWM1 5  //OC0B
 #define PWM2 6  //OC0A
@@ -79,6 +82,7 @@ void printTimingResult(){
 #define PWM4 10 //OC1B
 #define PWM5 11 //OC2A
 
+#define LED_OUT 13
 #define LED_OUT_1 PORTB |= _BV(PB5)
 #define LED_OUT_0 PORTB &= ~_BV(PB5)
 #define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
@@ -118,7 +122,7 @@ public:
     maxPwm = 200;
     tempTarget = 32;
     tempMax = 50;
-    constRpm = 900;
+    constRpm = 700;
     minRpm = 600;
     maxRpm = 1400;
     tempTargetRpm = 32;
@@ -267,6 +271,7 @@ CommandHandler<16, 42, 0> SerialCommandHandler; // 16 commands, max length of co
 
 byte i = 0;
 byte j = 0;
+byte part_32;  // cycles from 0 to 31;
 byte gui = 0;  // enable gui
 byte updatesRTToSend[] = {0, 0, 0, 0, 0, 0};
 
