@@ -1,3 +1,23 @@
+
+int main(void)
+{
+  myInit();
+
+#if defined(USBCON)
+  USBDevice.attach();
+#endif
+  
+  setup();
+    
+  for (;;) {
+    loop();
+    if (serialEventRun) serialEventRun();
+  }
+        
+  return 0;
+} 
+
+
 void setup() {
 
 //  wdt_disable();
@@ -58,7 +78,7 @@ void setPinsIO(){
 void setTimers(){
   //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
   //TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
-  //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
+  TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz (The DEFAULT)
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
@@ -90,7 +110,9 @@ void setTimers(){
   TCNT1 = 0;
   TCNT2 = 205;
   GTCCR = 0;                                 // start timers
+  #ifdef USE_TIMER1_OVF
   TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
+  #endif USE_TIMER1_OVF
   sei();
 
 /*
@@ -150,11 +172,14 @@ void init_pcint()
   // PB0, PB4
   PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
 
+  // PC5
+  PCMSK1 = (1 << PCINT13);
+
   // PD2, PD4, PD7
   PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
 
-  // PORTB, PORTD
-  PCICR = (1 << PCIE0) | (1 << PCIE2);
+  // PORTB, PORTC, PORTD
+  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 }
 
 void init_adc()
@@ -173,7 +198,7 @@ void init_adc()
 void init_pid(){
   for(int i = 0; i <= 5; i++){
     pid[i].SetOutputLimits(15, 255);
-    pid[i].SetSampleTime(60);        // will be computed every 64ms
+    pid[i].SetSampleTime(62);                          // will be computed every 64ms
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:
@@ -202,7 +227,9 @@ void printTempProfile(){
 
 void measureInterrupts(){
   delay(20);
+  #ifdef USE_TIMER1_OVF
   TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
+  #endif USE_TIMER1_OVF
   PCICR = 0;                            // disable pin change interrupts
   ADCSRA &= ~(1 << ADIE);               // disable ADC conversion complete interrupt
   unsigned long start = micros();
@@ -210,8 +237,10 @@ void measureInterrupts(){
   now = micros();
   unsigned long m1 = now - start;
 
+  #ifdef USE_TIMER1_OVF
   TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
-  PCICR = (1 << PCIE0) | (1 << PCIE2);  // enable pin change interrupts
+  #endif USE_TIMER1_OVF
+  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
   ADCSRA |= (1 << ADIE);                // enable ADC conversion complete interrupt
   delay(10);
   start = micros();

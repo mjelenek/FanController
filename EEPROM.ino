@@ -1,4 +1,5 @@
 void loadConfiguration(){
+  ControllerConfiguration.Load();
   ConfigurationPWM0.Load();
   ConfigurationPWM1.Load();
   ConfigurationPWM2.Load();
@@ -10,6 +11,11 @@ void loadConfiguration(){
 void saveConfiguration(){
   #ifdef SAVE_DEBUG
   Serial.print(F("Before save - "));
+  printBufferToStoreDebug();
+  #endif
+  ControllerConfiguration.Save();
+  #ifdef SAVE_DEBUG
+  Serial.print(F("After save configuration - "));
   printBufferToStoreDebug();
   #endif
   ConfigurationPWM0.Save();

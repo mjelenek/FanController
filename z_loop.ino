@@ -1,4 +1,3 @@
-
 void loop(){
   part_32 = i & B00011111; // cycles from 0 to 31;
 

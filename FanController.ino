@@ -4,6 +4,7 @@
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
+#define USE_TIMER1_OVF
 
 #ifdef TIMING_DEBUG
 #define WARN_MICROSECONDS_DEBUG 600
@@ -19,7 +20,7 @@ byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
 void printTimingResult(){
-  Serial.println(F("Timing results"));
+  Serial.println(F("Timing"));
 //  Serial.print(F("Time in code: "));
 //  Serial.println(timeInCode);
 //  Serial.print(F("Time total: "));
@@ -29,20 +30,20 @@ void printTimingResult(){
   Serial.println(F("%"));
   Serial.print(F("Average delay: "));
   Serial.println(timeInCode / 512);
-  Serial.print(F("<400 - "));
+  Serial.print(F("<400-"));
   Serial.println(to400);
-  Serial.print(F("<600 - "));
+  Serial.print(F("<600-"));
   Serial.println(to600);
-  Serial.print(F("<800 - "));
+  Serial.print(F("<800-"));
   Serial.println(to800);
-  Serial.print(F("<1000 - "));
+  Serial.print(F("<1000-"));
   Serial.println(to1000);
   if(to1200 > 0){
-    Serial.print(F("<1200 - "));
+    Serial.print(F("<1200-"));
     Serial.println(to1200);
   }
   if(over1200 > 0){
-    Serial.print(F(">1200 - "));
+    Serial.print(F(">1200-"));
     Serial.println(over1200);
   }
 }
@@ -50,7 +51,7 @@ void printTimingResult(){
 
 //one iteration microseconds
 #define ITERATION_MICROSECONDS 2000
-#define WARN_MICROSECONDS 1600
+#define WARN_MICROSECONDS 1900
 #define DELAY_THRESHOLD 10000
 
 //by multimeter
@@ -198,6 +199,23 @@ PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data.m_UserData, &Con
                                         &ConfigurationPWM2.Data.m_UserData, &ConfigurationPWM3.Data.m_UserData,
                                         &ConfigurationPWM4.Data.m_UserData, &ConfigurationPWM5.Data.m_UserData};
 
+class ControllerConfiguration
+{
+public:
+  // sensor to mainboard
+  byte rmpToMainboard;
+
+  void Reset()
+  {
+    rmpToMainboard = 5;
+  }
+};
+
+EEPROMStore<ControllerConfiguration> ControllerConfiguration;
+
+// sensor to mainboard
+byte *rmpToMainboard = &ControllerConfiguration.Data.m_UserData.rmpToMainboard;
+ 
 byte pwm[] = {0, 0, 0, 0, 0, 0};
 byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
 
@@ -242,12 +260,6 @@ volatile byte lastFanRpmSensorTime4;
 volatile byte lastFanRpmSensorTime5;
 volatile byte lastFanRpmSensorTimeUpdated;
 unsigned short rpm[6];
-
-#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 250
-volatile byte cnt2;
-
-// sensor to mainboard
-volatile byte rmpToMainboard = 5;
 
 // Define Variables PIDs will be connecting to
 double outputPid;

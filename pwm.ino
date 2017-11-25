@@ -90,14 +90,14 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
             if(T0Connected){
               setpointPid[fanNumber] = countExpectedRPM(T0WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
             } else {
-              setpointPid[fanNumber] = conf.tempMaxRpm;
+              setpointPid[fanNumber] = conf.maxRpm;
             }
             break;
           case 1:
             if(T1Connected){
               setpointPid[fanNumber] = countExpectedRPM(T1WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
             } else {
-              setpointPid[fanNumber] = conf.tempMaxRpm;
+              setpointPid[fanNumber] = conf.maxRpm;
             }
             break;
           case 2:
@@ -113,10 +113,10 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
               setpointPid[fanNumber] = countExpectedRPM(T1WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
               break;
             }
-            setpointPid[fanNumber] = conf.tempMaxRpm;
+            setpointPid[fanNumber] = conf.maxRpm;
             break;
           default:
-            setpointPid[fanNumber] = conf.tempMaxRpm;
+            setpointPid[fanNumber] = conf.maxRpm;
         }
       }
       if(TIME_TO_COMPUTE_PID){

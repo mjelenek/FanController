@@ -171,7 +171,7 @@ void sendPidUpates(CommandParameter &parameters){
 void setRPMToMainboard(CommandParameter &parameters){
   byte select = parameters.NextParameterAsInteger();
   if(select >= 0 && select <= 5){
-    rmpToMainboard = select;
+    *rmpToMainboard = select;
   }
 }
 
