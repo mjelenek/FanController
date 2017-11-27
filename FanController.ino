@@ -128,10 +128,10 @@ public:
     maxRpm = 1400;
     tempTargetRpm = 32;
     tempMaxRpm = 50;
-    // PID parameters (real value is parameter value / 100)
-    kp = 20;
-    ki = 15;
-    kd = 3;
+    // PID parameters (real value is parameter value / 200)
+    kp = 40;
+    ki = 30;
+    kd = 5;
   }
 
   void set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
@@ -267,12 +267,12 @@ double inputPid;
 double setpointPid[6];
 //Specify the links and initial tuning parameters
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM0.Data.m_UserData.kp / 100, (double)ConfigurationPWM0.Data.m_UserData.ki / 100, (double)ConfigurationPWM0.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM1.Data.m_UserData.kp / 100, (double)ConfigurationPWM1.Data.m_UserData.ki / 100, (double)ConfigurationPWM1.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM2.Data.m_UserData.kp / 100, (double)ConfigurationPWM2.Data.m_UserData.ki / 100, (double)ConfigurationPWM2.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM3.Data.m_UserData.kp / 100, (double)ConfigurationPWM3.Data.m_UserData.ki / 100, (double)ConfigurationPWM3.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM4.Data.m_UserData.kp / 100, (double)ConfigurationPWM4.Data.m_UserData.ki / 100, (double)ConfigurationPWM4.Data.m_UserData.kd / 100, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM5.Data.m_UserData.kp / 100, (double)ConfigurationPWM5.Data.m_UserData.ki / 100, (double)ConfigurationPWM5.Data.m_UserData.kd / 100, P_ON_E, DIRECT)
+  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM0.Data.m_UserData.kp / 200, (double)ConfigurationPWM0.Data.m_UserData.ki / 200, (double)ConfigurationPWM0.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM1.Data.m_UserData.kp / 200, (double)ConfigurationPWM1.Data.m_UserData.ki / 200, (double)ConfigurationPWM1.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM2.Data.m_UserData.kp / 200, (double)ConfigurationPWM2.Data.m_UserData.ki / 200, (double)ConfigurationPWM2.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM3.Data.m_UserData.kp / 200, (double)ConfigurationPWM3.Data.m_UserData.ki / 200, (double)ConfigurationPWM3.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM4.Data.m_UserData.kp / 200, (double)ConfigurationPWM4.Data.m_UserData.ki / 200, (double)ConfigurationPWM4.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM5.Data.m_UserData.kp / 200, (double)ConfigurationPWM5.Data.m_UserData.ki / 200, (double)ConfigurationPWM5.Data.m_UserData.kd / 200, P_ON_E, DIRECT)
 };
 
 #ifdef TIMING_DEBUG

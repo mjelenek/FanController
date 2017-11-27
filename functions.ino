@@ -136,7 +136,7 @@ void setPidConfiguration(CommandParameter &parameters){
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
     ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
-    pid[pwmChannel].SetTunings((double) kp / 100, (double) ki / 100, (double) kd / 100);
+    pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
   }
 }
 
@@ -169,6 +169,8 @@ void sendPidUpates(CommandParameter &parameters){
 }
 
 void setRPMToMainboard(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
+
   byte select = parameters.NextParameterAsInteger();
   if(select >= 0 && select <= 5){
     *rmpToMainboard = select;
