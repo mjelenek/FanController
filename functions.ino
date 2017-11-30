@@ -12,20 +12,20 @@ void serialWriteLong(unsigned long l){
 
 void guistat1(){
   Serial.print(F("!!"));
-  Serial.write(62);
-  Serial.print(F("guistat1"));
-  ConfigurationPWM0.Data.m_UserData.guiStat();
-  ConfigurationPWM1.Data.m_UserData.guiStat();
-  ConfigurationPWM2.Data.m_UserData.guiStat();
+  Serial.write(61);
+  Serial.print(F("gui1"));
+  ConfigurationPWM[0] -> guiStat();
+  ConfigurationPWM[1] -> guiStat();
+  ConfigurationPWM[2] -> guiStat();
 }
 
 void guistat2(){
   Serial.print(F("!!"));
-  Serial.write(62);
-  Serial.print(F("guistat2"));
-  ConfigurationPWM3.Data.m_UserData.guiStat();
-  ConfigurationPWM4.Data.m_UserData.guiStat();
-  ConfigurationPWM5.Data.m_UserData.guiStat();
+  Serial.write(61);
+  Serial.print(F("gui2"));
+  ConfigurationPWM[3] -> guiStat();
+  ConfigurationPWM[4] -> guiStat();
+  ConfigurationPWM[5] -> guiStat();
 }
 
 void guiEnable(){
@@ -133,10 +133,12 @@ void setPidConfiguration(CommandParameter &parameters){
   byte kp = parameters.NextParameterAsInteger();
   byte ki = parameters.NextParameterAsInteger();
   byte kd = parameters.NextParameterAsInteger();
+  byte minPidPwm = parameters.NextParameterAsInteger();
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd);
+    ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd, minPidPwm);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
+    pid[pwmChannel].SetOutputLimits(ConfigurationPWM[pwmChannel] -> minPidPwm, 255);
   }
 }
 

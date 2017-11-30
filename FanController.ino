@@ -109,10 +109,11 @@ public:
   unsigned short maxRpm;
   byte tempTargetRpm;
   byte tempMaxRpm;
-  // pid parameters, real value is parameter / 100
+  // pid parameters, real value is parameter / 200
   byte kp;
   byte ki;
   byte kd;
+  byte minPidPwm; // minimal value of PWM when speed is driven by PID. Can not be 0, because fans with pwm power=0 instantly indicates 0rpm.
 
   void Reset()
   {
@@ -132,6 +133,7 @@ public:
     kp = 40;
     ki = 30;
     kd = 5;
+    minPidPwm = 15;
   }
 
   void set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
@@ -154,7 +156,7 @@ public:
   }
 
   void setPid(unsigned short constRpm1, unsigned short minRpm1, unsigned short maxRpm1,
-    byte tempTargetRpm1, byte tempMaxRpm1, byte kp1, byte ki1, byte kd1)
+    byte tempTargetRpm1, byte tempMaxRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
   {
     constRpm = constRpm1;
     minRpm = minRpm1;
@@ -168,6 +170,7 @@ public:
     kp = kp1;
     ki = ki1;
     kd = kd1;
+    minPidPwm = minPidPwm1;
   }
 
   void guiStat(){
@@ -186,6 +189,7 @@ public:
     Serial.write(kp);
     Serial.write(ki);
     Serial.write(kd);
+    Serial.write(minPidPwm);
   }
 };
 

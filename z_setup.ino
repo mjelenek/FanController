@@ -197,8 +197,8 @@ void init_adc()
 
 void init_pid(){
   for(int i = 0; i <= 5; i++){
-    pid[i].SetOutputLimits(15, 255);
-    pid[i].SetSampleTime(62);                          // will be computed every 64ms
+    pid[i].SetOutputLimits(ConfigurationPWM[i] -> minPidPwm, 255);
+    pid[i].SetSampleTime(62);                     // will be computed every 64ms
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:
@@ -211,7 +211,6 @@ void init_pid(){
       pid[i].SetMode(AUTOMATIC);
     }
   }
-  pid[5].SetOutputLimits(50, 255);
 }
 
 void printTempProfile(){
