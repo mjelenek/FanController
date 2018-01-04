@@ -59,7 +59,10 @@ ISR(ADC_vect)
 
   ADMUX = channelSelect;             // select next ADC channel, VREF is EXTERNAL
 
-// Start next conversion - triggered by Timer1
-//  ADCSRA |= (1 << ADSC); 
+  // slow down ADC conversions
+  ADCSRA &= ~(1 << ADEN);            // Disable ADC
+  ADCSRA |= (1 << ADEN);             // Enable ADC
+
+  ADCSRA |= (1 << ADSC);             // Start next conversion
 }
 
