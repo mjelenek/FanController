@@ -1,9 +1,29 @@
-void printBCD(unsigned long input){ // value from 0 to 99999999
-
-  unsigned long bcd = binaryToBCDLong(input);
-
+void printBCD(unsigned long bcd){ // value from 0 to 99999999
   byte writable = 0;
   byte number;
+  
+  if(bcd >> 8 == 0){
+    number = (bcd >> 4) & 0xF;
+    if(number > 0){
+      Serial.write(number + '0');
+    }
+    number = bcd & 0xF;
+    Serial.write(number + '0');
+    return;
+  } 
+
+  if(bcd >> 16 == 0){
+    unsigned int bcdInt = (unsigned int)bcd;
+    for(signed char a = 12; a >= 0; a-=4){
+      number = (bcdInt >> a) & 0xF;
+      if(number > 0) writable = 1;
+      if(writable == 1 || a == 0){
+        Serial.write(number + '0');
+      }
+    }
+    return;
+  } 
+  
   for(signed char a = 28; a >= 0; a-=4){
     number = (bcd >> a) & 0xF;
     if(number > 0) writable = 1;
@@ -13,52 +33,58 @@ void printBCD(unsigned long input){ // value from 0 to 99999999
   }
 }
 
-void printlnBCD(unsigned long input){ // value from 0 to 99999999
-  printBCD(input);
+void printlnBCD(unsigned long bcd){ // value from 0 to 99999999
+  printBCD(bcd);
   Serial.println("");
 }
 
 void printStatus(){
   Serial.print(F("T0:"));
   if (T0Connected){
-    Serial.print((float)T0int / 10, 1);
+    unsigned int T0BCD = binaryToBCD(T0int);
+    printBCD(T0BCD >> 4);
+    Serial.print(F("."));
+    printBCD(T0BCD & 0xF);
   } else {
     Serial.print(F("N/A"));
   }
   Serial.print(F(" T1:"));
   if (T1Connected){
-    Serial.println((float)T1int / 10, 1);
+    unsigned int T1BCD = binaryToBCD(T1int);
+    printBCD(T1BCD >> 4);
+    Serial.print(F("."));
+    printlnBCD(T1BCD & 0xF);
   } else {
     Serial.println(F("N/A"));
   }
   Serial.print(F("RPM0:"));
-  printBCD(rpm[0]);
+  printBCD(binaryToBCDLong(rpm[0]));
   Serial.print(F(" RPM1:"));
-  printBCD(rpm[1]);
+  printBCD(binaryToBCDLong(rpm[1]));
   Serial.print(F(" RPM2:"));
-  printBCD(rpm[2]);
+  printBCD(binaryToBCDLong(rpm[2]));
   Serial.print(F(" RPM3:"));
-  printBCD(rpm[3]);
+  printBCD(binaryToBCDLong(rpm[3]));
   Serial.print(F(" RPM4:"));
-  printBCD(rpm[4]);
+  printBCD(binaryToBCDLong(rpm[4]));
   Serial.print(F(" RPM5:"));
-  printlnBCD(rpm[5]);
+  printlnBCD(binaryToBCDLong(rpm[5]));
 }
 
 void printFullStatus(){
   printStatus();
   Serial.print(F("PWM0:"));
-  printBCD(pwm[0]);
+  printBCD(binaryToBCD(pwm[0]));
   Serial.print(F(" PWM1:"));
-  printBCD(pwm[1]);
+  printBCD(binaryToBCD(pwm[1]));
   Serial.print(F(" PWM2:"));
-  printBCD(pwm[2]);
+  printBCD(binaryToBCD(pwm[2]));
   Serial.print(F(" PWM3:"));
-  printBCD(pwm[3]);
+  printBCD(binaryToBCD(pwm[3]));
   Serial.print(F(" PWM4:"));
-  printBCD(pwm[4]);
+  printBCD(binaryToBCD(pwm[4]));
   Serial.print(F(" PWM5:"));
-  printlnBCD(pwm[5]);
+  printlnBCD(binaryToBCD(pwm[5]));
   Serial.print(F(" pwm0Drive: "));
   printlnPwmDrive(ConfigurationPWM0.Data.m_UserData);
   Serial.print(F(" pwm1Drive: "));
@@ -82,23 +108,23 @@ void printlnPwmDrive(PWMConfiguration &conf){
       break;
     case 1:
       Serial.print(F("constant power, PWM="));
-      printlnBCD(conf.constPwm);
+      printlnBCD(binaryToBCD(conf.constPwm));
       break;
     case 2:
       Serial.print(F("PWM by temperature, minPWM="));
-      printBCD(conf.minPwm);
+      printBCD(binaryToBCD(conf.minPwm));
       Serial.print(F(", maxPWM="));
-      printlnBCD(conf.maxPwm);
+      printlnBCD(binaryToBCD(conf.maxPwm));
       break;
     case 3:
       Serial.print(F("constant speed, expected RPM="));
-      printlnBCD(conf.constRpm);
+      printlnBCD(binaryToBCDLong(conf.constRpm));
       break;
     case 4:
       Serial.print(F("speed by temperature, minRPM="));
-      printBCD(conf.minRpm);
+      printBCD(binaryToBCDLong(conf.minRpm));
       Serial.print(F(", maxRPM="));
-      printlnBCD(conf.maxRpm);
+      printlnBCD(binaryToBCDLong(conf.maxRpm));
       break;
   }
 }
@@ -106,9 +132,9 @@ void printlnPwmDrive(PWMConfiguration &conf){
 void printDelay(byte i, unsigned long d){
   if(!gui){
     Serial.print(F("!"));
-    printBCD(i);
+    printBCD(binaryToBCD(i));
     Serial.print(F("-"));
-    printlnBCD(d);
+    printlnBCD(binaryToBCDLong(d));
   } else {
     Serial.write(6);
     Serial.print(F("!"));
@@ -132,7 +158,8 @@ void printHelp(){
   Serial.println(F("fs - print full status in human readable format"));
   Serial.println(F("guiE - enable GUI mode. GUI mode means, that informations about temperatures and fan rotations are sending periodically in binary mode"));
   Serial.println(F("guiD - disable GUI mode"));
-  Serial.println(F("guistat - send fan configurations in binary mode"));
+  Serial.println(F("guistat1 - send fan0 - fan2 configurations in binary mode"));
+  Serial.println(F("guistat2 - send fan3 - fan5 configurations in binary mode"));
   Serial.println(F("guiUpdate - send temperatures and fan rotations in binary mode"));
   Serial.println(F("setFan param1 param2 param3 param4 param5 param6 param7 param8 - set PWM configuration of fan, all parameters are mandatory"));
   Serial.println(F("    param1 - fan number. Allowed values 0 - 5"));

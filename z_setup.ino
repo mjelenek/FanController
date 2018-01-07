@@ -1,4 +1,3 @@
-
 int main(void)
 {
   myInit();
@@ -84,8 +83,11 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-  //TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+  #ifndef USE_TIMER1_OVF
+  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+  #else
   TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
+  #endif USE_TIMER1_OVF
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
@@ -99,6 +101,7 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
 
+  #ifdef USE_TIMER1_OVF
   cli();
   // synchronize timers 1 and 2
   GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
@@ -110,10 +113,10 @@ void setTimers(){
   TCNT1 = 0;
   TCNT2 = 205;
   GTCCR = 0;                                 // start timers
-  #ifdef USE_TIMER1_OVF
+
   TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   sei();
+  #endif USE_TIMER1_OVF
 
 /*
   Serial.println(F("Timers configuration"));
@@ -172,8 +175,10 @@ void init_pcint()
   // PB0, PB4
   PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
 
+  #ifndef USE_TIMER1_OVF
   // PC5
   PCMSK1 = (1 << PCINT13);
+  #endif USE_TIMER1_OVF
 
   // PD2, PD4, PD7
   PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
@@ -186,13 +191,10 @@ void init_adc()
 {
   ADMUX = 0;                                           // VREF is EXTERNAL, channel 0
   ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler to 128
-//  ADCSRA = (1 << ADPS2) | (1 << ADPS1);                // prescaler to 64
-  //ADCSRB = (1 << ADTS2);                             // ADC Auto Trigger Source - Timer0 Overflow
-  ADCSRB = (1 << ADTS2) | (1 << ADTS1);                // ADC Auto Trigger Source - Timer1 Overflow
   ADCSRA |= (1 << ADATE);                              // ADC Auto Trigger Enable
   ADCSRA |= (1 << ADIE);                               // Enable ADC conversion complete interrupt
   ADCSRA |= (1 << ADEN);                               // Enable ADC
-//  ADCSRA |= (1 << ADSC);                               // Start conversion - triggered by Timer1
+  ADCSRA |= (1 << ADSC);                               // Start conversion
 }
 
 void init_pid(){
@@ -278,7 +280,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
   SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
-  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
+//  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
   SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);

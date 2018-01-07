@@ -1,39 +1,35 @@
-#define fanSensor5FilterDefinition B00000111
-#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 250
-#define READ_RPM5_BY_PCINT1_VECT_MINPWM 255
-
 #ifdef USE_TIMER1_OVF
+
+#define fanSensor5FilterDefinition B00000111
+#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 230
+
 // overflow on timer1 interrupt handler
 ISR(TIMER1_OVF_vect){
   static byte lastState;
   static byte fanSensor5Filter = 0;
   byte cnt2 = TCNT2;
   byte fanSensor5 = (PINC >> 5) & 1;
-  if (pwm[5] <= READ_RPM5_BY_PCINT1_VECT_MINPWM){
-    if(cnt2 < CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5){
-      return;
+  if(cnt2 < CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5){
+    return;
+  }
+  fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
+  byte fanSensor5Value = lastState;
+  if(fanSensor5Filter == 0){
+    fanSensor5Value = 0;
+  }
+  if(fanSensor5Filter == fanSensor5FilterDefinition){
+    fanSensor5Value = 1;
+  }
+
+  if(lastState ^ fanSensor5Value){
+    if(*rmpToMainboard == 5){
+      if(fanSensor5Value) LED_OUT_SET;
     }
-    fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
-    byte fanSensor5Value = lastState;
-    if(fanSensor5Filter == 0){
-      fanSensor5Value = 0;
+    if(fanSensor5Value){
+      writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  micros());
+      lastFanRpmSensorTimeUpdated |= B00100000;
     }
-    if(fanSensor5Filter == fanSensor5FilterDefinition){
-      fanSensor5Value = 1;
-    }
-  
-    if(lastState ^ fanSensor5Value){
-      if(*rmpToMainboard == 5){
-        if(fanSensor5Value) LED_OUT_SET;
-      }
-      if(fanSensor5Value){
-        writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  micros());
-        lastFanRpmSensorTimeUpdated |= B00100000;
-      }
-      lastState = fanSensor5Value;
-    }
-  } else {
-    PCMSK1 |= (1 << PCINT13);  // enable pin PC5 change interrupts
+    lastState = fanSensor5Value;
   }
 }
 #endif USE_TIMER1_OVF
@@ -68,25 +64,22 @@ ISR(PCINT0_vect){
   lastState = state;
 }
 
+#ifndef USE_TIMER1_OVF
 // change pin PC5
 ISR(PCINT1_vect){
-  static unsigned long lastTime;
-  static byte count = 0;
-  PCMSK1 &= ~(1 << PCINT13);  // disable pin PC5 change interrupts
-    unsigned long now = micros();
-    if((now - lastTime) > 5000){
-      count++;
-      if(count > 1){
-        count = 0;
-        writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  now);
-        lastFanRpmSensorTimeUpdated |= B00100000;
-      }
-    lastTime = now;
+  static byte lastState;
+  unsigned long now = micros();
+  byte state = PINC & (1 << PINC5);
+  if(*rmpToMainboard == 5){
+    if(state) LED_OUT_SET;
   }
-  if (pwm[5] > READ_RPM5_BY_PCINT1_VECT_MINPWM){
-    PCMSK1 |= (1 << PCINT13);  // enable pin PC5 change interrupts
+  if(state){
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  now);
+    lastFanRpmSensorTimeUpdated |= B00100000;
   }
+  lastState = state;
 }
+#endif USE_TIMER1_OVF
 
 // change pin PD2, PD4, PD7
 ISR(PCINT2_vect){
@@ -151,7 +144,8 @@ short countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[]
   TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
   #endif USE_TIMER1_OVF
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
-  if((micros() - time0) > 240000 || (micros() - time1) > 840000){
+  unsigned long now = micros();
+  if((now - time0) > 240000 || (now - time1) > 840000){
     return 0;
   }
   return 60000000 / (time0 - time1);

@@ -64,6 +64,7 @@ void loop(){
   i++;
 }
 
+#ifdef TIMING_DEBUG
 void timingDebugStart(){
   if(timeCounting > 0){
     timeCounting--;
@@ -87,36 +88,37 @@ void timingDebugStart(){
 }
 
 void timingDebug(){
-    if(zpozdeni < 400){
-    to400++;
-  } else
-  if(zpozdeni < 600){
-    to600++;
-  } else
-  if(zpozdeni < 800){
-    to800++;
-  } else
-  if(zpozdeni < 1000){
-    to1000++;
-  } else
-  if(zpozdeni < 1200){
-    to1200++;
-  } else
-  if(zpozdeni >= 1200){
-    over1200++;
-  }
-
   if(timeCounting > 0){
+    if(zpozdeni < 400){
+      to400++;
+    } else
+    if(zpozdeni < 600){
+      to600++;
+    } else
+    if(zpozdeni < 800){
+      to800++;
+    } else
+    if(zpozdeni < 1000){
+      to1000++;
+    } else
+    if(zpozdeni < 1200){
+      to1200++;
+    } else
+    if(zpozdeni >= 1200){
+      over1200++;
+    }
+
     if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
       Serial.print(F("!"));
-      Serial.print(i);
+      printBCD(binaryToBCD(part_32));
       Serial.print(F("-"));
-      Serial.println(zpozdeni);
+      printlnBCD(binaryToBCDLong(zpozdeni));
     }
-  }
 
-  timeInCode = timeInCode + zpozdeni;
-  now = micros();
-  zpozdeni = now - start;
+    timeInCode = timeInCode + zpozdeni;
+    now = micros();
+    zpozdeni = now - start;
+  }
 }
+#endif
 

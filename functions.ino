@@ -56,13 +56,16 @@ void serialWriteLong(unsigned long l){
 
 void guistat1(){
   Serial.print(F("!!"));
-  Serial.write(61);
+  Serial.write(118);
   Serial.print(F("gui1"));
   ConfigurationPWM[0] -> guiStat();
   ConfigurationPWM[1] -> guiStat();
   ConfigurationPWM[2] -> guiStat();
+  ConfigurationPWM[3] -> guiStat();
+  ConfigurationPWM[4] -> guiStat();
+  ConfigurationPWM[5] -> guiStat();
 }
-
+/*
 void guistat2(){
   Serial.print(F("!!"));
   Serial.write(61);
@@ -71,7 +74,7 @@ void guistat2(){
   ConfigurationPWM[4] -> guiStat();
   ConfigurationPWM[5] -> guiStat();
 }
-
+*/
 void guiEnable(){
   gui = 1;  
 }

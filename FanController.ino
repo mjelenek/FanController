@@ -4,10 +4,10 @@
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
-#define USE_TIMER1_OVF
+//#define USE_TIMER1_OVF
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 600
+#define WARN_MICROSECONDS_DEBUG 450
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;
@@ -20,38 +20,35 @@ byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 
 void printTimingResult(){
-  Serial.println(F("Timing"));
-//  Serial.print(F("Time in code: "));
-//  Serial.println(timeInCode);
-//  Serial.print(F("Time total: "));
-//  Serial.println(timeTotal);
   Serial.print(F("Time in code: "));
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
   Serial.print(F("Average delay: "));
-  Serial.println(timeInCode / 512);
+  printlnBCD(binaryToBCDLong((unsigned long)timeInCode >> 9));
   Serial.print(F("<400-"));
-  Serial.println(to400);
+  printlnBCD(binaryToBCD(to400));
   Serial.print(F("<600-"));
-  Serial.println(to600);
+  printlnBCD(binaryToBCD(to600));
   Serial.print(F("<800-"));
-  Serial.println(to800);
-  Serial.print(F("<1000-"));
-  Serial.println(to1000);
+  printlnBCD(binaryToBCD(to800));
+  if(to1000 > 0){
+    Serial.print(F("<1000-"));
+    printlnBCD(binaryToBCD(to1000));
+  }
   if(to1200 > 0){
     Serial.print(F("<1200-"));
-    Serial.println(to1200);
+    printlnBCD(binaryToBCD(to1200));
   }
   if(over1200 > 0){
     Serial.print(F(">1200-"));
-    Serial.println(over1200);
+    printlnBCD(binaryToBCD(over1200));
   }
 }
 #endif
 
 //one iteration microseconds
 #define ITERATION_MICROSECONDS 2000
-#define WARN_MICROSECONDS 1900
+#define WARN_MICROSECONDS 1600
 #define DELAY_THRESHOLD 10000
 
 //by multimeter
@@ -76,6 +73,7 @@ void printTimingResult(){
 #define RPMSENSOR4 12
 #define RPMSENSOR5 19   // A5
 
+//PWM output pins
 #define PWM0 3  //OC2B
 #define PWM1 5  //OC0B
 #define PWM2 6  //OC0A
@@ -280,9 +278,9 @@ PID pid[] = {
 };
 
 #ifdef TIMING_DEBUG
-CommandHandler<18, 42, 0> SerialCommandHandler; // 18 commands, max length of command 42, 0 variables
+CommandHandler<18, 45, 0> SerialCommandHandler; // 18 commands, max length of command 45, 0 variables
 #else
-CommandHandler<16, 42, 0> SerialCommandHandler; // 16 commands, max length of command 42, 0 variables
+CommandHandler<16, 45, 0> SerialCommandHandler; // 16 commands, max length of command 45, 0 variables
 #endif
 
 byte i = 0;
