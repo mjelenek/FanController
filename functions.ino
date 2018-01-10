@@ -107,10 +107,6 @@ void guiUpdate(){
 //  serialWriteInt(T1WithHysteresisInt);
 //  serialWriteInt(sensorValue6Averaged);
 //  serialWriteInt(sensorValue7Averaged);
-
-//  serialWriteInt(cnt2);
-//  serialWriteInt(T0WithHysteresisInt + T1WithHysteresisInt);
-//  serialWriteInt(OutputInt);
 }
 
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
@@ -154,7 +150,6 @@ void setPwmConfiguration(CommandParameter &parameters){
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
     ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
-  
     switch (pwmDrive) {
     case 0:
     case 1:
@@ -226,7 +221,7 @@ void setRPMToMainboard(CommandParameter &parameters){
   }
 }
 
-void tempCacheStatus(){
+void cacheStatus(){
   cacheT0.printStatus();
   cacheT1.printStatus();
 }

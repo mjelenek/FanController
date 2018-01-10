@@ -1,25 +1,25 @@
-byte countPWM(unsigned int temperature, unsigned int temperatureTarget, unsigned int temperatureMax, byte pwmMin, byte pwmMax){
-  temperatureTarget = temperatureTarget  * 10;
+byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+  unsigned int temperatureTarget = conf.tempTarget * 10;
   if(temperature <= temperatureTarget){
-    return pwmMin;
+    return conf.minPwm;
   }
-  temperatureMax = temperatureMax * 10;
+  unsigned int temperatureMax = conf.tempMax * 10;
   if(temperature >= temperatureMax){
-    return pwmMax;
+    return conf.maxPwm;
   }
-  return (temperature - temperatureTarget) * (pwmMax - pwmMin) / (temperatureMax - temperatureTarget) + pwmMin;
+  return ((unsigned long)(temperature - temperatureTarget) * (conf.maxPwm - conf.minPwm)) / (temperatureMax - temperatureTarget) + conf.minPwm;
 }
 
-unsigned short countExpectedRPM(unsigned short temperature, unsigned short temperatureTarget, unsigned short temperatureMax, unsigned short rpmMin, unsigned short rpmMax){
-  temperatureTarget = temperatureTarget  * 10;
+unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+  unsigned short temperatureTarget = conf.tempTargetRpm * 10;
   if(temperature <= temperatureTarget){
-    return rpmMin;
+    return conf.minRpm;
   }
-  temperatureMax = temperatureMax * 10;
+  unsigned short temperatureMax = conf.tempMaxRpm * 10;
   if(temperature >= temperatureMax){
-    return rpmMax;
+    return conf.maxRpm;
   }
-  return (((unsigned long)(temperature - temperatureTarget)) * (rpmMax - rpmMin)) / (temperatureMax - temperatureTarget) + rpmMin;
+  return (((unsigned long)(temperature - temperatureTarget)) * (conf.maxRpm - conf.minRpm)) / (temperatureMax - temperatureTarget) + conf.minRpm;
 }
 
 // 3, 7, 11, 15, 19, 23
@@ -45,23 +45,23 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
         switch (conf.tSelect) {
           case 0:
             if(T0Connected){
-              return countPWM(T0WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+              return countPWM(conf, T0WithHysteresisInt, fanNumber);
             }
             return conf.maxPwm;
           case 1:
             if(T1Connected){
-              return countPWM(T1WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+              return countPWM(conf, T1WithHysteresisInt, fanNumber);
             }
             return conf.maxPwm;
           case 2:
             if(T0Connected && T1Connected){
-              return countPWM(T0WithHysteresisInt + T1WithHysteresisInt, conf.tempTarget << 1, conf.tempMax << 1, conf.minPwm, conf.maxPwm);
+              return countPWM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1, fanNumber);
             }
             if(T0Connected){
-              return countPWM(T0WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+              return countPWM(conf, T0WithHysteresisInt, fanNumber);
             }
             if(T1Connected){
-              return countPWM(T1WithHysteresisInt, conf.tempTarget, conf.tempMax, conf.minPwm, conf.maxPwm);
+              return countPWM(conf, T1WithHysteresisInt, fanNumber);
             }
           return conf.maxPwm;
         }
@@ -88,29 +88,29 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
         switch (conf.tSelect) {
           case 0:
             if(T0Connected){
-              setpointPid[fanNumber] = countExpectedRPM(T0WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
+              setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt, fanNumber);
             } else {
               setpointPid[fanNumber] = conf.maxRpm;
             }
             break;
           case 1:
             if(T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(T1WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
+              setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt, fanNumber);
             } else {
               setpointPid[fanNumber] = conf.maxRpm;
             }
             break;
           case 2:
             if(T0Connected && T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(T0WithHysteresisInt + T1WithHysteresisInt, conf.tempTargetRpm << 1, conf.tempMaxRpm << 1, conf.minRpm, conf.maxRpm);
+              setpointPid[fanNumber] = countExpectedRPM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1, fanNumber);
               break;
             }
             if(T0Connected){
-              setpointPid[fanNumber] = countExpectedRPM(T0WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
+              setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt, fanNumber);
               break;
             }
             if(T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(T1WithHysteresisInt, conf.tempTargetRpm, conf.tempMaxRpm, conf.minRpm, conf.maxRpm);
+              setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt, fanNumber);
               break;
             }
             setpointPid[fanNumber] = conf.maxRpm;

@@ -297,6 +297,8 @@ void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
+byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
+unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
