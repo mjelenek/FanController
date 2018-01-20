@@ -280,11 +280,11 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
   SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
-//  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
   SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
   SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
+  SerialCommandHandler.AddCommand(F("h"), setHysteresis);
   SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
   SerialCommandHandler.AddCommand(F("sendPidUpates"), sendPidUpates);
   SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);

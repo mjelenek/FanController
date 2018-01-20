@@ -97,6 +97,8 @@ void printFullStatus(){
   printlnPwmDrive(ConfigurationPWM4.Data.m_UserData);
   Serial.print(F(" pwm5Drive: "));
   printlnPwmDrive(ConfigurationPWM5.Data.m_UserData);
+  Serial.print(F(" hysteresis: "));
+  printlnBCD(binaryToBCDLong(*hysteresis));
 }  
   
 
@@ -158,8 +160,7 @@ void printHelp(){
   Serial.println(F("fs - print full status in human readable format"));
   Serial.println(F("guiE - enable GUI mode. GUI mode means, that informations about temperatures and fan rotations are sending periodically in binary mode"));
   Serial.println(F("guiD - disable GUI mode"));
-  Serial.println(F("guistat1 - send fan0 - fan2 configurations in binary mode"));
-  Serial.println(F("guistat2 - send fan3 - fan5 configurations in binary mode"));
+  Serial.println(F("guistat1 - send fan configurations in binary mode"));
   Serial.println(F("guiUpdate - send temperatures and fan rotations in binary mode"));
   Serial.println(F("setFan param1 param2 param3 param4 param5 param6 param7 param8 - set PWM configuration of fan, all parameters are mandatory"));
   Serial.println(F("    param1 - fan number. Allowed values 0 - 5"));
@@ -173,17 +174,18 @@ void printHelp(){
   Serial.println(F("    param8 - maximal temperature. Allowed values 0 - 60. Param8 should be bigger than param7"));
   Serial.println(F("setPid param1 param2 param3 param4 param5 param6 param7 param8 param9 - set PID configuration of fan, all parameters are mandatory. Used when fan is driven by PID. Parameter drivingFan is set to 3(constant rpm) or 4 (rpm driven by temperatures)"));
   Serial.println(F("    param1 - fan number. Allowed values 0 - 5"));
-  Serial.println(F("    param2 - const rpm value, used when parameter drivingFan is set to 3. Allowed values 0 - 2000"));
-  Serial.println(F("    param3 - rpm value at target temperature and below target temperature. Allowed values 0 - 2000"));
-  Serial.println(F("    param4 - rpm value at maximum temperature and above maximal temperature. Allowed values 0 - 2000"));
+  Serial.println(F("    param2 - const rpm value, used when parameter drivingFan is set to 3"));
+  Serial.println(F("    param3 - rpm value at target temperature and below target temperature"));
+  Serial.println(F("    param4 - rpm value at maximum temperature and above maximal temperature"));
   Serial.println(F("    param5 - target temperature. Allowed values 0 - 60"));
   Serial.println(F("    param6 - maximal temperature. Allowed values 0 - 60. Param6 should be bigger than param5"));
-  Serial.println(F("    param7 - Kp parameter of PID multiplied by 100. Allowed values 0 - 255"));
-  Serial.println(F("    param8 - Ki parameter of PID multiplied by 100. Allowed values 0 - 255"));
-  Serial.println(F("    param9 - Kd parameter of PID multiplied by 100. Allowed values 0 - 255"));
+  Serial.println(F("    param7 - Kp parameter of PID multiplied by 200. Allowed values 0 - 255"));
+  Serial.println(F("    param8 - Ki parameter of PID multiplied by 200. Allowed values 0 - 255"));
+  Serial.println(F("    param9 - Kd parameter of PID multiplied by 200. Allowed values 0 - 255"));
   Serial.println(F("load - load fan configurations from internal memory"));
   Serial.println(F("save - save fan configurations into internal memory"));
   Serial.println(F("rpm - setRPMToMainboard"));
+  Serial.println(F("h param1 - set temperature hysteresis. Allowed values 0(0°C) - 100(10°C)"));
   Serial.println(F("disableFan param1 param2 ... paramN - disable rotation of fan [param1, param3, param5...] for [param2, param4, param6...] seconds"));
   Serial.println(F("tempCacheStatus - print current state of caches with temperature values computed from thermistors"));
 #ifdef TIMING_DEBUG

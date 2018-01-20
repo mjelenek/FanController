@@ -65,16 +65,7 @@ void guistat1(){
   ConfigurationPWM[4] -> guiStat();
   ConfigurationPWM[5] -> guiStat();
 }
-/*
-void guistat2(){
-  Serial.print(F("!!"));
-  Serial.write(61);
-  Serial.print(F("gui2"));
-  ConfigurationPWM[3] -> guiStat();
-  ConfigurationPWM[4] -> guiStat();
-  ConfigurationPWM[5] -> guiStat();
-}
-*/
+
 void guiEnable(){
   gui = 1;  
 }
@@ -91,7 +82,7 @@ void guiDisable(){
 
 void guiUpdate(){
   Serial.print(F("!!"));
-  Serial.write(25);
+  Serial.write(29);
   Serial.print(F("guiUpdate"));
 
   serialWriteInt(roundRPM(rpm[0]));
@@ -102,9 +93,8 @@ void guiUpdate(){
   serialWriteInt(roundRPM(rpm[5]));
   serialWriteInt(T0int);
   serialWriteInt(T1int);
-//  serialWriteInt(cnt2);
-//  serialWriteInt(T0WithHysteresisInt);
-//  serialWriteInt(T1WithHysteresisInt);
+  serialWriteInt(T0WithHysteresisInt);
+  serialWriteInt(T1WithHysteresisInt);
 //  serialWriteInt(sensorValue6Averaged);
 //  serialWriteInt(sensorValue7Averaged);
 }
@@ -131,8 +121,8 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
   }
 }
 
-unsigned int roundRPM(double rpm){
-  unsigned int rpmRounded = (rpm + 5) / 10;
+unsigned short roundRPM(unsigned short rpm){
+  unsigned short rpmRounded = (rpm + 5) / 10;
   return rpmRounded * 10;
 }
 
@@ -218,6 +208,13 @@ void setRPMToMainboard(CommandParameter &parameters){
   byte select = parameters.NextParameterAsInteger();
   if(select >= 0 && select <= 5){
     *rmpToMainboard = select;
+  }
+}
+
+void setHysteresis(CommandParameter &parameters){
+  unsigned short h = parameters.NextParameterAsInteger();
+  if(h >= 0 && h <= 100){
+    *hysteresis = h;
   }
 }
 

@@ -206,10 +206,13 @@ class ControllerConfiguration
 public:
   // sensor to mainboard
   byte rmpToMainboard;
+  // hysteresis * 10°C -> value 10 means +- 1°C
+  int hysteresis;
 
   void Reset()
   {
     rmpToMainboard = 5;
+    hysteresis = 10;
   }
 };
 
@@ -217,6 +220,7 @@ EEPROMStore<ControllerConfiguration> ControllerConfiguration;
 
 // sensor to mainboard
 byte *rmpToMainboard = &ControllerConfiguration.Data.m_UserData.rmpToMainboard;
+int *hysteresis = &ControllerConfiguration.Data.m_UserData.hysteresis;
  
 byte pwm[] = {0, 0, 0, 0, 0, 0};
 byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
@@ -242,8 +246,6 @@ boolean T0Connected;
 boolean T1Connected;
 int T0int;
 int T1int;
-// hysteresis * 10°C -> value 10 means +- 1°C
-#define HYSTERESIS 10
 int T0WithHysteresisInt;
 int T1WithHysteresisInt;
 
