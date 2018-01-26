@@ -7,7 +7,7 @@
 //#define USE_TIMER1_OVF
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 450
+#define WARN_MICROSECONDS_DEBUG 800
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;

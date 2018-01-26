@@ -1,4 +1,8 @@
 void printBCD(unsigned long bcd){ // value from 0 to 99999999
+  if(bcd > 99999999){
+      Serial.print(F("99999999"));
+  }
+  
   byte writable = 0;
   byte number;
   

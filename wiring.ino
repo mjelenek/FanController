@@ -24,7 +24,8 @@
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
+//#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
+#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(510))
 
 // the whole number of milliseconds per timer0 overflow
 #define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOWW / 1000)
@@ -47,18 +48,15 @@ ISR(TIMER0_OVF_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
-  unsigned long m = timer0_millis;
   unsigned char f = timer0_fract;
 
-  m += MILLIS_INC;
   f += FRACT_INC;
   if (f >= FRACT_MAX) {
+    timer0_millis++;
     f -= FRACT_MAX;
-    m += 1;
   }
 
   timer0_fract = f;
-  timer0_millis = m;
   timer0_overflow_count++;
 }
 
@@ -78,29 +76,30 @@ unsigned long millis()
 
 unsigned long micros() {
   unsigned long m;
-  uint8_t oldSREG = SREG, t;
+  uint8_t oldSREG = SREG, t, t2;
   
   cli();
-  m = timer0_overflow_count;
-#if defined(TCNT0)
   t = TCNT0;
-#elif defined(TCNT0L)
-  t = TCNT0L;
-#else
-  #error TIMER 0 not defined
-#endif
+  t2 = TCNT0;
+  m = timer0_overflow_count;
 
 #ifdef TIFR0
-  if ((TIFR0 & _BV(TOV0)) && (t < 255))
+  if ((TIFR0 & _BV(TOV0)) && (t == 0))
     m++;
 #else
-  if ((TIFR & _BV(TOV0)) && (t < 255))
+  if ((TIFR & _BV(TOV0)) && (t == 0))
     m++;
 #endif
+
+  if(t2 < t) {
+    t = 255 - (t >> 1);    
+  } else {
+    t = t >> 1;    
+  }
 
   SREG = oldSREG;
   
-  return ((m << 8) + t) >> 1;
+  return ((m << 8) + t) >> 3;
 }
 
 void delay(unsigned long ms)
@@ -247,10 +246,14 @@ void myInit()
   // on the ATmega168, timer 0 is also used for fast hardware pwm
   // (using phase-correct PWM would mean that timer 0 overflowed half as often
   // resulting in different millis() behavior on the ATmega8 and ATmega168)
+/*
 #if defined(TCCR0A) && defined(WGM01)
   sbi(TCCR0A, WGM01);
   sbi(TCCR0A, WGM00);
 #endif
+*/
+// put timer 1 in 8-bit phase correct pwm mode
+  sbi(TCCR0A, WGM00);
 
   // set timer 0 prescale factor to 64
 #if defined(__AVR_ATmega128__)
