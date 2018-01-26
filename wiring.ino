@@ -47,18 +47,15 @@ ISR(TIMER0_OVF_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
-  unsigned long m = timer0_millis;
   unsigned char f = timer0_fract;
 
-  m += MILLIS_INC;
   f += FRACT_INC;
   if (f >= FRACT_MAX) {
+    timer0_millis++;
     f -= FRACT_MAX;
-    m += 1;
   }
 
   timer0_fract = f;
-  timer0_millis = m;
   timer0_overflow_count++;
 }
 

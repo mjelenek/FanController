@@ -1,4 +1,7 @@
 unsigned int binaryToBCD(unsigned int input){    //enter any number from 0 to 9999
+  if(input > 99999999){
+      return 0x9999;
+  }
     unsigned int output = 0;
     signed char a;
     for(a = 13; a >= 0; a--){
@@ -14,6 +17,9 @@ unsigned int binaryToBCD(unsigned int input){    //enter any number from 0 to 99
 }
 
 unsigned long binaryToBCDLong(unsigned long input){    //enter any number from 0 to 99999999
+  if(input > 99999999){
+      return 0x99999999;
+  }
   if(input <= 9999){
     return binaryToBCD((unsigned int)input);
   } else {
