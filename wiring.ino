@@ -79,21 +79,10 @@ unsigned long micros() {
   
   cli();
   m = timer0_overflow_count;
-#if defined(TCNT0)
   t = TCNT0;
-#elif defined(TCNT0L)
-  t = TCNT0L;
-#else
-  #error TIMER 0 not defined
-#endif
-
-#ifdef TIFR0
-  if ((TIFR0 & _BV(TOV0)) && (t < 255))
+  if ((TIFR0 & _BV(TOV0)) && (t < 255)){
     m++;
-#else
-  if ((TIFR & _BV(TOV0)) && (t < 255))
-    m++;
-#endif
+  }
 
   SREG = oldSREG;
   
@@ -113,7 +102,7 @@ void delay(unsigned long ms)
   }
 }
 
-/* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
+// Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock.
 void delayMicroseconds(unsigned int us)
 {
   // call = 4 cycles + 2 to 4 cycles to init us(2 for constant delay, 4 for variable)
@@ -326,20 +315,20 @@ void myInit()
   sbi(TCCR3A, WGM30);   // put timer 3 in 8-bit phase correct pwm mode
 #endif
 
-#if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) /* beginning of timer4 block for 32U4 and similar */
+#if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) // beginning of timer4 block for 32U4 and similar
   sbi(TCCR4B, CS42);    // set timer4 prescale factor to 64
   sbi(TCCR4B, CS41);
   sbi(TCCR4B, CS40);
   sbi(TCCR4D, WGM40);   // put timer 4 in phase- and frequency-correct PWM mode 
   sbi(TCCR4A, PWM4A);   // enable PWM mode for comparator OCR4A
   sbi(TCCR4C, PWM4D);   // enable PWM mode for comparator OCR4D
-#else /* beginning of timer4 block for ATMEGA1280 and ATMEGA2560 */
+#else // beginning of timer4 block for ATMEGA1280 and ATMEGA2560 
 #if defined(TCCR4B) && defined(CS41) && defined(WGM40)
   sbi(TCCR4B, CS41);    // set timer 4 prescale factor to 64
   sbi(TCCR4B, CS40);
   sbi(TCCR4A, WGM40);   // put timer 4 in 8-bit phase correct pwm mode
 #endif
-#endif /* end timer4 block for ATMEGA1280/2560 and similar */ 
+#endif // end timer4 block for ATMEGA1280/2560 and similar
 
 #if defined(TCCR5B) && defined(CS51) && defined(WGM50)
   sbi(TCCR5B, CS51);    // set timer 5 prescale factor to 64
@@ -388,4 +377,3 @@ void myInit()
   UCSR0B = 0;
 #endif
 }
-

@@ -122,11 +122,13 @@ ISR(PCINT2_vect){
 }
 
 inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[], unsigned long now){
-  (*lastFanRpmSensorTime)++;
-  if(*lastFanRpmSensorTime >= FAN_RPM_SENSOR_TIMES_FIELD){
-    *lastFanRpmSensorTime = 0;
+  byte lastFanRpmSensorTimeValue = *lastFanRpmSensorTime;
+  lastFanRpmSensorTimeValue++;
+  if(lastFanRpmSensorTimeValue >= FAN_RPM_SENSOR_TIMES_FIELD){
+    lastFanRpmSensorTimeValue = 0;
   }
-  fanRpmSensorTimes[*lastFanRpmSensorTime] = now;
+  fanRpmSensorTimes[lastFanRpmSensorTimeValue] = now;
+  *lastFanRpmSensorTime = lastFanRpmSensorTimeValue;
 }
 
 short countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[]){
