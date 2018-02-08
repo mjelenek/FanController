@@ -34,7 +34,7 @@ byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAvera
   // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   switch (conf.pwmDrive) {
     case 0:
-      return map(sensorValueAveraged, 0, 1023, 0, 255);
+      return sensorValueAveraged >> 2;      // map 0-1023 to 0-255
     case 1:
       return conf.constPwm;
     case 2:

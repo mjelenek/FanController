@@ -24,7 +24,8 @@
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
+//#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
+#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(510))
 
 // the whole number of milliseconds per timer0 overflow
 #define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOWW / 1000)
@@ -75,18 +76,30 @@ unsigned long millis()
 
 unsigned long micros() {
   unsigned long m;
-  uint8_t oldSREG = SREG, t;
+  uint8_t oldSREG = SREG, t, t2;
   
   cli();
-  m = timer0_overflow_count;
   t = TCNT0;
-  if ((TIFR0 & _BV(TOV0)) && (t < 255)){
+  t2 = TCNT0;
+  m = timer0_overflow_count;
+
+#ifdef TIFR0
+  if ((TIFR0 & _BV(TOV0)) && (t == 0))
     m++;
+#else
+  if ((TIFR & _BV(TOV0)) && (t == 0))
+    m++;
+#endif
+
+  if(t2 < t) {
+    t = 255 - (t >> 1);    
+  } else {
+    t = t >> 1;    
   }
 
   SREG = oldSREG;
   
-  return ((m << 8) + t) >> 1;
+  return ((m << 8) + t) >> 3;
 }
 
 void delay(unsigned long ms)
@@ -102,7 +115,7 @@ void delay(unsigned long ms)
   }
 }
 
-// Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock.
+/* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
 void delayMicroseconds(unsigned int us)
 {
   // call = 4 cycles + 2 to 4 cycles to init us(2 for constant delay, 4 for variable)
@@ -233,10 +246,14 @@ void myInit()
   // on the ATmega168, timer 0 is also used for fast hardware pwm
   // (using phase-correct PWM would mean that timer 0 overflowed half as often
   // resulting in different millis() behavior on the ATmega8 and ATmega168)
+/*
 #if defined(TCCR0A) && defined(WGM01)
   sbi(TCCR0A, WGM01);
   sbi(TCCR0A, WGM00);
 #endif
+*/
+// put timer 1 in 8-bit phase correct pwm mode
+  sbi(TCCR0A, WGM00);
 
   // set timer 0 prescale factor to 64
 #if defined(__AVR_ATmega128__)
@@ -315,20 +332,20 @@ void myInit()
   sbi(TCCR3A, WGM30);   // put timer 3 in 8-bit phase correct pwm mode
 #endif
 
-#if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) // beginning of timer4 block for 32U4 and similar
+#if defined(TCCR4A) && defined(TCCR4B) && defined(TCCR4D) /* beginning of timer4 block for 32U4 and similar */
   sbi(TCCR4B, CS42);    // set timer4 prescale factor to 64
   sbi(TCCR4B, CS41);
   sbi(TCCR4B, CS40);
   sbi(TCCR4D, WGM40);   // put timer 4 in phase- and frequency-correct PWM mode 
   sbi(TCCR4A, PWM4A);   // enable PWM mode for comparator OCR4A
   sbi(TCCR4C, PWM4D);   // enable PWM mode for comparator OCR4D
-#else // beginning of timer4 block for ATMEGA1280 and ATMEGA2560 
+#else /* beginning of timer4 block for ATMEGA1280 and ATMEGA2560 */
 #if defined(TCCR4B) && defined(CS41) && defined(WGM40)
   sbi(TCCR4B, CS41);    // set timer 4 prescale factor to 64
   sbi(TCCR4B, CS40);
   sbi(TCCR4A, WGM40);   // put timer 4 in 8-bit phase correct pwm mode
 #endif
-#endif // end timer4 block for ATMEGA1280/2560 and similar
+#endif /* end timer4 block for ATMEGA1280/2560 and similar */ 
 
 #if defined(TCCR5B) && defined(CS51) && defined(WGM50)
   sbi(TCCR5B, CS51);    // set timer 5 prescale factor to 64
@@ -377,3 +394,4 @@ void myInit()
   UCSR0B = 0;
 #endif
 }
+
