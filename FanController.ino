@@ -7,7 +7,7 @@
 //#define USE_TIMER1_OVF
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 450
+#define WARN_MICROSECONDS_DEBUG 600
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;
@@ -80,6 +80,7 @@ void printTimingResult(){
 #define PWM3 9  //OC1A
 #define PWM4 10 //OC1B
 #define PWM5 11 //OC2A
+byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 
 #define LED_OUT 13
 #define LED_OUT_1 PORTB |= _BV(PB5)
@@ -249,7 +250,7 @@ int T1int;
 int T0WithHysteresisInt;
 int T1WithHysteresisInt;
 
-#define FAN_RPM_SENSOR_TIMES_FIELD 3
+#define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes0[FAN_RPM_SENSOR_TIMES_FIELD];
 volatile unsigned long fanRpmSensorTimes1[FAN_RPM_SENSOR_TIMES_FIELD];
 volatile unsigned long fanRpmSensorTimes2[FAN_RPM_SENSOR_TIMES_FIELD];
@@ -263,7 +264,7 @@ volatile byte lastFanRpmSensorTime3;
 volatile byte lastFanRpmSensorTime4;
 volatile byte lastFanRpmSensorTime5;
 volatile byte lastFanRpmSensorTimeUpdated;
-unsigned short rpm[6];
+double rpm[6];
 
 // Define Variables PIDs will be connecting to
 double outputPid;
@@ -298,10 +299,12 @@ void setPwmConfiguration(CommandParameter &parameters);
 void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
+void setHysteresis(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
 byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
 byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
+byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();

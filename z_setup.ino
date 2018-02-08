@@ -189,12 +189,14 @@ void init_pcint()
 
 void init_adc()
 {
-  ADMUX = 0;                                           // VREF is EXTERNAL, channel 0
-  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // prescaler to 128
-  ADCSRA |= (1 << ADATE);                              // ADC Auto Trigger Enable
-  ADCSRA |= (1 << ADIE);                               // Enable ADC conversion complete interrupt
-  ADCSRA |= (1 << ADEN);                               // Enable ADC
-  ADCSRA |= (1 << ADSC);                               // Start conversion
+  DIDR0 = B11011111;                                   // Disable digital input buffer for ADC pins
+  
+  ADMUX = 0;                                          // VREF is EXTERNAL, channel 0
+  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) // prescaler to 128
+         | (1 << ADATE)                               // ADC Auto Trigger Enable
+         | (1 << ADIE)                                // Enable ADC conversion complete interrupt
+         | (1 << ADEN)                                // Enable ADC
+         | (1 << ADSC);                               // Start conversion
 }
 
 void init_pid(){
@@ -258,7 +260,7 @@ void measureInterrupts(){
   Serial.print(F("m2:"));
   Serial.print(m2);
   Serial.println(F("us"));
-  Serial.print(F("Interrupts occupy "));
+  Serial.print(F("Interrupts(except TIMER0_OVF) occupy "));
   Serial.print(percentage, 2);
   Serial.println(F("% of processor time"));
 }

@@ -121,13 +121,35 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
     Serial.print(F("pU"));
     Serial.write(fanNumber);
     serialWriteInt(expectedRpm);
-    serialWriteInt(rpm[fanNumber]);
+    serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
     updatesRTToSend[fanNumber]--;
   }
 }
 
-unsigned short roundRPM(unsigned short rpm){
+byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
+  if(updatesRTToSend[fanNumber] > 0){
+    unsigned short expectedRpm = rpm[fanNumber];
+    if(pwmDisabled[fanNumber] == 0){
+      if(conf.pwmDrive == 3){
+        expectedRpm = conf.constRpm;
+      }
+      if(conf.pwmDrive == 4){
+        expectedRpm = setpointPid[fanNumber];
+      }
+    }
+    Serial.print(F("!!"));
+    Serial.write(8);
+    Serial.print(F("pU"));
+    Serial.write(fanNumber);
+    serialWriteInt(expectedRpm);
+    serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
+    Serial.write(pwm[fanNumber]);
+    updatesRTToSend[fanNumber]--;
+  }
+}
+
+unsigned short roundRPM(double rpm){
   unsigned short rpmRounded = (rpm + 5) / 10;
   return rpmRounded * 10;
 }
