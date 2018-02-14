@@ -1,22 +1,3 @@
-int main(void)
-{
-  myInit();
-
-#if defined(USBCON)
-  USBDevice.attach();
-#endif
-  
-  setup();
-    
-  for (;;) {
-    loop();
-    if (serialEventRun) serialEventRun();
-  }
-        
-  return 0;
-} 
-
-
 void setup() {
 
 //  wdt_disable();

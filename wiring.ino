@@ -25,15 +25,15 @@
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
 //#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
-#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(510))
+#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(1 * 510))
 
 // the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOWW / 1000)
+#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
 
 // the fractional number of milliseconds per timer0 overflow. we shift right
 // by three to fit these numbers into a byte. (for the clock speeds we care
 // about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOWW % 1000) >> 3)
+#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
 #define FRACT_MAX (1000 >> 3)
 
 volatile byte timer0_overflow_count0 = 0;
@@ -110,7 +110,9 @@ unsigned long micros() {
   
   cli();
   t = TCNT0;
-  t2 = TCNT0;
+  do{
+    t2 = TCNT0;
+  } while (t == t2);
   m = timer0_overflow_count3;
   m = (m << 8) + timer0_overflow_count2;
   m = (m << 8) + timer0_overflow_count1;
@@ -125,8 +127,10 @@ unsigned long micros() {
 #endif
 
   if(t2 < t) {
-    t = 255 - (t >> 1);    
+    //value t read when decrement counter
+    t = 254 - ((t - 1) >> 1);    
   } else {
+    //value t read when increment counter
     t = t >> 1;    
   }
 
@@ -286,7 +290,9 @@ void myInit()
 #endif
 */
 // put timer 1 in 8-bit phase correct pwm mode
+#if defined(TCCR0A) && defined(WGM00)
   sbi(TCCR0A, WGM00);
+#endif
 
   // set timer 0 prescale factor to 64
 #if defined(__AVR_ATmega128__)
@@ -427,4 +433,22 @@ void myInit()
   UCSR0B = 0;
 #endif
 }
+
+int main(void)
+{
+  myInit();
+
+#if defined(USBCON)
+  USBDevice.attach();
+#endif
+  
+  setup();
+    
+  for (;;) {
+    loop();
+    if (serialEventRun) serialEventRun();
+  }
+        
+  return 0;
+} 
 
