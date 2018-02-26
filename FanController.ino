@@ -4,7 +4,6 @@
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
-//#define USE_TIMER1_OVF
 
 #ifdef TIMING_DEBUG
 #define WARN_MICROSECONDS_DEBUG 800

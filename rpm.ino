@@ -1,39 +1,3 @@
-#ifdef USE_TIMER1_OVF
-
-#define fanSensor5FilterDefinition B00000111
-#define CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5 230
-
-// overflow on timer1 interrupt handler
-ISR(TIMER1_OVF_vect){
-  static byte lastState;
-  static byte fanSensor5Filter = 0;
-  byte cnt2 = TCNT2;
-  byte fanSensor5 = (PINC >> 5) & 1;
-  if(cnt2 < CNT2_MIN_VALUE_FOR_READ_RPM_SENSOR5){
-    return;
-  }
-  fanSensor5Filter = ((fanSensor5Filter << 1) | fanSensor5) & fanSensor5FilterDefinition;
-  byte fanSensor5Value = lastState;
-  if(fanSensor5Filter == 0){
-    fanSensor5Value = 0;
-  }
-  if(fanSensor5Filter == fanSensor5FilterDefinition){
-    fanSensor5Value = 1;
-  }
-
-  if(lastState ^ fanSensor5Value){
-    if(*rmpToMainboard == 5){
-      if(fanSensor5Value) LED_OUT_SET;
-    }
-    if(fanSensor5Value){
-      writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  micros());
-      lastFanRpmSensorTimeUpdated |= B00100000;
-    }
-    lastState = fanSensor5Value;
-  }
-}
-#endif USE_TIMER1_OVF
-
 // change pin PB0, PB4
 ISR(PCINT0_vect){
   static byte lastState;
@@ -60,10 +24,8 @@ ISR(PCINT0_vect){
   lastState = state;
 }
 
-#ifndef USE_TIMER1_OVF
 // change pin PC5
 ISR(PCINT1_vect){
-//  static byte lastState;
   unsigned long now = micros();
   byte state = PINC & (1 << PINC5);
   if(*rmpToMainboard == 5){
@@ -71,9 +33,7 @@ ISR(PCINT1_vect){
   }
   writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  now);
   lastFanRpmSensorTimeUpdated |= B00100000;
-//  lastState = state;
 }
-#endif USE_TIMER1_OVF
 
 // change pin PD2, PD4, PD7
 ISR(PCINT2_vect){
@@ -121,18 +81,12 @@ inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastF
 
 double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[]){
   PCICR = 0;                            // disable pin change interrupts
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   byte time1Pointer = lastFanRpmSensorTimeIndex + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;
   }
   unsigned long time0 = fanRpmSensorTimes[lastFanRpmSensorTimeIndex];
   unsigned long time1 = fanRpmSensorTimes[time1Pointer];
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
   unsigned long now = micros();
   if((now - time0) > 240000 || (now - time1) > 840000){
@@ -143,14 +97,8 @@ double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[
 
 void countRPMs(){
   PCICR = 0;                            // disable pin change interrupts
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   byte lastFanRpmSensorTimeUpdatedLocal = lastFanRpmSensorTimeUpdated;
   lastFanRpmSensorTimeUpdated = 0;
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000001) > 0) || (i == (254 - 64))){

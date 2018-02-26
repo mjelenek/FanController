@@ -70,16 +70,13 @@ void setTimers(){
   // timer 0 is in 8-bit phase correct pwm mode
   TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-  //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
+  //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-  #ifndef USE_TIMER1_OVF
   TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
-  #else
-  TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-  #endif USE_TIMER1_OVF
+  //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
@@ -93,22 +90,6 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
 
-  #ifdef USE_TIMER1_OVF
-  cli();
-  // synchronize timers 1 and 2
-  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
-  TCNT1 = 0;
-  TCNT2 = 0;
-  GTCCR = 0;                                 // start timers
-  delayMicroseconds(1);
-  GTCCR = (1<<TSM)|(1<<PSRASY)|(1<<PSRSYNC); // stop timers
-  TCNT1 = 0;
-  TCNT2 = 205;
-  GTCCR = 0;                                 // start timers
-
-  TIMSK1 |= B00000001;                       // enable timer1 overflow interrupt
-  sei();
-  #endif USE_TIMER1_OVF
 
 /*
   Serial.println(F("Timers configuration"));
@@ -167,10 +148,8 @@ void init_pcint()
   // PB0, PB4
   PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
 
-  #ifndef USE_TIMER1_OVF
   // PC5
   PCMSK1 = (1 << PCINT13);
-  #endif USE_TIMER1_OVF
 
   // PD2, PD4, PD7
   PCMSK2 = (1 << PCINT18) | (1 << PCINT20) | (1 << PCINT23);
@@ -222,9 +201,6 @@ void printTempProfile(){
 
 void measureInterrupts(){
   delay(20);
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 &= B11111110;                  // disable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   PCICR = 0;                            // disable pin change interrupts
   ADCSRA &= ~(1 << ADIE);               // disable ADC conversion complete interrupt
   unsigned long start = micros();
@@ -232,14 +208,11 @@ void measureInterrupts(){
   now = micros();
   unsigned long m1 = now - start;
 
-  #ifdef USE_TIMER1_OVF
-  TIMSK1 |= B00000001;                  // enable timer1 overflow interrupt
-  #endif USE_TIMER1_OVF
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
   ADCSRA |= (1 << ADIE);                // enable ADC conversion complete interrupt
   delay(10);
   start = micros();
-  unsigned int b = doSomeMath(200);
+  unsigned int b = doSomeMath(101);
   now = micros();
   unsigned long m2 = now - start;
   float percentage = (1 - (float)m1 / (float)m2 ) * 100;
