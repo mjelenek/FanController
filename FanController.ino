@@ -4,6 +4,7 @@
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
+#define COUNT_MILLLIS_BY_DIVIDE_MICROS
 
 #ifdef TIMING_DEBUG
 #define WARN_MICROSECONDS_DEBUG 800
@@ -280,7 +281,7 @@ PID pid[] = {
 };
 
 #ifdef TIMING_DEBUG
-CommandHandler<18, 45, 0> SerialCommandHandler; // 18 commands, max length of command 45, 0 variables
+CommandHandler<20, 45, 0> SerialCommandHandler; // 20 commands, max length of command 45, 0 variables
 #else
 CommandHandler<16, 45, 0> SerialCommandHandler; // 16 commands, max length of command 45, 0 variables
 #endif

@@ -103,8 +103,7 @@ void timingDebug(){
     } else
     if(zpozdeni < 1200){
       to1200++;
-    } else
-    if(zpozdeni >= 1200){
+    } else {
       over1200++;
     }
 

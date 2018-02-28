@@ -84,6 +84,35 @@ void guiDisable(){
   void timing(){
     timeCountingStartFlag = 1;
   }
+
+  void sendMillis(){
+    unsigned long x1 = millis();
+    unsigned long x2 = millis();
+    unsigned long x3 = millis();
+    unsigned long x4 = millis();
+    unsigned long x5 = millis();
+    Serial.println("");    
+    Serial.println(x1);    
+    Serial.println(x2);    
+    Serial.println(x3);    
+    Serial.println(x4);    
+    Serial.println(x5);    
+  }
+  
+  void sendMicros(){
+    unsigned long x1 = micros();
+    unsigned long x2 = micros();
+    unsigned long x3 = micros();
+    unsigned long x4 = micros();
+    unsigned long x5 = micros();
+    Serial.println("");    
+    Serial.println(x1);    
+    Serial.println(x2);    
+    Serial.println(x3);    
+    Serial.println(x4);    
+    Serial.println(x5);    
+  }
+  
 #endif
 
 void guiUpdate(){

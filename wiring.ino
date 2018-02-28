@@ -24,27 +24,24 @@
 
 // the prescaler is set so that timer0 ticks every 64 clock cycles, and the
 // the overflow handler is called every 256 ticks.
-//#define MICROSECONDS_PER_TIMER0_OVERFLOWW (clockCyclesToMicroseconds(8 * 256))
+//#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(8 * 256))
 #define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(1 * 510))
 
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
-
-// the fractional number of milliseconds per timer0 overflow. we shift right
-// by three to fit these numbers into a byte. (for the clock speeds we care
-// about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
-#define FRACT_MAX (1000 >> 3)
+// the fractional number of milliseconds per timer0 overflow.
+#define FRACT_INC 255
+#define FRACT_MAX 8000
 
 volatile byte timer0_overflow_count0 = 0;
 volatile byte timer0_overflow_count1 = 0;
 volatile byte timer0_overflow_count2 = 0;
 volatile byte timer0_overflow_count3 = 0;
+//#ifndef COUNT_MILLLIS_BY_DIVIDE_MICROS
 volatile byte timer0_millis0 = 0;
 volatile byte timer0_millis1 = 0;
 volatile byte timer0_millis2 = 0;
 volatile byte timer0_millis3 = 0;
-static unsigned char timer0_fract = 0;
+static unsigned int timer0_fract = 0;
+//#endif
 
 #if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
 ISR(TIM0_OVF_vect)
@@ -54,9 +51,10 @@ ISR(TIMER0_OVF_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
-  unsigned char f = timer0_fract;
   byte x;
 
+#ifndef COUNT_MILLLIS_BY_DIVIDE_MICROS
+  unsigned int f = timer0_fract;
   f += FRACT_INC;
   if (f >= FRACT_MAX) {
     x = ++timer0_millis0;
@@ -71,8 +69,9 @@ ISR(TIMER0_OVF_vect)
     }
     f -= FRACT_MAX;
   }
-
   timer0_fract = f;
+#endif
+
   x = ++timer0_overflow_count0;
   if(x == 0){
     x = ++timer0_overflow_count1;
@@ -83,24 +82,6 @@ ISR(TIMER0_OVF_vect)
       }
     }
   }
-}
-
-unsigned long millis()
-{
-  unsigned long m;
-  uint8_t oldSREG = SREG;
-
-  // disable interrupts while we read timer0_millis or we might get an
-  // inconsistent value (e.g. in the middle of a write to timer0_millis)
-  cli();
-  m = timer0_millis3;
-  m = (m << 8) + timer0_millis2;
-  m = (m << 8) + timer0_millis1;
-  m = (m << 8) + timer0_millis0;
-
-  SREG = oldSREG;
-
-  return m;
 }
 
 unsigned long micros() {
@@ -135,7 +116,29 @@ unsigned long micros() {
 
   SREG = oldSREG;
   
-  return ((m << 8) + t) >> 3;
+  return ((m << 5) - (m >> 3) + (t >> 3));
+}
+
+unsigned long millis() {
+  unsigned long m;
+  uint8_t oldSREG = SREG;
+  // disable interrupts while we read timer0_millis or we might get an
+  // inconsistent value (e.g. in the middle of a write to timer0_millis)
+  cli();
+#ifndef COUNT_MILLLIS_BY_DIVIDE_MICROS
+  m = timer0_millis3;
+  m = (m << 8) + timer0_millis2;
+  m = (m << 8) + timer0_millis1;
+  m = (m << 8) + timer0_millis0;
+#else
+  m = timer0_overflow_count3;
+  m = (m << 8) + timer0_overflow_count2;
+  m = (m << 8) + timer0_overflow_count1;
+  m = (m << 8) + timer0_overflow_count0;
+  m = ((m << 5) - (m >> 3)) / 1000;
+#endif
+  SREG = oldSREG;
+  return m;
 }
 
 void delay(unsigned long ms)
