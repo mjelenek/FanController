@@ -90,7 +90,12 @@ public:
   
 };
 
+#ifdef USE_TEMP_CACHE
 SlowlyChangingKeyCache<int, 6> cacheT0; // 64 records ~ 6°C
 SlowlyChangingKeyCache<int, 5> cacheT1; // 32 records ~ 3°C
+#endif
 
+#ifdef USE_PWM_CACHE
+SlowlyChangingKeyCache<unsigned short, 2> cacheRMPbyTemp[6]; // 4 records
+#endif
 

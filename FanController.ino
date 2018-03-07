@@ -5,6 +5,16 @@
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
+#define USE_TEMP_CACHE
+#define USE_PWM_CACHE
+
+#ifdef USE_PWM_CACHE
+#define USE_FAN_NUMBER_DECLARATION ,byte fanNumber
+#define USE_FAN_NUMBER ,fanNumber
+#else
+#define USE_FAN_NUMBER_DECLARATION
+#define USE_FAN_NUMBER
+#endif
 
 #ifdef TIMING_DEBUG
 #define WARN_MICROSECONDS_DEBUG 800
@@ -301,9 +311,16 @@ void disableFan(CommandParameter &parameters);
 void setRPMToMainboard(CommandParameter &parameters);
 void setHysteresis(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
+byte countPWM(PWMConfiguration &conf, unsigned int temperature);
+unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature);
+#ifdef USE_PWM_CACHE
 byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
-byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber);
+#endif
+byte getNewPwm(PWMConfiguration &conf, byte pwmOld, unsigned short sensorValueAveraged, byte fanNumber);
+byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION);
+byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
+void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();

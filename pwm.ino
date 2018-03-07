@@ -1,4 +1,4 @@
-byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+byte countPWM(PWMConfiguration &conf, unsigned int temperature){
   unsigned int temperatureTarget = conf.tempTarget * 10;
   if(temperature <= temperatureTarget){
     return conf.minPwm;
@@ -10,7 +10,18 @@ byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
   return ((unsigned long)(temperature - temperatureTarget) * (conf.maxPwm - conf.minPwm)) / (temperatureMax - temperatureTarget) + conf.minPwm;
 }
 
-unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+#ifdef USE_PWM_CACHE
+byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+    byte pwm = cacheRMPbyTemp[fanNumber].get(temperature);
+    if(pwm == 0){
+      pwm = countPWM(conf, temperature);
+      cacheRMPbyTemp[fanNumber].put(temperature, pwm);
+    }
+  return pwm;
+}
+#endif
+
+unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature){
   unsigned short temperatureTarget = conf.tempTargetRpm * 10;
   if(temperature <= temperatureTarget){
     return conf.minRpm;
@@ -22,136 +33,150 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
   return (((unsigned long)(temperature - temperatureTarget)) * (conf.maxRpm - conf.minRpm)) / (temperatureMax - temperatureTarget) + conf.minRpm;
 }
 
+#ifdef USE_PWM_CACHE
+unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
+    unsigned short rpm = cacheRMPbyTemp[fanNumber].get(temperature);
+    if(rpm == 0){
+      rpm = countExpectedRPM(conf, temperature);
+      cacheRMPbyTemp[fanNumber].put(temperature, rpm);
+    }
+  return rpm;
+}
+#endif
+
 // 3, 7, 11, 15, 19, 23
 #define TIME_TO_COMPUTE_PWM part_32 == ((fanNumber << 2) + 3)
 // 4, 8, 12, 16, 20, 24
-#define TIME_TO_COMPUTE_PID part_32 == ((fanNumber << 2) + 4)
+#define TIME_TO_COMPUTE_PWM_BY_PID part_32 == ((fanNumber << 2) + 4)
 
-byte getNewPwm(PWMConfiguration &conf, byte pwm, unsigned short sensorValueAveraged, byte fanNumber){
+void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
+  unsigned short sensorValue;
+  byte pwmOld = pwm[fanNumber];
   if(pwmDisabled[fanNumber] > 0){
-    return 0;
+    pwm[fanNumber] = 0;
   }
+  PWMConfiguration &conf = *ConfigurationPWM[fanNumber];
   // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   switch (conf.pwmDrive) {
     case 0:
-      return sensorValueAveraged >> 2;      // map 0-1023 to 0-255
+      ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
+      sensorValue = *sensorValueVolatile;
+      ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
+      pwm[fanNumber] = sensorValue >> 2;            // map 0-1023 to 0-255
+      break;
     case 1:
-      return conf.constPwm;
+      pwm[fanNumber] = conf.constPwm;
+      break;
     case 2:
-      // compute once every 32 cycles (64ms)
       if(TIME_TO_COMPUTE_PWM){
-    
-      // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
-        switch (conf.tSelect) {
-          case 0:
-            if(T0Connected){
-              return countPWM(conf, T0WithHysteresisInt, fanNumber);
-            }
-            return conf.maxPwm;
-          case 1:
-            if(T1Connected){
-              return countPWM(conf, T1WithHysteresisInt, fanNumber);
-            }
-            return conf.maxPwm;
-          case 2:
-            if(T0Connected && T1Connected){
-              return countPWM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1, fanNumber);
-            }
-            if(T0Connected){
-              return countPWM(conf, T0WithHysteresisInt, fanNumber);
-            }
-            if(T1Connected){
-              return countPWM(conf, T1WithHysteresisInt, fanNumber);
-            }
-          return conf.maxPwm;
-        }
-      } else {
-        return pwm;
+        pwm[fanNumber] = getNewPwmByPowerCurve(conf, pwmOld USE_FAN_NUMBER);       
       }
+      break;
     case 3:
-      // compute once every 32 cycles (64ms)
-      if(TIME_TO_COMPUTE_PID){
-        setpointPid[fanNumber] = conf.constRpm;
-        if(pidCompute(fanNumber)){
-          return (byte)outputPid;
-        } else {
-          return pwm;
-        }
-      } else {
-        return pwm;
+      if(TIME_TO_COMPUTE_PWM_BY_PID){
+        pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
       }
+      break;
     case 4:
-      // compute once every 32 cycles (64ms)
       if(TIME_TO_COMPUTE_PWM){
-  
-        // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
-        switch (conf.tSelect) {
-          case 0:
-            if(T0Connected){
-              setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt, fanNumber);
-            } else {
-              setpointPid[fanNumber] = conf.maxRpm;
-            }
-            break;
-          case 1:
-            if(T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt, fanNumber);
-            } else {
-              setpointPid[fanNumber] = conf.maxRpm;
-            }
-            break;
-          case 2:
-            if(T0Connected && T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1, fanNumber);
-              break;
-            }
-            if(T0Connected){
-              setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt, fanNumber);
-              break;
-            }
-            if(T1Connected){
-              setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt, fanNumber);
-              break;
-            }
-            setpointPid[fanNumber] = conf.maxRpm;
-            break;
-          default:
-            setpointPid[fanNumber] = conf.maxRpm;
-        }
+        setpointPidByRpmCurve(conf, pwmOld, fanNumber);
       }
-      if(TIME_TO_COMPUTE_PID){
+      if(TIME_TO_COMPUTE_PWM_BY_PID){
         if(pidCompute(fanNumber)){
-          return (byte)outputPid;
-        } else {
-          return pwm;
+           pwm[fanNumber] = (byte)outputPid;
         }
-      } else {
-        return pwm;
       }
-    default:
-      return pwm;
+      break;
   }
+
+  if(pwmOld != pwm[fanNumber]){
+    analogWrite(PWMOUT[fanNumber], 255 - pwm[fanNumber]);
+  }
+  pidUpdate(fanNumber, *ConfigurationPWM[fanNumber]);
 }
 
-void setPwmi(byte i, unsigned short *sensorValueVolatile){
-  ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
-  unsigned short sensorValue = *sensorValueVolatile;
-  ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
-  byte pwmOld = pwm[i];
-  pwm[i] = getNewPwm(*ConfigurationPWM[i], pwm[i], sensorValue, i);
-  if(pwmOld != pwm[i]){
-    analogWrite(PWMOUT[i], 255 - pwm[i]);
+byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION){
+  // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
+  switch (conf.tSelect) {
+    case 0:
+      if(T0Connected){
+        return countPWM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
+      }
+      return conf.maxPwm;
+    case 1:
+      if(T1Connected){
+        return countPWM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
+      }
+      return conf.maxPwm;
+    case 2:
+      if(T0Connected && T1Connected){
+        return countPWM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1 USE_FAN_NUMBER);
+      }
+      if(T0Connected){
+        return countPWM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
+      }
+      if(T1Connected){
+        return countPWM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
+      }
+    return conf.maxPwm;
   }
-  pidUpdate(i, *ConfigurationPWM[i]);
+  return conf.maxPwm;
+}
+
+byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
+  setpointPid[fanNumber] = conf.constRpm;
+  if(pidCompute(fanNumber)){
+    return (byte)outputPid;
+  }
+  return pwmOld;
+}
+
+void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
+  // compute once every 32 cycles (64ms)
+  // compute setpointPid
+  // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
+  switch (conf.tSelect) {
+    case 0:
+      if(T0Connected){
+        setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
+      } else {
+        setpointPid[fanNumber] = conf.maxRpm;
+      }
+      break;
+    case 1:
+      if(T1Connected){
+        setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
+      } else {
+        setpointPid[fanNumber] = conf.maxRpm;
+      }
+      break;
+    case 2:
+      if(T0Connected && T1Connected){
+        setpointPid[fanNumber] = countExpectedRPM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1 USE_FAN_NUMBER);
+        break;
+      }
+      if(T0Connected){
+        setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
+        break;
+      }
+      if(T1Connected){
+        setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
+        break;
+      }
+      setpointPid[fanNumber] = conf.maxRpm;
+      break;
+    default:
+      setpointPid[fanNumber] = conf.maxRpm;
+  }
 }
 
 void setPwm(){
-  setPwmi(0, &sensorValue4Averaged);
-  setPwmi(1, &sensorValue3Averaged);
-  setPwmi(2, &sensorValue2Averaged);
-  setPwmi(3, &sensorValue1Averaged);
-  setPwmi(4, &sensorValue0Averaged);
-  setPwmi(5, &sensorValue0Averaged);
+  setPwm(0, &sensorValue4Averaged);
+  setPwm(1, &sensorValue3Averaged);
+  setPwm(2, &sensorValue2Averaged);
+  setPwm(3, &sensorValue1Averaged);
+  setPwm(4, &sensorValue0Averaged);
+  setPwm(5, &sensorValue0Averaged);
 }
 
 void decrementPwmDisabled(){

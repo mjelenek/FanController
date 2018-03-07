@@ -5,11 +5,15 @@ void countT0(){
 
   T0Connected = (sensorValueAveraged > 10);
   if(T0Connected == true){
+#ifdef USE_TEMP_CACHE
     T0int = cacheT0.get(sensorValueAveraged);
     if(T0int == 0){
+#endif
       T0int = countTemperature(RT0koeficient / sensorValueAveraged - RT0);
+#ifdef USE_TEMP_CACHE
       cacheT0.put(sensorValueAveraged, T0int);
     }
+#endif
     T0WithHysteresisInt = countHysteresisTemperature(T0WithHysteresisInt, T0int);
   } else {
     T0int = 0;
@@ -23,11 +27,15 @@ void countT1(){
 
   T1Connected = (sensorValueAveraged > 10);
   if(T1Connected == true){
+#ifdef USE_TEMP_CACHE
     T1int = cacheT1.get(sensorValueAveraged);
     if(T1int == 0){
+#endif
       T1int = countTemperature(RT1koeficient / sensorValueAveraged - RT1);
+#ifdef USE_TEMP_CACHE
       cacheT1.put(sensorValueAveraged, T1int);
     }
+#endif
     T1WithHysteresisInt = countHysteresisTemperature(T1WithHysteresisInt, T1int);
   } else {
     T1int = 0;

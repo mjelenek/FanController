@@ -197,6 +197,9 @@ void setPwmConfiguration(CommandParameter &parameters){
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
     ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
+#ifdef USE_PWM_CACHE
+    cacheRMPbyTemp[pwmChannel].clear();
+#endif    
     switch (pwmDrive) {
     case 0:
     case 1:
@@ -228,6 +231,9 @@ void setPidConfiguration(CommandParameter &parameters){
     ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd, minPidPwm);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
     pid[pwmChannel].SetOutputLimits(ConfigurationPWM[pwmChannel] -> minPidPwm, 255);
+#ifdef USE_PWM_CACHE
+    cacheRMPbyTemp[pwmChannel].clear();
+#endif    
   }
 }
 
@@ -276,8 +282,26 @@ void setHysteresis(CommandParameter &parameters){
 }
 
 void cacheStatus(){
+#ifdef USE_TEMP_CACHE
+  Serial.println(F("cache T0"));
   cacheT0.printStatus();
+  Serial.println(F("cache T1"));
   cacheT1.printStatus();
+#endif
+#ifdef USE_PWM_CACHE
+  Serial.println(F("cache RPMbyTemp[0]"));
+  cacheRMPbyTemp[0].printStatus();
+  Serial.println(F("cache RPMbyTemp[1]"));
+  cacheRMPbyTemp[1].printStatus();
+  Serial.println(F("cache RPMbyTemp[2]"));
+  cacheRMPbyTemp[2].printStatus();
+  Serial.println(F("cache RPMbyTemp[3]"));
+  cacheRMPbyTemp[3].printStatus();
+  Serial.println(F("cache RPMbyTemp[4]"));
+  cacheRMPbyTemp[4].printStatus();
+  Serial.println(F("cache RPMbyTemp[5]"));
+  cacheRMPbyTemp[5].printStatus();
+#endif
 }
 
 void Cmd_Unknown()
