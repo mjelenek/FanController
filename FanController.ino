@@ -34,24 +34,24 @@ void printTimingResult(){
   Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
   Serial.println(F("%"));
   Serial.print(F("Average delay: "));
-  printlnBCD(binaryToBCDLong((unsigned long)timeInCode >> 9));
+  Serial.println((unsigned long)timeInCode >> 9);
   Serial.print(F("<400-"));
-  printlnBCD(binaryToBCD(to400));
+  Serial.println(to400);
   Serial.print(F("<600-"));
-  printlnBCD(binaryToBCD(to600));
+  Serial.println(to600);
   Serial.print(F("<800-"));
-  printlnBCD(binaryToBCD(to800));
+  Serial.println(to800);
   if(to1000 > 0){
     Serial.print(F("<1000-"));
-    printlnBCD(binaryToBCD(to1000));
+    Serial.println(to1000);
   }
   if(to1200 > 0){
     Serial.print(F("<1200-"));
-    printlnBCD(binaryToBCD(to1200));
+    Serial.println(to1200);
   }
   if(over1200 > 0){
     Serial.print(F(">1200-"));
-    printlnBCD(binaryToBCD(over1200));
+    Serial.println(over1200);
   }
 }
 #endif

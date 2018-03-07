@@ -109,9 +109,9 @@ void timingDebug(){
 
     if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
       Serial.print(F("!"));
-      printBCD(binaryToBCD(part_32));
+      Serial.print(part_32);
       Serial.print(F("-"));
-      printlnBCD(binaryToBCDLong(zpozdeni));
+      Serial.println(zpozdeni);
     }
 
     timeInCode = timeInCode + zpozdeni;
