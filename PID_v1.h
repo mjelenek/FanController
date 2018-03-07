@@ -1,6 +1,6 @@
 #ifndef PID_v1_h
 #define PID_v1_h
-#define LIBRARY_VERSION	1.2.1
+#define LIBRARY_VERSION	1.2.1-modified
 
 class PID
 {
@@ -48,7 +48,7 @@ class PID
 										  //   means the output will increase when error is positive. REVERSE
 										  //   means the opposite.  it's very unlikely that this will be needed
 										  //   once it is set in the constructor.
-    void SetSampleTime(int);              // * sets the frequency, in Milliseconds, with which 
+    void SetSampleTime(unsigned long);    // * sets the frequency, in Microseconds, with which 
                                           //   the PID calculation is performed.  default is 100
 										  
 										  
@@ -58,15 +58,15 @@ class PID
 	double GetKi();						  //  they were created mainly for the pid front-end,
 	double GetKd();						  // where it's important to know what is actually 
 	int GetMode();						  //  inside the PID.
-	int GetDirection();					  //
+	int GetDirection();					
 
   private:
 	void Initialize();
-	
+/*
 	double dispKp;				// * we'll hold on to the tuning parameters in user-entered 
 	double dispKi;				//   format for display purposes
 	double dispKd;				//
-    
+*/  
 	double kp;                  // * (P)roportional Tuning Parameter
   double ki;                  // * (I)ntegral Tuning Parameter
   double kd;                  // * (D)erivative Tuning Parameter

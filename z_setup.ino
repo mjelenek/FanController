@@ -173,7 +173,7 @@ void init_adc()
 void init_pid(){
   for(int i = 0; i <= 5; i++){
     pid[i].SetOutputLimits(ConfigurationPWM[i] -> minPidPwm, 255);
-    pid[i].SetSampleTime(62);                     // will be computed every 64ms
+    pid[i].SetSampleTime(62000);                     // will be computed every 64ms
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:

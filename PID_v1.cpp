@@ -28,12 +28,12 @@ PID::PID(double* Input, double* Output, double* Setpoint,
     PID::SetOutputLimits(0, 255);				//default output limit corresponds to
 												//the arduino pwm limits
 
-    SampleTime = 100;							//default Controller Sample Time is 0.1 seconds
+    SampleTime = 100000L;							//default Controller Sample Time is 0.1 seconds
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
 
-    lastTime = millis()-SampleTime;
+    lastTime = 0;
 }
 
 /*Constructor (...)*********************************************************
@@ -58,7 +58,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 bool PID::Compute()
 {
    if(!inAuto) return false;
-   unsigned long now = millis();
+   unsigned long now = micros();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)
    {
@@ -106,9 +106,9 @@ void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
    pOn = POn;
    pOnE = POn == P_ON_E;
 
-   dispKp = Kp; dispKi = Ki; dispKd = Kd;
+//   dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
-   double SampleTimeInSec = ((double)SampleTime)/1000;
+   double SampleTimeInSec = ((double)SampleTime)/1000000;
    kp = Kp;
    ki = Ki * SampleTimeInSec;
    kd = Kd / SampleTimeInSec;
@@ -129,9 +129,9 @@ void PID::SetTunings(double Kp, double Ki, double Kd){
 }
 
 /* SetSampleTime(...) *********************************************************
- * sets the period, in Milliseconds, at which the calculation is performed
+ * sets the period, in Microseconds, at which the calculation is performed
  ******************************************************************************/
-void PID::SetSampleTime(int NewSampleTime)
+void PID::SetSampleTime(unsigned long NewSampleTime)
 {
    if (NewSampleTime > 0)
    {
@@ -139,7 +139,7 @@ void PID::SetSampleTime(int NewSampleTime)
                       / (double)SampleTime;
       ki *= ratio;
       kd /= ratio;
-      SampleTime = (unsigned long)NewSampleTime;
+      SampleTime = NewSampleTime;
    }
 }
 
@@ -216,9 +216,11 @@ void PID::SetControllerDirection(int Direction)
  * functions query the internal state of the PID.  they're here for display
  * purposes.  this are the functions the PID Front-end uses for example
  ******************************************************************************/
+/*
 double PID::GetKp(){ return  dispKp; }
 double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
+*/
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
 int PID::GetDirection(){ return controllerDirection;}
 
