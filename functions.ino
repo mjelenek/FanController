@@ -35,40 +35,20 @@ void guiDisable(){
     timeCountingStartFlag = 1;
   }
 
-  void sendMillis(){
-    unsigned long x1 = millis();
-    unsigned long x2 = millis();
-    unsigned long x3 = millis();
-    unsigned long x4 = millis();
-    unsigned long x5 = millis();
-    Serial.println("");    
-    Serial.println(x1);    
-    Serial.println(x2);    
-    Serial.println(x3);    
-    Serial.println(x4);    
-    Serial.println(x5);    
+  void sendTime(){
+    unsigned long us = micros();
+    unsigned long ms = millis();
+    unsigned long s = ms / 1000;
+    Serial.println(us);    
+    Serial.println(ms);    
+    Serial.println(s);    
   }
-  
-  void sendMicros(){
-    unsigned long x1 = micros();
-    unsigned long x2 = micros();
-    unsigned long x3 = micros();
-    unsigned long x4 = micros();
-    unsigned long x5 = micros();
-    Serial.println("");    
-    Serial.println(x1);    
-    Serial.println(x2);    
-    Serial.println(x3);    
-    Serial.println(x4);    
-    Serial.println(x5);    
-  }
-  
 #endif
 
 void guiUpdate(){
   Serial.print(F("!!"));
-  Serial.write(29);
-  Serial.print(F("guiUpdate"));
+  Serial.write(24);
+  Serial.print(F("guiU"));
 
   serialWriteInt(roundRPM(rpm[0]));
   serialWriteInt(roundRPM(rpm[1]));

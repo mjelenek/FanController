@@ -256,8 +256,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("sendPidUpates"), sendPidUpates);
   SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);
 #ifdef TIMING_DEBUG
-  SerialCommandHandler.AddCommand(F("millis"), sendMillis);
-  SerialCommandHandler.AddCommand(F("micros"), sendMicros);
+  SerialCommandHandler.AddCommand(F("time"), sendTime);
   SerialCommandHandler.AddCommand(F("timing"), timing);
   SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
 #endif

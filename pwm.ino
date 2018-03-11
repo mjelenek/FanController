@@ -52,41 +52,42 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
 void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
   unsigned short sensorValue;
   byte pwmOld = pwm[fanNumber];
-  if(pwmDisabled[fanNumber] > 0){
-    pwm[fanNumber] = 0;
-  }
-  PWMConfiguration &conf = *ConfigurationPWM[fanNumber];
-  // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
-  switch (conf.pwmDrive) {
-    case 0:
-      ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
-      sensorValue = *sensorValueVolatile;
-      ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
-      pwm[fanNumber] = sensorValue >> 2;            // map 0-1023 to 0-255
-      break;
-    case 1:
-      pwm[fanNumber] = conf.constPwm;
-      break;
-    case 2:
-      if(TIME_TO_COMPUTE_PWM){
-        pwm[fanNumber] = getNewPwmByPowerCurve(conf, pwmOld USE_FAN_NUMBER);       
-      }
-      break;
-    case 3:
-      if(TIME_TO_COMPUTE_PWM_BY_PID){
-        pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
-      }
-      break;
-    case 4:
-      if(TIME_TO_COMPUTE_PWM){
-        setpointPidByRpmCurve(conf, pwmOld, fanNumber);
-      }
-      if(TIME_TO_COMPUTE_PWM_BY_PID){
-        if(pidCompute(fanNumber)){
-           pwm[fanNumber] = (byte)outputPid;
+  if(pwmDisabled[fanNumber] == 0){
+    PWMConfiguration &conf = *ConfigurationPWM[fanNumber];
+    // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
+    switch (conf.pwmDrive) {
+      case 0:
+        ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
+        sensorValue = *sensorValueVolatile;
+        ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
+        pwm[fanNumber] = sensorValue >> 2;            // map 0-1023 to 0-255
+        break;
+      case 1:
+        pwm[fanNumber] = conf.constPwm;
+        break;
+      case 2:
+        if(TIME_TO_COMPUTE_PWM){
+          pwm[fanNumber] = getNewPwmByPowerCurve(conf, pwmOld USE_FAN_NUMBER);       
         }
-      }
-      break;
+        break;
+      case 3:
+        if(TIME_TO_COMPUTE_PWM_BY_PID){
+          pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
+        }
+        break;
+      case 4:
+        if(TIME_TO_COMPUTE_PWM){
+          setpointPidByRpmCurve(conf, pwmOld, fanNumber);
+        }
+        if(TIME_TO_COMPUTE_PWM_BY_PID){
+          if(pidCompute(fanNumber)){
+             pwm[fanNumber] = (byte)outputPid;
+          }
+        }
+        break;
+    }
+  } else {
+    pwm[fanNumber] = 0;
   }
 
   if(pwmOld != pwm[fanNumber]){
