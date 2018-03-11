@@ -253,7 +253,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
   SerialCommandHandler.AddCommand(F("h"), setHysteresis);
   SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
-  SerialCommandHandler.AddCommand(F("sendPidUpates"), sendPidUpates);
+  SerialCommandHandler.AddCommand(F("pidU"), sendPidUpdates);
   SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);
 #ifdef TIMING_DEBUG
   SerialCommandHandler.AddCommand(F("time"), sendTime);

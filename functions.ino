@@ -181,7 +181,7 @@ void disableFan(CommandParameter &parameters){
   }
 }
 
-void sendPidUpates(CommandParameter &parameters){
+void sendPidUpdates(CommandParameter &parameters){
   while(1){
     byte pwmChannel = parameters.NextParameterAsInteger( 255 );
     byte numberOfUpdates = parameters.NextParameterAsInteger( 255 );
