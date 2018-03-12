@@ -3,6 +3,7 @@ void setup() {
 //  wdt_disable();
  //serial port configuration
   Serial.begin(115200);
+//  Serial.begin(19200);
 
 //welcome
   Serial.println(F("Starting..."));
@@ -30,11 +31,6 @@ void setup() {
   delay(1);
 
   start = micros();
-
-#ifdef TIMING_DEBUG
-  timeTotal = micros();
-  timeCounting = 1;
-#endif  
 }
 
 void setPinsIO(){
