@@ -11,8 +11,8 @@ void serialWriteLong(unsigned long l){
 }
 
 void guistat1(){
-  Serial.print(F("!!"));
-  Serial.write(118);
+  Serial.print(F("!"));
+  Serial.write(119);
   Serial.print(F("gui1"));
   ConfigurationPWM[0] -> guiStat();
   ConfigurationPWM[1] -> guiStat();
@@ -20,6 +20,7 @@ void guistat1(){
   ConfigurationPWM[3] -> guiStat();
   ConfigurationPWM[4] -> guiStat();
   ConfigurationPWM[5] -> guiStat();
+  Serial.print(F("#"));
 }
 
 void guiEnable(){
@@ -46,8 +47,8 @@ void guiDisable(){
 #endif
 
 void guiUpdate(){
-  Serial.print(F("!!"));
-  Serial.write(24);
+  Serial.print(F("!"));
+  Serial.write(25);
   Serial.print(F("guiU"));
 
   serialWriteInt(roundRPM(rpm[0]));
@@ -62,6 +63,7 @@ void guiUpdate(){
   serialWriteInt(T1WithHysteresisInt);
 //  serialWriteInt(sensorValue6Averaged);
 //  serialWriteInt(sensorValue7Averaged);
+  Serial.print(F("#"));
 }
 
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
@@ -75,13 +77,14 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
         expectedRpm = setpointPid[fanNumber];
       }
     }
-    Serial.print(F("!!"));
-    Serial.write(8);
+    Serial.print(F("!"));
+    Serial.write(9);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
     serialWriteInt(expectedRpm);
     serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
+    Serial.print(F("#"));
     updatesRTToSend[fanNumber]--;
   }
 }
@@ -97,13 +100,14 @@ byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
         expectedRpm = setpointPid[fanNumber];
       }
     }
-    Serial.print(F("!!"));
-    Serial.write(8);
+    Serial.print(F("!"));
+    Serial.write(9);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
     serialWriteInt(expectedRpm);
     serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
+    Serial.print(F("#"));
     updatesRTToSend[fanNumber]--;
   }
 }
