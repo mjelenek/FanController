@@ -12,7 +12,7 @@ void serialWriteLong(unsigned long l){
 
 void guistat1(){
   Serial.print(F("!"));
-  Serial.write(119);
+  Serial.write(118);
   Serial.print(F("gui1"));
   ConfigurationPWM[0] -> guiStat();
   ConfigurationPWM[1] -> guiStat();
@@ -48,7 +48,7 @@ void guiDisable(){
 
 void guiUpdate(){
   Serial.print(F("!"));
-  Serial.write(25);
+  Serial.write(24);
   Serial.print(F("guiU"));
 
   serialWriteInt(roundRPM(rpm[0]));
@@ -78,7 +78,7 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
       }
     }
     Serial.print(F("!"));
-    Serial.write(9);
+    Serial.write(8);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
     serialWriteInt(expectedRpm);
@@ -101,7 +101,7 @@ byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
       }
     }
     Serial.print(F("!"));
-    Serial.write(9);
+    Serial.write(8);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
     serialWriteInt(expectedRpm);
