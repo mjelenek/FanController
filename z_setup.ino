@@ -257,6 +257,9 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("timing"), timing);
   SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
 #endif
+#ifdef FREE_MEMORY_DEBUG
+  SerialCommandHandler.AddCommand(F("freemem"), freeMem);
+#endif
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }
 

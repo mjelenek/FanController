@@ -1,10 +1,12 @@
 #include "PID_v1.h"
 #include "CommandHandler.h"
 #include "EEPROMStoreISR.h"
+#include "MemoryFree.h"
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
 //#define TEMPERATURES_DEBUG
+#define FREE_MEMORY_DEBUG
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
 #define USE_TEMP_CACHE
 #define USE_PWM_CACHE
@@ -55,6 +57,10 @@ void printTimingResult(){
     Serial.println(over1200);
   }
 }
+#endif
+
+#ifdef FREE_MEMORY_DEBUG
+volatile int freemem = 2000;
 #endif
 
 //one iteration microseconds
@@ -337,9 +343,9 @@ PID pid[] = {
 };
 
 #ifdef TIMING_DEBUG
-CommandHandler<21, 70, 0> SerialCommandHandler; // 21 commands, max length of command 70, 0 variables
+CommandHandler<22, 70, 0> SerialCommandHandler; // 21 commands, max length of command 70, 0 variables
 #else
-CommandHandler<17, 70, 0> SerialCommandHandler; // 17 commands, max length of command 70, 0 variables
+CommandHandler<18, 70, 0> SerialCommandHandler; // 17 commands, max length of command 70, 0 variables
 #endif
 
 byte i = 0;

@@ -114,6 +114,13 @@ unsigned long micros() {
     t = t >> 1;    
   }
 
+#ifdef FREE_MEMORY_DEBUG
+  int freememory = freeMemory();
+  if(freememory < freemem){
+    freemem = freememory;  
+  }
+#endif
+
   SREG = oldSREG;
   
   return ((m << 5) - (m >> 3) + (t >> 3));

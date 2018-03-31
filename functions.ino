@@ -257,6 +257,15 @@ void cacheStatus(){
 #endif
 }
 
+#ifdef FREE_MEMORY_DEBUG
+void freeMem ()
+{
+  Serial.print(F("Free memory minimum: "));
+  Serial.print(freemem);
+  Serial.println(F("B"));
+}
+#endif
+
 void Cmd_Unknown()
 {
   if(gui){
