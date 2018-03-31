@@ -1,13 +1,14 @@
 byte countPWM(PWMConfiguration &conf, unsigned int temperature){
-  unsigned int temperatureTarget = conf.tempTarget * 10;
+  byte tPartSelect = getTemperaturePartSelect(conf.tPwm, temperature);
+  unsigned int temperatureTarget = conf.tPwm[tPartSelect] * 10;
   if(temperature <= temperatureTarget){
-    return conf.minPwm;
+    return conf.pwm[tPartSelect];
   }
-  unsigned int temperatureMax = conf.tempMax * 10;
+  unsigned int temperatureMax = conf.tPwm[tPartSelect + 1] * 10;
   if(temperature >= temperatureMax){
-    return conf.maxPwm;
+    return conf.pwm[tPartSelect + 1];
   }
-  return ((unsigned long)(temperature - temperatureTarget) * (conf.maxPwm - conf.minPwm)) / (temperatureMax - temperatureTarget) + conf.minPwm;
+  return ((long)(temperature - temperatureTarget) * ((int)conf.pwm[tPartSelect + 1] - (int)conf.pwm[tPartSelect])) / (temperatureMax - temperatureTarget) + conf.pwm[tPartSelect];
 }
 
 #ifdef USE_PWM_CACHE
@@ -22,15 +23,16 @@ byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
 #endif
 
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature){
-  unsigned short temperatureTarget = conf.tempTargetRpm * 10;
+  byte tPartSelect = getTemperaturePartSelect(conf.tRpm, temperature);
+  unsigned short temperatureTarget = conf.tRpm[tPartSelect] * 10;
   if(temperature <= temperatureTarget){
-    return conf.minRpm;
+    return conf.rpm[tPartSelect];
   }
-  unsigned short temperatureMax = conf.tempMaxRpm * 10;
+  unsigned short temperatureMax = conf.tRpm[tPartSelect + 1] * 10;
   if(temperature >= temperatureMax){
-    return conf.maxRpm;
+    return conf.rpm[tPartSelect + 1];
   }
-  return (((unsigned long)(temperature - temperatureTarget)) * (conf.maxRpm - conf.minRpm)) / (temperatureMax - temperatureTarget) + conf.minRpm;
+  return (((long)(temperature - temperatureTarget)) * ((int)conf.rpm[tPartSelect + 1] - (int)conf.rpm[tPartSelect])) / (temperatureMax - temperatureTarget) + conf.rpm[tPartSelect];
 }
 
 #ifdef USE_PWM_CACHE
@@ -103,12 +105,12 @@ byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DE
       if(T0Connected){
         return countPWM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
       }
-      return conf.maxPwm;
+      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
     case 1:
       if(T1Connected){
         return countPWM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
       }
-      return conf.maxPwm;
+      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
     case 2:
       if(T0Connected && T1Connected){
         return countPWM(conf, (T0WithHysteresisInt + T1WithHysteresisInt) >> 1 USE_FAN_NUMBER);
@@ -119,9 +121,9 @@ byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DE
       if(T1Connected){
         return countPWM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
       }
-    return conf.maxPwm;
+      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
   }
-  return conf.maxPwm;
+  return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
 }
 
 byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
@@ -141,14 +143,14 @@ void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
       if(T0Connected){
         setpointPid[fanNumber] = countExpectedRPM(conf, T0WithHysteresisInt USE_FAN_NUMBER);
       } else {
-        setpointPid[fanNumber] = conf.maxRpm;
+        setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
       }
       break;
     case 1:
       if(T1Connected){
         setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
       } else {
-        setpointPid[fanNumber] = conf.maxRpm;
+        setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
       }
       break;
     case 2:
@@ -164,11 +166,19 @@ void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
         setpointPid[fanNumber] = countExpectedRPM(conf, T1WithHysteresisInt USE_FAN_NUMBER);
         break;
       }
-      setpointPid[fanNumber] = conf.maxRpm;
+      setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
       break;
     default:
-      setpointPid[fanNumber] = conf.maxRpm;
+      setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
   }
+}
+
+byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature){
+  byte i = 0;
+  while (i < 3 && temperatures[i+2] != 0 && (temperatures[i+1] * 10) <= temperature){
+    i++;
+  }
+  return i;
 }
 
 void setPwm(){

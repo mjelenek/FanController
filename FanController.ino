@@ -4,6 +4,7 @@
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
+//#define TEMPERATURES_DEBUG
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
 #define USE_TEMP_CACHE
 #define USE_PWM_CACHE
@@ -97,6 +98,8 @@ byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 #define LED_OUT_0 PORTB &= ~_BV(PB5)
 #define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
 
+#define MAX_ALLOWED_TEMP 100
+
 class PWMConfiguration
 {
 public:
@@ -107,17 +110,13 @@ public:
   // settings when pwmDrive == 2 or pwmDrive == 4
   byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
   // settings when pwmDrive == 2
-  byte minPwm;
-  byte maxPwm;
-  byte tempTarget;
-  byte tempMax;
+  byte tPwm[5];
+  byte pwm[5];
   // settings when pwmDrive == 3
   unsigned short constRpm;
   // settings when pwmDrive == 4
-  unsigned short minRpm;
-  unsigned short maxRpm;
-  byte tempTargetRpm;
-  byte tempMaxRpm;
+  byte tRpm[5];
+  unsigned short rpm[5];
   // pid parameters, real value is parameter / 200
   byte kp;
   byte ki;
@@ -129,15 +128,15 @@ public:
     pwmDrive = 1;
     constPwm = 120;
     tSelect = 0;
-    minPwm = 90;
-    maxPwm = 200;
-    tempTarget = 32;
-    tempMax = 50;
+    tPwm[0] = 32;
+    pwm[0] = 90;
+    tPwm[1] = 50;
+    pwm[1] = 200;
     constRpm = 700;
-    minRpm = 600;
-    maxRpm = 1400;
-    tempTargetRpm = 32;
-    tempMaxRpm = 50;
+    tRpm[0] = 32;
+    rpm[0] = 600;
+    tRpm[1] = 50;
+    rpm[1] = 1400;
     // PID parameters (real value is parameter value / 200)
     kp = 40;
     ki = 30;
@@ -145,7 +144,12 @@ public:
     minPidPwm = 15;
   }
 
-  void set(byte pwmDrive1, byte constPwm1, byte tSelect1, byte minPwm1, byte maxPwm1, byte tempTarget1, byte tempMax1)
+  void set(byte pwmDrive1, byte constPwm1, byte tSelect1,
+    byte t0, byte pwm0,
+    byte t1, byte pwm1,
+    byte t2, byte pwm2,
+    byte t3, byte pwm3,
+    byte t4, byte pwm4)
   {
     if(pwmDrive1 >= 0 && pwmDrive1 <= 4){
       pwmDrive = pwmDrive1;
@@ -154,47 +158,89 @@ public:
     if(tSelect1 >= 0 && tSelect1 <= 2){
       tSelect = tSelect1;
     }
-    minPwm = minPwm1;
-    maxPwm = maxPwm1;
-    if(tempTarget1 <= 60 && tempTarget1 < tempMax1){
-      tempTarget = tempTarget1;
+    if(t0 <= 60 && t0 <= t1){
+      tPwm[0] = t0;
+      pwm[0] = pwm0;
     }
-    if(tempMax1 <= 60 && tempTarget1 < tempMax1){
-      tempMax = tempMax1;
+    if(t1 <= 60 && t0 <= t1){
+      tPwm[1] = t1;
+      pwm[1] = pwm1;
+    }
+    tPwm[2] = tPwm[3] = tPwm[4] = 0;
+    pwm[2] = pwm[3] = pwm[4] = 0;
+    
+    if(t2 <= 60 && (t1 <= t2)){
+      tPwm[2] = t2;
+      pwm[2] = pwm2;
+    } else {
+      return;
+    }
+    if(t3 <= 60 && (t2 <= t3)){
+      tPwm[3] = t3;
+      pwm[3] = pwm3;
+    } else {
+      return;
+    }
+    if(t4 <= 60 && (t3 <= t4)){
+      tPwm[4] = t4;
+      pwm[4] = pwm4;
     }
   }
 
-  void setPid(unsigned short constRpm1, unsigned short minRpm1, unsigned short maxRpm1,
-    byte tempTargetRpm1, byte tempMaxRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
+  void setPid(unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1,
+    byte t0, unsigned short rpm0,
+    byte t1, unsigned short rpm1,
+    byte t2, unsigned short rpm2,
+    byte t3, unsigned short rpm3,
+    byte t4, unsigned short rpm4)
   {
     constRpm = constRpm1;
-    minRpm = minRpm1;
-    maxRpm = maxRpm1;
-    if(tempTargetRpm1 <= 60 && tempTargetRpm1 < tempMaxRpm1){
-      tempTargetRpm = tempTargetRpm1;
-    }
-    if(tempMaxRpm1 <= 60 && tempTargetRpm1 < tempMaxRpm1){
-      tempMaxRpm = tempMaxRpm1;
-    }
     kp = kp1;
     ki = ki1;
     kd = kd1;
     minPidPwm = minPidPwm1;
+    if(t0 <= 60 && t0 <= t1){
+      tRpm[0] = t0;
+      rpm[0] = rpm0;
+    }
+    if(t0 <= 60 && t0 <= t1){
+      tRpm[1] = t1;
+      rpm[1] = rpm1;
+    }
+    tRpm[2] = tRpm[3] = tRpm[4] = 0;
+    rpm[2] = rpm[3] = rpm[4] = 0;
+    
+    if(t2 <= 60 && t1 <= t2){
+      tRpm[2] = t2;
+      rpm[2] = rpm2;
+    } else {
+      return;
+    }
+    if(t3 <= 60 && t2 <= t3){
+      tRpm[3] = t3;
+      rpm[3] = rpm3;
+    } else {
+      return;
+    }
+    if(t4 <= 60 && t3 <= t4){
+      tRpm[4] = t4;
+      rpm[4] = rpm4;
+    }
   }
 
   void guiStat(){
     Serial.write(pwmDrive);
     Serial.write(constPwm);
     Serial.write(tSelect);
-    Serial.write(minPwm);
-    Serial.write(maxPwm);
-    Serial.write(tempTarget);
-    Serial.write(tempMax);
+    for(int i = 0; i <= 4; i++){
+      Serial.write(tPwm[i]);
+      Serial.write(pwm[i]);
+    }
     serialWriteInt(constRpm);
-    serialWriteInt(minRpm);
-    serialWriteInt(maxRpm);
-    Serial.write(tempTargetRpm);
-    Serial.write(tempMaxRpm);
+    for(int i = 0; i <= 4; i++){
+      Serial.write(tRpm[i]);
+      serialWriteInt(rpm[i]);
+    }
     Serial.write(kp);
     Serial.write(ki);
     Serial.write(kd);
@@ -291,9 +337,9 @@ PID pid[] = {
 };
 
 #ifdef TIMING_DEBUG
-CommandHandler<20, 45, 0> SerialCommandHandler; // 20 commands, max length of command 45, 0 variables
+CommandHandler<21, 70, 0> SerialCommandHandler; // 21 commands, max length of command 70, 0 variables
 #else
-CommandHandler<16, 45, 0> SerialCommandHandler; // 16 commands, max length of command 45, 0 variables
+CommandHandler<17, 70, 0> SerialCommandHandler; // 17 commands, max length of command 70, 0 variables
 #endif
 
 byte i = 0;

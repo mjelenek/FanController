@@ -1,3 +1,4 @@
+#ifndef TEMPERATURES_DEBUG
 void countT0(){
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
   unsigned short sensorValueAveraged = sensorValue6Averaged;
@@ -41,6 +42,20 @@ void countT1(){
     T1int = 0;
   }
 }
+
+#else
+void countT0(){
+  T0Connected = 1;
+  T0int = (int)((millis() / 100) % 600) + 100;
+  T0WithHysteresisInt = countHysteresisTemperature(T0WithHysteresisInt, T0int);
+}
+
+void countT1(){
+  T1Connected = 1;
+  T1int = 700 - (int)((millis() / 100) % 600);
+  T1WithHysteresisInt = countHysteresisTemperature(T1WithHysteresisInt, T1int);
+}
+#endif
 
 int countTemperature(unsigned long thermistorResistance){
   float steinhart2;

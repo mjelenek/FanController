@@ -12,11 +12,18 @@ void serialWriteLong(unsigned long l){
 
 void guistat1(){
   Serial.print(F("!"));
-  Serial.write(118);
+  Serial.write(106);
   Serial.print(F("gui1"));
   ConfigurationPWM[0] -> guiStat();
   ConfigurationPWM[1] -> guiStat();
   ConfigurationPWM[2] -> guiStat();
+  Serial.print(F("#"));
+}
+
+void guistat2(){
+  Serial.print(F("!"));
+  Serial.write(106);
+  Serial.print(F("gui2"));
   ConfigurationPWM[3] -> guiStat();
   ConfigurationPWM[4] -> guiStat();
   ConfigurationPWM[5] -> guiStat();
@@ -124,13 +131,19 @@ void setPwmConfiguration(CommandParameter &parameters){
   byte pwmDrive = parameters.NextParameterAsInteger();
   byte constPwm = parameters.NextParameterAsInteger();
   byte tSelect =  parameters.NextParameterAsInteger();
-  byte minPwm = parameters.NextParameterAsInteger();
-  byte maxPwm = parameters.NextParameterAsInteger();
-  byte tempTarget = parameters.NextParameterAsInteger();
-  byte tempMax = parameters.NextParameterAsInteger();
+  byte t0 = parameters.NextParameterAsInteger( 0 );
+  byte pwm0 = parameters.NextParameterAsInteger( 0 );
+  byte t1 = parameters.NextParameterAsInteger( 0 );
+  byte pwm1 = parameters.NextParameterAsInteger( 0 );
+  byte t2 = parameters.NextParameterAsInteger( 0 );
+  byte pwm2 = parameters.NextParameterAsInteger( 0 );
+  byte t3 = parameters.NextParameterAsInteger( 0 );
+  byte pwm3 = parameters.NextParameterAsInteger( 0 );
+  byte t4 = parameters.NextParameterAsInteger( 0 );
+  byte pwm4 = parameters.NextParameterAsInteger( 0 );
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, minPwm, maxPwm, tempTarget, tempMax);
+    ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
 #ifdef USE_PWM_CACHE
     cacheRMPbyTemp[pwmChannel].clear();
 #endif    
@@ -152,17 +165,23 @@ void setPidConfiguration(CommandParameter &parameters){
   
   byte pwmChannel = parameters.NextParameterAsInteger();
   unsigned short constRPM = parameters.NextParameterAsInteger();
-  unsigned short minRPM = parameters.NextParameterAsInteger();
-  unsigned short maxRPM = parameters.NextParameterAsInteger();
-  byte tempTargetRPM = parameters.NextParameterAsInteger();
-  byte tempMaxRPM = parameters.NextParameterAsInteger();
   byte kp = parameters.NextParameterAsInteger();
   byte ki = parameters.NextParameterAsInteger();
   byte kd = parameters.NextParameterAsInteger();
   byte minPidPwm = parameters.NextParameterAsInteger();
+  byte t0 = parameters.NextParameterAsInteger( 0 );
+  unsigned short rpm0 = parameters.NextParameterAsInteger( 0 );
+  byte t1 = parameters.NextParameterAsInteger( 0 );
+  unsigned short rpm1 = parameters.NextParameterAsInteger( 0 );
+  byte t2 = parameters.NextParameterAsInteger( 0 );
+  unsigned short rpm2 = parameters.NextParameterAsInteger( 0 );
+  byte t3 = parameters.NextParameterAsInteger( 0 );
+  unsigned short rpm3 = parameters.NextParameterAsInteger( 0 );
+  byte t4 = parameters.NextParameterAsInteger( 0 );
+  unsigned short rpm4 = parameters.NextParameterAsInteger( 0 );
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM[pwmChannel] -> setPid(constRPM, minRPM, maxRPM, tempTargetRPM, tempMaxRPM, kp, ki, kd, minPidPwm);
+    ConfigurationPWM[pwmChannel] -> setPid(constRPM, kp, ki, kd, minPidPwm, t0, rpm0, t1, rpm1, t2, rpm2, t3, rpm3, t4, rpm4);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
     pid[pwmChannel].SetOutputLimits(ConfigurationPWM[pwmChannel] -> minPidPwm, 255);
 #ifdef USE_PWM_CACHE

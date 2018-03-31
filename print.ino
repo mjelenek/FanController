@@ -71,20 +71,52 @@ void printlnPwmDrive(PWMConfiguration &conf){
       Serial.println(conf.constPwm);
       break;
     case 2:
-      Serial.print(F("PWM by temperature, minPWM="));
-      Serial.print(conf.minPwm);
-      Serial.print(F(", maxPWM="));
-      Serial.println(conf.maxPwm);
+      Serial.print(F("PWM by temperature, t0="));
+      Serial.print(conf.tPwm[0]);
+      Serial.print(F(", pwm0="));
+      Serial.print(conf.pwm[0]);
+      Serial.print(F(" t1="));
+      Serial.print(conf.tPwm[1]);
+      Serial.print(F(", pwm1="));
+      Serial.print(conf.pwm[1]);
+      Serial.print(F(" t2="));
+      Serial.print(conf.tPwm[2]);
+      Serial.print(F(", pwm2="));
+      Serial.print(conf.pwm[2]);
+      Serial.print(F(" t3="));
+      Serial.print(conf.tPwm[3]);
+      Serial.print(F(", pwm3="));
+      Serial.print(conf.pwm[3]);
+      Serial.print(F(" t4="));
+      Serial.print(conf.tPwm[4]);
+      Serial.print(F(", pwm4="));
+      Serial.println(conf.pwm[4]);
       break;
     case 3:
       Serial.print(F("constant speed, expected RPM="));
       Serial.println(conf.constRpm);
       break;
     case 4:
-      Serial.print(F("speed by temperature, minRPM="));
-      Serial.print(conf.minRpm);
-      Serial.print(F(", maxRPM="));
-      Serial.println(conf.maxRpm);
+      Serial.print(F("RPM by temperature, t0="));
+      Serial.print(conf.tRpm[0]);
+      Serial.print(F(", rpm0="));
+      Serial.print(conf.rpm[0]);
+      Serial.print(F(" t1="));
+      Serial.print(conf.tRpm[1]);
+      Serial.print(F(", rpm1="));
+      Serial.print(conf.rpm[1]);
+      Serial.print(F(" t2="));
+      Serial.print(conf.tRpm[2]);
+      Serial.print(F(", rpm2="));
+      Serial.print(conf.rpm[2]);
+      Serial.print(F(" t3="));
+      Serial.print(conf.tRpm[3]);
+      Serial.print(F(", rpm3="));
+      Serial.print(conf.rpm[3]);
+      Serial.print(F(" t4="));
+      Serial.print(conf.tRpm[4]);
+      Serial.print(F(", rpm4="));
+      Serial.println(conf.rpm[4]);
       break;
   }
 }
