@@ -260,9 +260,33 @@ void cacheStatus(){
 #ifdef FREE_MEMORY_DEBUG
 void freeMem ()
 {
-  Serial.print(F("Free memory minimum: "));
-  Serial.print(freemem);
-  Serial.println(F("B"));
+  int memPointer;
+  extern int  __bss_end;
+  extern int* __brkval;
+  int notUsedMemory = 0;
+  int free_memory;
+  if (reinterpret_cast<int>(__brkval) == 0) {
+    // if no heap use from end of bss section
+    free_memory = reinterpret_cast<int>(&free_memory) - reinterpret_cast<int>(&__bss_end);
+    memPointer = reinterpret_cast<int>(&__bss_end);
+  } else {
+    // use from top of stack to heap
+    free_memory = reinterpret_cast<int>(&free_memory) - reinterpret_cast<int>(__brkval);
+    memPointer = reinterpret_cast<int>(__brkval);
+  }
+  while(memPointer < &free_memory) {
+    if((*(byte*)(memPointer++)) == 0){
+      notUsedMemory++;
+    } else {
+      break;
+    }
+  }
+  Serial.print(F("actual free memory: "));
+  Serial.print(free_memory);
+  Serial.println(F(" Bytes"));
+  Serial.print(F("not used memory: "));
+  Serial.print(notUsedMemory);
+  Serial.println(F(" Bytes"));
 }
 #endif
 
