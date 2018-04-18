@@ -85,29 +85,6 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000101;    // set timer 2 divisor to   128 for PWM frequency of   245.10 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
-
-
-/*
-  Serial.println(F("Timers configuration"));
-  Serial.print(F("TCCR0A: "));
-  Serial.println(TCCR0A, BIN);
-  Serial.print(F("TCCR0B: "));
-  Serial.println(TCCR0B, BIN);
-  Serial.print(F("TIMSK0: "));
-  Serial.println(TIMSK0, BIN);
-  Serial.print(F("TCCR1A: "));
-  Serial.println(TCCR1A, BIN);
-  Serial.print(F("TCCR1B: "));
-  Serial.println(TCCR1B, BIN);
-  Serial.print(F("TIMSK1: "));
-  Serial.println(TIMSK1, BIN);
-  Serial.print(F("TCCR2A: "));
-  Serial.println(TCCR2A, BIN);
-  Serial.print(F("TCCR2B: "));
-  Serial.println(TCCR2B, BIN);
-  Serial.print(F("TIMSK2: "));
-  Serial.println(TIMSK2, BIN);
-*/
 }
 
 void init_thermistors(){
@@ -169,7 +146,8 @@ void init_adc()
 void init_pid(){
   for(int i = 0; i <= 5; i++){
     pid[i].SetOutputLimits(ConfigurationPWM[i] -> minPidPwm, 255);
-    pid[i].SetSampleTime(62000);                     // will be computed every 64ms
+//    pid[i].SetSampleTime(62000);                     // will be computed every 64ms
+    pid[i].SetSampleTime(120000);                     // will be computed every 128ms
 
     switch (ConfigurationPWM[i] -> pwmDrive) {
     case 0:
@@ -232,34 +210,5 @@ unsigned int doSomeMath(unsigned int x){
     result = result + countTemperature(i);
   }
   return result;
-}
-
-void setSerialCommandHandler(){
-  SerialCommandHandler.AddCommand(F("help"), printHelp);
-  SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
-  SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
-  SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
-  SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
-  SerialCommandHandler.AddCommand(F("s"), printStatus);
-  SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
-  SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
-  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
-  SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
-  SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
-  SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
-  SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
-  SerialCommandHandler.AddCommand(F("h"), setHysteresis);
-  SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
-  SerialCommandHandler.AddCommand(F("pidU"), sendPidUpdates);
-  SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);
-#ifdef TIMING_DEBUG
-  SerialCommandHandler.AddCommand(F("time"), sendTime);
-  SerialCommandHandler.AddCommand(F("timing"), timing);
-  SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
-#endif
-#ifdef FREE_MEMORY_DEBUG
-  SerialCommandHandler.AddCommand(F("freemem"), freeMem);
-#endif
-  SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }
 

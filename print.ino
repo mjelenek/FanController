@@ -128,10 +128,12 @@ void printDelay(byte i, unsigned long d){
     Serial.print(F("-"));
     Serial.println(d);
   } else {
-    Serial.write(6);
     Serial.print(F("!"));
+    Serial.write(10);
+    Serial.print(F("delay"));
     Serial.write(i);
     serialWriteLong(d);
+    Serial.print(F("#"));
   }
 }
 
@@ -139,8 +141,10 @@ void printDelayThreshold(){
     if(!gui){
       Serial.println(F("!delayed"));
     } else {
-      Serial.write(7);
-      Serial.print(F("delayed"));
+    Serial.print(F("!"));
+    Serial.write(7);
+    Serial.print(F("delayed"));
+    Serial.print(F("#"));
     }
 }
 
@@ -206,4 +210,48 @@ void printHelp(){
 #endif
   Serial.println(F("help - this help"));
 }
+
+#ifdef TIMING_DEBUG
+void printTimingResult(){
+  if(!gui){
+    Serial.print(F("Time in code: "));
+    Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
+    Serial.println(F("%"));
+    Serial.print(F("Average delay: "));
+    Serial.println((unsigned long)timeInCode >> 9);
+    Serial.print(F("<400-"));
+    Serial.println(to400);
+    Serial.print(F("<600-"));
+    Serial.println(to600);
+    Serial.print(F("<800-"));
+    Serial.println(to800);
+    if(to1000 > 0){
+      Serial.print(F("<1000-"));
+      Serial.println(to1000);
+    }
+    if(to1200 > 0){
+      Serial.print(F("<1200-"));
+      Serial.println(to1200);
+    }
+    if(over1200 > 0){
+      Serial.print(F(">1200-"));
+      Serial.println(over1200);
+    }
+  } else {
+    Serial.print(F("!"));
+    Serial.write(24);
+    Serial.print(F("timing"));
+    serialWriteInt((unsigned int)(10000 * (float)timeInCode / (float)timeTotal));
+    serialWriteLong((unsigned long)timeInCode >> 9);
+    serialWriteInt(to400);
+    serialWriteInt(to600);
+    serialWriteInt(to800);
+    serialWriteInt(to1000);
+    serialWriteInt(to1200);
+    serialWriteInt(over1200);
+    Serial.print(F("#"));
+  }
+}
+#endif
+
 

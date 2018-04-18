@@ -58,18 +58,16 @@ void guiUpdate(){
   Serial.write(24);
   Serial.print(F("guiU"));
 
-  serialWriteInt(roundRPM(rpm[0]));
-  serialWriteInt(roundRPM(rpm[1]));
-  serialWriteInt(roundRPM(rpm[2]));
-  serialWriteInt(roundRPM(rpm[3]));
-  serialWriteInt(roundRPM(rpm[4]));
-  serialWriteInt(roundRPM(rpm[5]));
+  serialWriteInt(rpm[0]);
+  serialWriteInt(rpm[1]);
+  serialWriteInt(rpm[2]);
+  serialWriteInt(rpm[3]);
+  serialWriteInt(rpm[4]);
+  serialWriteInt(rpm[5]);
   serialWriteInt(T0int);
   serialWriteInt(T1int);
   serialWriteInt(T0WithHysteresisInt);
   serialWriteInt(T1WithHysteresisInt);
-//  serialWriteInt(sensorValue6Averaged);
-//  serialWriteInt(sensorValue7Averaged);
   Serial.print(F("#"));
 }
 
@@ -236,12 +234,25 @@ void setHysteresis(CommandParameter &parameters){
 
 void cacheStatus(){
 #ifdef USE_TEMP_CACHE
+if(gui){
+  cacheT0.printStatus();
+  cacheT1.printStatus();
+} else {
   Serial.println(F("cache T0"));
   cacheT0.printStatus();
   Serial.println(F("cache T1"));
   cacheT1.printStatus();
+}
 #endif
 #ifdef USE_PWM_CACHE
+if(gui){
+  cacheRMPbyTemp[0].printStatus();
+  cacheRMPbyTemp[1].printStatus();
+  cacheRMPbyTemp[2].printStatus();
+  cacheRMPbyTemp[3].printStatus();
+  cacheRMPbyTemp[4].printStatus();
+  cacheRMPbyTemp[5].printStatus();
+} else {
   Serial.println(F("cache RPMbyTemp[0]"));
   cacheRMPbyTemp[0].printStatus();
   Serial.println(F("cache RPMbyTemp[1]"));
@@ -254,12 +265,19 @@ void cacheStatus(){
   cacheRMPbyTemp[4].printStatus();
   Serial.println(F("cache RPMbyTemp[5]"));
   cacheRMPbyTemp[5].printStatus();
+}
 #endif
 }
 
 #ifdef FREE_MEMORY_DEBUG
-void freeMem ()
+void freeMem(CommandParameter &parameters)
 {
+  int f = parameters.NextParameterAsInteger();
+  if(f > 0){
+    Serial.print(F("fibbonacci: "));
+    Serial.println(fibbonacci(f));
+  }
+  
   int memPointer;
   extern int  __bss_end;
   extern int* __brkval;
@@ -281,20 +299,39 @@ void freeMem ()
       break;
     }
   }
-  Serial.print(F("actual free memory: "));
-  Serial.print(free_memory);
-  Serial.println(F(" Bytes"));
-  Serial.print(F("not used memory: "));
-  Serial.print(notUsedMemory);
-  Serial.println(F(" Bytes"));
+  if(!gui){
+    Serial.print(F("actual free memory: "));
+    Serial.print(free_memory);
+    Serial.println(F(" Bytes"));
+    Serial.print(F("not used memory: "));
+    Serial.print(notUsedMemory);
+    Serial.println(F(" Bytes"));
+  } else {
+    Serial.print(F("!"));
+    Serial.write(11);
+    Serial.print(F("freemem"));
+    serialWriteInt(free_memory);
+    serialWriteInt(notUsedMemory);
+    Serial.println(F("#"));
+  }
+}
+
+// function for increase stack test
+int fibbonacci(int input){
+  if(input <= 0)
+    return 0;
+  if(input == 1)
+    return 1;
+  return (fibbonacci(input - 1) + fibbonacci(input - 2));
 }
 #endif
 
 void Cmd_Unknown()
 {
   if(gui){
+    Serial.print(F("!"));
     Serial.write(15);
-    Serial.print(F("Unknown command"));
+    Serial.print(F("Unknown command#"));
   } else {
     Serial.println(F("Unknown command"));
   }

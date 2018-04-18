@@ -47,7 +47,7 @@ void loop(){
 #endif
 
   if(zpozdeni >= WARN_MICROSECONDS){
-    printDelay(i, zpozdeni);
+    printDelay(part_32, zpozdeni);
   }
   if(zpozdeni < ITERATION_MICROSECONDS){
     delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
@@ -108,10 +108,7 @@ void timingDebug(){
     }
 
     if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
-      Serial.print(F("!"));
-      Serial.print(part_32);
-      Serial.print(F("-"));
-      Serial.println(zpozdeni);
+      printDelay(part_32, zpozdeni);
     }
 
     timeInCode = timeInCode + zpozdeni;

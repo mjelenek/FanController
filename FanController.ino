@@ -31,32 +31,6 @@ unsigned int to1200;
 unsigned int over1200;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
-
-void printTimingResult(){
-  Serial.print(F("Time in code: "));
-  Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
-  Serial.println(F("%"));
-  Serial.print(F("Average delay: "));
-  Serial.println((unsigned long)timeInCode >> 9);
-  Serial.print(F("<400-"));
-  Serial.println(to400);
-  Serial.print(F("<600-"));
-  Serial.println(to600);
-  Serial.print(F("<800-"));
-  Serial.println(to800);
-  if(to1000 > 0){
-    Serial.print(F("<1000-"));
-    Serial.println(to1000);
-  }
-  if(to1200 > 0){
-    Serial.print(F("<1200-"));
-    Serial.println(to1200);
-  }
-  if(over1200 > 0){
-    Serial.print(F(">1200-"));
-    Serial.println(over1200);
-  }
-}
 #endif
 
 //one iteration microseconds
@@ -101,6 +75,8 @@ byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 #define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
 
 #define MAX_ALLOWED_TEMP 100
+
+void serialWriteInt(unsigned int i);
 
 class PWMConfiguration
 {
@@ -287,9 +263,20 @@ byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
 unsigned long start;
 unsigned long now;
 unsigned short zpozdeni;
+byte gui = 0;  // enable gui
+byte i = 0;
+byte j = 0;
+byte part_32;  // cycles from 0 to 31;
+byte updatesRTToSend[] = {0, 0, 0, 0, 0, 0};
 
 unsigned long RT0koeficient;
 unsigned long RT1koeficient;
+boolean T0Connected;
+boolean T1Connected;
+int T0int;
+int T1int;
+int T0WithHysteresisInt;
+int T1WithHysteresisInt;
 
 // ADC values from mainboard
 volatile uint16_t sensorValue0Averaged = 0;
@@ -300,13 +287,6 @@ volatile uint16_t sensorValue4Averaged = 0;
 // ADC values from thermistors
 volatile uint16_t sensorValue6Averaged = 0;
 volatile uint16_t sensorValue7Averaged = 0;
-
-boolean T0Connected;
-boolean T1Connected;
-int T0int;
-int T1int;
-int T0WithHysteresisInt;
-int T1WithHysteresisInt;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes0[FAN_RPM_SENSOR_TIMES_FIELD];
@@ -338,18 +318,6 @@ PID pid[] = {
   PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM5.Data.m_UserData.kp / 200, (double)ConfigurationPWM5.Data.m_UserData.ki / 200, (double)ConfigurationPWM5.Data.m_UserData.kd / 200, P_ON_E, DIRECT)
 };
 
-#ifdef TIMING_DEBUG
-CommandHandler<22, 70, 0> SerialCommandHandler; // 22 commands, max length of command 70, 0 variables
-#else
-CommandHandler<18, 70, 0> SerialCommandHandler; // 18 commands, max length of command 70, 0 variables
-#endif
-
-byte i = 0;
-byte j = 0;
-byte part_32;  // cycles from 0 to 31;
-byte gui = 0;  // enable gui
-byte updatesRTToSend[] = {0, 0, 0, 0, 0, 0};
-
 void printlnPwmDrive(PWMConfiguration &conf);
 void printStatus();
 void printFullStatus();
@@ -373,3 +341,39 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();
+
+#ifdef TIMING_DEBUG
+CommandHandler<22, 70, 0> SerialCommandHandler; // 22 commands, max length of command 70, 0 variables
+#else
+CommandHandler<18, 70, 0> SerialCommandHandler; // 18 commands, max length of command 70, 0 variables
+#endif
+
+void setSerialCommandHandler(){
+  SerialCommandHandler.AddCommand(F("help"), printHelp);
+  SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
+  SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
+  SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
+  SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
+  SerialCommandHandler.AddCommand(F("s"), printStatus);
+  SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
+  SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
+  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
+  SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
+  SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
+  SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
+  SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
+  SerialCommandHandler.AddCommand(F("h"), setHysteresis);
+  SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
+  SerialCommandHandler.AddCommand(F("pidU"), sendPidUpdates);
+  SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);
+#ifdef TIMING_DEBUG
+  SerialCommandHandler.AddCommand(F("time"), sendTime);
+  SerialCommandHandler.AddCommand(F("timing"), timing);
+  SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
+#endif
+#ifdef FREE_MEMORY_DEBUG
+  SerialCommandHandler.AddCommand(F("freemem"), freeMem);
+#endif
+  SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
+}
+

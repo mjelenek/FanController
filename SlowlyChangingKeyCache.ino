@@ -64,21 +64,19 @@ public:
   };
 
   void printStatus(){
-    Serial.print(F("!cache"));
     if(gui){
-      for(short i = lowLimit; i <= highLimit; i++){
-        byte buff[4];
-        buff[0] = lowByte(i);
-        buff[1] = lowByte(i >> 8);
- 
-        TData data = get(i);
-        buff[2] = lowByte(data);
-        buff[3] = lowByte(data >> 8);
-        Serial.write(buff, 4);
+      Serial.print(F("!"));
+      Serial.write(2 * buffSize + 8);
+      Serial.print(F("cache"));
+      Serial.write(buffSize);
+      serialWriteInt(lowLimit);
+      for(short i = lowLimit; i < lowLimit + buffSize; i++){
+        serialWriteInt(get(i));
       }
+      Serial.print(F("#"));
     } else {
       Serial.println(F(""));
-      for(short i = lowLimit; i <= highLimit; i++){
+      for(short i = lowLimit; i < lowLimit + buffSize; i++){
         Serial.print(i);
         Serial.print(F(" - ["));
         Serial.print(i & mask);
