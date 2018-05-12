@@ -7,23 +7,19 @@
 #include <avr/eeprom.h>
 #include <avr/crc16.h>
 
-template <class TData> class EEPROMStore
+template <class CEEPROMData> class EEPROMStore
 {
   // The Data stored in the eprom. The EEMEM complier attribute instructs
   // the complier to locate this variable in the eeprom. 
-  struct EEMEM CEEPROMData
-  {
-    uint16_t m_uChecksum;
-    TData m_UserData;
-
-  } m_EEPROMData;
+  CEEPROMData* m_EEPROMData;
 
 public:
 
   CEEPROMData Data;
 
-  EEPROMStore()
+  EEPROMStore(CEEPROMData* eepromPointer)
   {
+    m_EEPROMData = eepromPointer;
     Reset();
     if (!Load())
       Reset();
@@ -46,11 +42,11 @@ public:
     // We only save if the current version in the eeprom doesn't match the Data we plan to save. 
     // This helps protect the eeprom against save called many times within the arduino loop,
     // though it makes things a little slower. 
-    Data.m_uChecksum = CalculateChecksum(Data.m_UserData);
+    Data.m_uChecksum = CalculateChecksum(reinterpret_cast<const uint8_t *>(&(Data.m_UserData)));
     CEEPROMData StoredVersion;
-    if (!Load(StoredVersion) || StoredVersion.m_uChecksum != Data.m_uChecksum || memcmp(&StoredVersion.m_UserData, &Data.m_UserData, sizeof(TData)) != 0)
+    if (!Load(StoredVersion) || StoredVersion.m_uChecksum != Data.m_uChecksum || memcmp(&StoredVersion.m_UserData, &(Data.m_UserData), sizeof(CEEPROMData) - sizeof(uint16_t)) != 0)
     {
-      int i = eeprom_interrupt_write_block(&Data, &m_EEPROMData, sizeof(CEEPROMData));
+      int i = eeprom_interrupt_write_block(&Data, m_EEPROMData, sizeof(CEEPROMData));
       if(i != 0) return i;
       return 0; 
     }
@@ -65,16 +61,15 @@ public:
 private:
   bool Load(CEEPROMData &Result)
   {
-    eeprom_read_block(&Result, (const void *)&m_EEPROMData, sizeof(CEEPROMData));
-    uint16_t uChecksum = CalculateChecksum(Result.m_UserData);
+    eeprom_read_block(&Result, (const void *)m_EEPROMData, sizeof(CEEPROMData));
+    uint16_t uChecksum = CalculateChecksum(reinterpret_cast<const uint8_t *>(&(Result.m_UserData)));
     return uChecksum == Result.m_uChecksum;
   }
 
-  uint16_t CalculateChecksum(const TData &TestData) const
+  uint16_t CalculateChecksum(const uint8_t *pRawData) const
   {
     uint16_t uChecksum = 0;
-    const uint8_t *pRawData = reinterpret_cast<const uint8_t *>(&TestData);
-    size_t szData = sizeof(TestData);
+    size_t szData = sizeof(CEEPROMData) - sizeof(uint16_t);
 
     while (szData--){
       uChecksum = _crc16_update(uChecksum, *pRawData++);

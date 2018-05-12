@@ -1,11 +1,8 @@
 void loadConfiguration(){
-  ControllerConfiguration.Load();
-  ConfigurationPWM0.Load();
-  ConfigurationPWM1.Load();
-  ConfigurationPWM2.Load();
-  ConfigurationPWM3.Load();
-  ConfigurationPWM4.Load();
-  ConfigurationPWM5.Load();
+  ControllerConfigurationHolder.Load();
+  for(int i = 0; i <= 5; i++){
+    ConfigurationPWMHolder[i].Load();
+  }
 }
 
 void saveConfiguration(){
@@ -13,41 +10,20 @@ void saveConfiguration(){
   Serial.print(F("Before save - "));
   printBufferToStoreDebug();
   #endif
-  ControllerConfiguration.Save();
+  ControllerConfigurationHolder.Save();
   #ifdef SAVE_DEBUG
   Serial.print(F("After save configuration - "));
   printBufferToStoreDebug();
   #endif
-  ConfigurationPWM0.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 0 - "));
-  printBufferToStoreDebug();
-  #endif
-  ConfigurationPWM1.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 1 - "));
-  printBufferToStoreDebug();
-  #endif
-  ConfigurationPWM2.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 2 - "));
-  printBufferToStoreDebug();
-  #endif
-  ConfigurationPWM3.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 3 - "));
-  printBufferToStoreDebug();
-  #endif
-  ConfigurationPWM4.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 4 - "));
-  printBufferToStoreDebug();
-  #endif
-  ConfigurationPWM5.Save();
-  #ifdef SAVE_DEBUG
-  Serial.print(F("After save 5 - "));
-  printBufferToStoreDebug();
-  #endif
+  for(int i = 0; i <= 5; i++){
+    ConfigurationPWMHolder[i].Save();
+    #ifdef SAVE_DEBUG
+    Serial.print(F("After save "));
+    Serial.print(i);
+    Serial.print(F(" - "));
+    printBufferToStoreDebug();
+    #endif
+  }
   startWritingBufferByISR();
 }
 

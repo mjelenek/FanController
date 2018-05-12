@@ -75,7 +75,6 @@ public:
       }
       Serial.print(F("#"));
     } else {
-      Serial.println(F(""));
       for(short i = lowLimit; i < lowLimit + buffSize; i++){
         Serial.print(i);
         Serial.print(F(" - ["));

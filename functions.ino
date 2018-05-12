@@ -253,18 +253,12 @@ if(gui){
   cacheRMPbyTemp[4].printStatus();
   cacheRMPbyTemp[5].printStatus();
 } else {
-  Serial.println(F("cache RPMbyTemp[0]"));
-  cacheRMPbyTemp[0].printStatus();
-  Serial.println(F("cache RPMbyTemp[1]"));
-  cacheRMPbyTemp[1].printStatus();
-  Serial.println(F("cache RPMbyTemp[2]"));
-  cacheRMPbyTemp[2].printStatus();
-  Serial.println(F("cache RPMbyTemp[3]"));
-  cacheRMPbyTemp[3].printStatus();
-  Serial.println(F("cache RPMbyTemp[4]"));
-  cacheRMPbyTemp[4].printStatus();
-  Serial.println(F("cache RPMbyTemp[5]"));
-  cacheRMPbyTemp[5].printStatus();
+  for(int i = 0; i <= 5; i++){
+    Serial.print(F("cache RPMbyTemp["));
+    Serial.print(i);
+    Serial.println(F("]"));
+    cacheRMPbyTemp[i].printStatus();
+  }
 }
 #endif
 }

@@ -226,15 +226,25 @@ public:
   }
 };
 
-EEPROMStore<PWMConfiguration> ConfigurationPWM0;
-EEPROMStore<PWMConfiguration> ConfigurationPWM1;
-EEPROMStore<PWMConfiguration> ConfigurationPWM2;
-EEPROMStore<PWMConfiguration> ConfigurationPWM3;
-EEPROMStore<PWMConfiguration> ConfigurationPWM4;
-EEPROMStore<PWMConfiguration> ConfigurationPWM5;
-PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWM0.Data.m_UserData, &ConfigurationPWM1.Data.m_UserData,
-                                        &ConfigurationPWM2.Data.m_UserData, &ConfigurationPWM3.Data.m_UserData,
-                                        &ConfigurationPWM4.Data.m_UserData, &ConfigurationPWM5.Data.m_UserData};
+typedef struct CEEPROMPWM
+{
+  uint16_t m_uChecksum;
+  PWMConfiguration m_UserData;
+};
+
+CEEPROMPWM EEMEM EEPROPWM0, EEPROPWM1, EEPROPWM2, EEPROPWM3, EEPROPWM4, EEPROPWM5;
+
+EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM0),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM1),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM2),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM3),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM4),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM5)};
+
+PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWMHolder[0].Data.m_UserData, &ConfigurationPWMHolder[1].Data.m_UserData,
+                                        &ConfigurationPWMHolder[2].Data.m_UserData, &ConfigurationPWMHolder[3].Data.m_UserData,
+                                        &ConfigurationPWMHolder[4].Data.m_UserData, &ConfigurationPWMHolder[5].Data.m_UserData};
 
 class ControllerConfiguration
 {
@@ -251,11 +261,18 @@ public:
   }
 };
 
-EEPROMStore<ControllerConfiguration> ControllerConfiguration;
+  typedef struct CEEPROMC
+  {
+    uint16_t m_uChecksum;
+    ControllerConfiguration m_UserData;
+  };
+CEEPROMC EEMEM EEPROMConf;
+
+EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 
 // sensor to mainboard
-byte *rmpToMainboard = &ControllerConfiguration.Data.m_UserData.rmpToMainboard;
-byte *hysteresis = &ControllerConfiguration.Data.m_UserData.hysteresis;
+byte *rmpToMainboard = &ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard;
+byte *hysteresis = &ControllerConfigurationHolder.Data.m_UserData.hysteresis;
  
 byte pwm[] = {0, 0, 0, 0, 0, 0};
 byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};
@@ -310,12 +327,12 @@ double inputPid;
 double setpointPid[6];
 //Specify the links and initial tuning parameters
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM0.Data.m_UserData.kp / 200, (double)ConfigurationPWM0.Data.m_UserData.ki / 200, (double)ConfigurationPWM0.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM1.Data.m_UserData.kp / 200, (double)ConfigurationPWM1.Data.m_UserData.ki / 200, (double)ConfigurationPWM1.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM2.Data.m_UserData.kp / 200, (double)ConfigurationPWM2.Data.m_UserData.ki / 200, (double)ConfigurationPWM2.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM3.Data.m_UserData.kp / 200, (double)ConfigurationPWM3.Data.m_UserData.ki / 200, (double)ConfigurationPWM3.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM4.Data.m_UserData.kp / 200, (double)ConfigurationPWM4.Data.m_UserData.ki / 200, (double)ConfigurationPWM4.Data.m_UserData.kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM5.Data.m_UserData.kp / 200, (double)ConfigurationPWM5.Data.m_UserData.ki / 200, (double)ConfigurationPWM5.Data.m_UserData.kd / 200, P_ON_E, DIRECT)
+  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM[0] -> kp / 200, (double)ConfigurationPWM[0] -> ki / 200, (double)ConfigurationPWM[0] -> kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM[1] -> kp / 200, (double)ConfigurationPWM[1] -> ki / 200, (double)ConfigurationPWM[1] -> kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM[2] -> kp / 200, (double)ConfigurationPWM[2] -> ki / 200, (double)ConfigurationPWM[2] -> kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM[3] -> kp / 200, (double)ConfigurationPWM[3] -> ki / 200, (double)ConfigurationPWM[3] -> kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM[4] -> kp / 200, (double)ConfigurationPWM[4] -> ki / 200, (double)ConfigurationPWM[4] -> kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM[5] -> kp / 200, (double)ConfigurationPWM[5] -> ki / 200, (double)ConfigurationPWM[5] -> kd / 200, P_ON_E, DIRECT)
 };
 
 void printlnPwmDrive(PWMConfiguration &conf);

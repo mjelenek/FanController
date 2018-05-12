@@ -1,3 +1,7 @@
+static const int TEMPERATURES_LOOKUP_TABLE[1024] PROGMEM =
+{
+};
+
 #ifndef TEMPERATURES_DEBUG
 void countT0(){
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
@@ -58,6 +62,7 @@ void countT1(){
 #endif
 
 int countTemperature(unsigned long thermistorResistance){
+//  return pgm_read_word(&TEMPERATURES_LOOKUP_TABLE[0]);
   float steinhart2;
   steinhart2 = (float)thermistorResistance / THERMISTORNOMINAL;     // (R/Ro)
   steinhart2 = log(steinhart2);                                     // ln(R/Ro)

@@ -15,46 +15,30 @@ void printStatus(){
   } else {
     Serial.println(F("N/A"));
   }
-  Serial.print(F("RPM0:"));
-  Serial.print(roundRPM(rpm[0]));
-  Serial.print(F(" RPM1:"));
-  Serial.print(roundRPM(rpm[1]));
-  Serial.print(F(" RPM2:"));
-  Serial.print(roundRPM(rpm[2]));
-  Serial.print(F(" RPM3:"));
-  Serial.print(roundRPM(rpm[3]));
-  Serial.print(F(" RPM4:"));
-  Serial.print(roundRPM(rpm[4]));
-  Serial.print(F(" RPM5:"));
-  Serial.println(roundRPM(rpm[5]));
+  for(int i = 0; i <= 5; i++){
+    Serial.print(F(" RPM"));
+    Serial.print(i);
+    Serial.print(F(":"));
+    Serial.print(roundRPM(rpm[i]));
+  }
+  Serial.println(F(""));
 }
 
 void printFullStatus(){
   printStatus();
-  Serial.print(F("PWM0:"));
-  Serial.print(pwm[0]);
-  Serial.print(F(" PWM1:"));
-  Serial.print(pwm[1]);
-  Serial.print(F(" PWM2:"));
-  Serial.print(pwm[2]);
-  Serial.print(F(" PWM3:"));
-  Serial.print(pwm[3]);
-  Serial.print(F(" PWM4:"));
-  Serial.print(pwm[4]);
-  Serial.print(F(" PWM5:"));
-  Serial.println(pwm[5]);
-  Serial.print(F(" pwm0Drive: "));
-  printlnPwmDrive(ConfigurationPWM0.Data.m_UserData);
-  Serial.print(F(" pwm1Drive: "));
-  printlnPwmDrive(ConfigurationPWM1.Data.m_UserData);
-  Serial.print(F(" pwm2Drive: "));
-  printlnPwmDrive(ConfigurationPWM2.Data.m_UserData);
-  Serial.print(F(" pwm3Drive: "));
-  printlnPwmDrive(ConfigurationPWM3.Data.m_UserData);
-  Serial.print(F(" pwm4Drive: "));
-  printlnPwmDrive(ConfigurationPWM4.Data.m_UserData);
-  Serial.print(F(" pwm5Drive: "));
-  printlnPwmDrive(ConfigurationPWM5.Data.m_UserData);
+  for(int i = 0; i <= 5; i++){
+    Serial.print(F(" PWM"));
+    Serial.print(i);
+    Serial.print(F(":"));
+    Serial.print(pwm[i]);
+  }
+  Serial.println(F(""));
+  for(int i = 0; i <= 5; i++){
+    Serial.print(F(" pwm"));
+    Serial.print(i);
+    Serial.print(F("Drive: "));
+    printlnPwmDrive(ConfigurationPWMHolder[i].Data.m_UserData);
+  }
   Serial.print(F(" hysteresis: "));
   Serial.println(*hysteresis);
 }  
@@ -73,23 +57,23 @@ void printlnPwmDrive(PWMConfiguration &conf){
     case 2:
       Serial.print(F("PWM by temperature, t0="));
       Serial.print(conf.tPwm[0]);
-      Serial.print(F(", pwm0="));
+      Serial.print(F(" pwm0="));
       Serial.print(conf.pwm[0]);
-      Serial.print(F(" t1="));
+      Serial.print(F(", t1="));
       Serial.print(conf.tPwm[1]);
-      Serial.print(F(", pwm1="));
+      Serial.print(F(" pwm1="));
       Serial.print(conf.pwm[1]);
-      Serial.print(F(" t2="));
+      Serial.print(F(", t2="));
       Serial.print(conf.tPwm[2]);
-      Serial.print(F(", pwm2="));
+      Serial.print(F(" pwm2="));
       Serial.print(conf.pwm[2]);
-      Serial.print(F(" t3="));
+      Serial.print(F(", t3="));
       Serial.print(conf.tPwm[3]);
-      Serial.print(F(", pwm3="));
+      Serial.print(F(" pwm3="));
       Serial.print(conf.pwm[3]);
-      Serial.print(F(" t4="));
+      Serial.print(F(", t4="));
       Serial.print(conf.tPwm[4]);
-      Serial.print(F(", pwm4="));
+      Serial.print(F(" pwm4="));
       Serial.println(conf.pwm[4]);
       break;
     case 3:
@@ -99,23 +83,23 @@ void printlnPwmDrive(PWMConfiguration &conf){
     case 4:
       Serial.print(F("RPM by temperature, t0="));
       Serial.print(conf.tRpm[0]);
-      Serial.print(F(", rpm0="));
+      Serial.print(F(" rpm0="));
       Serial.print(conf.rpm[0]);
-      Serial.print(F(" t1="));
+      Serial.print(F(", t1="));
       Serial.print(conf.tRpm[1]);
-      Serial.print(F(", rpm1="));
+      Serial.print(F(" rpm1="));
       Serial.print(conf.rpm[1]);
-      Serial.print(F(" t2="));
+      Serial.print(F(", t2="));
       Serial.print(conf.tRpm[2]);
-      Serial.print(F(", rpm2="));
+      Serial.print(F(" rpm2="));
       Serial.print(conf.rpm[2]);
-      Serial.print(F(" t3="));
+      Serial.print(F(", t3="));
       Serial.print(conf.tRpm[3]);
-      Serial.print(F(", rpm3="));
+      Serial.print(F(" rpm3="));
       Serial.print(conf.rpm[3]);
-      Serial.print(F(" t4="));
+      Serial.print(F(", t4="));
       Serial.print(conf.tRpm[4]);
-      Serial.print(F(", rpm4="));
+      Serial.print(F(" rpm4="));
       Serial.println(conf.rpm[4]);
       break;
   }

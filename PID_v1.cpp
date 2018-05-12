@@ -151,7 +151,7 @@ void PID::SetSampleTime(unsigned long NewSampleTime)
  *  want to clamp it from 0-125.  who knows.  at any rate, that can all be done
  *  here.
  **************************************************************************/
-void PID::SetOutputLimits(double Min, double Max)
+void PID::SetOutputLimits(byte Min, byte Max)
 {
    if(Min >= Max) return;
    outMin = Min;
