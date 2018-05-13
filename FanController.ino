@@ -46,13 +46,6 @@ byte timeCountingStartFlag = 0;
 #define RT0 9990
 #define RT1 9990
 
-// temp. for nominal resistance (almost always 25 C)
-#define TEMPERATURENOMINAL 25   
-// resistance at nominal temperature
-#define THERMISTORNOMINAL 10000      
-// The beta coefficient of the thermistor (usually 3000-4000)
-#define BCOEFFICIENT 3950
-
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
 #define RPMSENSOR2 2
@@ -246,6 +239,24 @@ PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWMHolder[0].Data.m_UserDa
                                         &ConfigurationPWMHolder[2].Data.m_UserData, &ConfigurationPWMHolder[3].Data.m_UserData,
                                         &ConfigurationPWMHolder[4].Data.m_UserData, &ConfigurationPWMHolder[5].Data.m_UserData};
 
+class ThermistorDefinition
+{
+  public:
+  // temp. for nominal resistance (almost always 25 C)
+  unsigned char tempNominal;
+  // resistance at nominal temperature
+  unsigned int resistanceNominal;
+  // The beta coefficient of the thermistor (usually 3000-4000)
+  unsigned int bCoefficient;
+
+  void Reset()
+  {
+    tempNominal = 25;
+    resistanceNominal = 10000;
+    bCoefficient = 3950;
+  }
+};
+
 class ControllerConfiguration
 {
 public:
@@ -253,11 +264,15 @@ public:
   byte rmpToMainboard;
   // hysteresis * 10°C -> value 10 means +- 1°C
   byte hysteresis;
-
+  //Thermistor definitions
+  ThermistorDefinition thermistors[2];
+  
   void Reset()
   {
     rmpToMainboard = 5;
     hysteresis = 10;
+    thermistors[0].Reset();
+    thermistors[1].Reset();
   }
 };
 
@@ -273,6 +288,7 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 // sensor to mainboard
 byte *rmpToMainboard = &ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard;
 byte *hysteresis = &ControllerConfigurationHolder.Data.m_UserData.hysteresis;
+ThermistorDefinition *thermistors = ControllerConfigurationHolder.Data.m_UserData.thermistors;
  
 byte pwm[] = {0, 0, 0, 0, 0, 0};
 byte pwmDisabled[] = {0, 0, 0, 0, 0, 0};

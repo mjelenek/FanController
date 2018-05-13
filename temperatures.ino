@@ -1,7 +1,3 @@
-static const int TEMPERATURES_LOOKUP_TABLE[1024] PROGMEM =
-{
-};
-
 #ifndef TEMPERATURES_DEBUG
 void countT0(){
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
@@ -14,7 +10,7 @@ void countT0(){
     T0int = cacheT0.get(sensorValueAveraged);
     if(T0int == 0){
 #endif
-      T0int = countTemperature(RT0koeficient / sensorValueAveraged - RT0);
+      T0int = countTemperature(RT0koeficient / sensorValueAveraged - RT0, thermistors);
 #ifdef USE_TEMP_CACHE
       cacheT0.put(sensorValueAveraged, T0int);
     }
@@ -36,7 +32,7 @@ void countT1(){
     T1int = cacheT1.get(sensorValueAveraged);
     if(T1int == 0){
 #endif
-      T1int = countTemperature(RT1koeficient / sensorValueAveraged - RT1);
+      T1int = countTemperature(RT1koeficient / sensorValueAveraged - RT1, thermistors + 1);
 #ifdef USE_TEMP_CACHE
       cacheT1.put(sensorValueAveraged, T1int);
     }
@@ -61,15 +57,19 @@ void countT1(){
 }
 #endif
 
-int countTemperature(unsigned long thermistorResistance){
+static const int TEMPERATURES_LOOKUP_TABLE[1024] PROGMEM =
+{
+};
+
+int countTemperature(unsigned long thermistorResistance, ThermistorDefinition *tDef){
 //  return pgm_read_word(&TEMPERATURES_LOOKUP_TABLE[0]);
   float steinhart2;
-  steinhart2 = (float)thermistorResistance / THERMISTORNOMINAL;     // (R/Ro)
-  steinhart2 = log(steinhart2);                                     // ln(R/Ro)
-  steinhart2 /= BCOEFFICIENT;                                       // 1/B * ln(R/Ro)
-  steinhart2 += 1.0 / (TEMPERATURENOMINAL + 273.15);                // + (1/To)
-  steinhart2 = 1.0 / steinhart2;                                    // Invert
-  steinhart2 -= 273.15;                                             // convert to C
+  steinhart2 = (float)thermistorResistance / tDef -> resistanceNominal;// (R/Ro)
+  steinhart2 = log(steinhart2);                                        // ln(R/Ro)
+  steinhart2 /= tDef -> bCoefficient;                                  // 1/B * ln(R/Ro)
+  steinhart2 += 1.0 / (tDef -> tempNominal + 273.15);                  // + (1/To)
+  steinhart2 = 1.0 / steinhart2;                                       // Invert
+  steinhart2 -= 273.15;                                                // convert to C
   return (int)(steinhart2 * 10);
 }
 
