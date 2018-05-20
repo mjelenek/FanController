@@ -180,8 +180,8 @@ void printHelp(){
   Serial.println(F("    param16 - rpm value at temperature t4, and above temperature t4 if next temperature is not defined"));
   Serial.println(F("load - load fan configurations from internal memory"));
   Serial.println(F("save - save fan configurations into internal memory"));
-  Serial.println(F("rpm - setRPMToMainboard"));
-  Serial.println(F("h param1 - set temperature hysteresis. Allowed values 0(0°C) - 100(10°C)"));
+  Serial.println(F("setConf - set configuration(TODO)"));
+  Serial.println(F("setThermistor - set thermistor parameters(TODO)"));
   Serial.println(F("disableFan param1 param2 ... paramN - disable rotation of fan [param1, param3, param5...] for [param2, param4, param6...] seconds"));
   Serial.println(F("cacheStatus - print current state of caches with temperature values computed from thermistors"));
 #ifdef TIMING_DEBUG

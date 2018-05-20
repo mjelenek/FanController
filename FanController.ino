@@ -2,6 +2,8 @@
 #include "CommandHandler.h"
 #include "EEPROMStoreISR.h"
 
+#define HWversion 1.0
+
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
 //#define TEMPERATURES_DEBUG
@@ -39,12 +41,12 @@ byte timeCountingStartFlag = 0;
 #define DELAY_THRESHOLD 10000
 
 //by multimeter
-#define ANALOGREFERENCEVOLTAGE 3.3
-// voltage to thermistor
-#define VOLTAGETHERMISTOR 3.3
+//#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
 #define RT0 9990
 #define RT1 9990
+
+#define NUMBER_OF_THERMISTORS 2
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -245,15 +247,30 @@ class ThermistorDefinition
   // temp. for nominal resistance (almost always 25 C)
   unsigned char tempNominal;
   // resistance at nominal temperature
-  unsigned int resistanceNominal;
+  unsigned short resistanceNominal;
   // The beta coefficient of the thermistor (usually 3000-4000)
-  unsigned int bCoefficient;
+  unsigned short bCoefficient;
 
   void Reset()
   {
     tempNominal = 25;
     resistanceNominal = 10000;
     bCoefficient = 3950;
+  }
+
+  void Set(unsigned char t, unsigned short r, unsigned short b){
+    if(t < 0 || t >= 100) return;
+    if(r < 3000 || r >= 50000) return;
+    if(b < 1000 || b >= 10000) return;
+    tempNominal = t;
+    resistanceNominal = r;
+    bCoefficient = b;
+  }
+
+  void sendDefinition(){
+    Serial.write(tempNominal);
+    serialWriteInt(resistanceNominal);
+    serialWriteInt(bCoefficient);
   }
 };
 
@@ -265,14 +282,15 @@ public:
   // hysteresis * 10°C -> value 10 means +- 1°C
   byte hysteresis;
   //Thermistor definitions
-  ThermistorDefinition thermistors[2];
+  ThermistorDefinition thermistors[NUMBER_OF_THERMISTORS];
   
   void Reset()
   {
     rmpToMainboard = 5;
     hysteresis = 10;
-    thermistors[0].Reset();
-    thermistors[1].Reset();
+    for(int i = 0; i < NUMBER_OF_THERMISTORS; i++){
+      thermistors[i].Reset();
+    }
   }
 };
 
@@ -357,8 +375,7 @@ void printFullStatus();
 void setPwmConfiguration(CommandParameter &parameters);
 void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
-void setRPMToMainboard(CommandParameter &parameters);
-void setHysteresis(CommandParameter &parameters);
+void configure(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
 byte countPWM(PWMConfiguration &conf, unsigned int temperature);
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature);
@@ -387,15 +404,16 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
   SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
   SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
+  SerialCommandHandler.AddCommand(F("setConf"), setConfiguration);
+  SerialCommandHandler.AddCommand(F("setThermistor"), setThermistor);
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
+  SerialCommandHandler.AddCommand(F("conf"), configuration);
   SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
   SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
   SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
-  SerialCommandHandler.AddCommand(F("rpm"), setRPMToMainboard);
-  SerialCommandHandler.AddCommand(F("h"), setHysteresis);
   SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
   SerialCommandHandler.AddCommand(F("pidU"), sendPidUpdates);
   SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);

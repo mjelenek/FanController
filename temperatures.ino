@@ -57,12 +57,7 @@ void countT1(){
 }
 #endif
 
-static const int TEMPERATURES_LOOKUP_TABLE[1024] PROGMEM =
-{
-};
-
 int countTemperature(unsigned long thermistorResistance, ThermistorDefinition *tDef){
-//  return pgm_read_word(&TEMPERATURES_LOOKUP_TABLE[0]);
   float steinhart2;
   steinhart2 = (float)thermistorResistance / tDef -> resistanceNominal;// (R/Ro)
   steinhart2 = log(steinhart2);                                        // ln(R/Ro)

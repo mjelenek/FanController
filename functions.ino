@@ -10,6 +10,18 @@ void serialWriteLong(unsigned long l){
   Serial.write(lowByte(l >> 32));
 }
 
+void configuration(){
+  Serial.print(F("!"));
+  Serial.write(17);
+  Serial.print(F("conf"));
+  Serial.write((byte)HWversion);
+  Serial.write(*rmpToMainboard);
+  Serial.write(*hysteresis);
+  thermistors -> sendDefinition();
+  (thermistors+1) -> sendDefinition();
+  Serial.print(F("#"));
+}
+
 void guistat1(){
   Serial.print(F("!"));
   Serial.write(106);
@@ -216,20 +228,36 @@ void sendPidUpdates(CommandParameter &parameters){
   }
 }
 
-void setRPMToMainboard(CommandParameter &parameters){
+void setConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
 
   byte select = parameters.NextParameterAsInteger();
+  byte h = parameters.NextParameterAsInteger();
+
   if(select >= 0 && select <= 5){
     *rmpToMainboard = select;
   }
-}
-
-void setHysteresis(CommandParameter &parameters){
-  unsigned short h = parameters.NextParameterAsInteger();
+  
   if(h >= 0 && h <= 100){
     *hysteresis = h;
   }
+}
+
+void setThermistor(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
+
+  byte thermistorNumber = parameters.NextParameterAsInteger();
+  if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
+  
+  byte tempNominal = parameters.NextParameterAsInteger(25);
+  unsigned short resistanceNominal = parameters.NextParameterAsInteger(10000);
+  unsigned short bCoefficient = parameters.NextParameterAsInteger(3950);
+  (thermistors + thermistorNumber) -> Set(tempNominal, resistanceNominal, bCoefficient);
+
+ #ifdef USE_TEMP_CACHE
+    cacheT0.clear();
+    cacheT1.clear();
+ #endif    
 }
 
 void cacheStatus(){

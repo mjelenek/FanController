@@ -88,10 +88,6 @@ void setTimers(){
 }
 
 void init_thermistors(){
-// VOLTAGETHERMISTOR != ANALOGREFERENCEVOLTAGE
-//  RT0koeficient = RT0 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
-//  RT1koeficient = RT1 * (1023 * VOLTAGETHERMISTOR) / ANALOGREFERENCEVOLTAGE;
-
 // VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
   RT0koeficient = (unsigned long)RT0 * 1023;
   RT1koeficient = (unsigned long)RT1 * 1023;
