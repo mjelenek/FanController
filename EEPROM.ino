@@ -24,7 +24,6 @@ void saveConfiguration(){
     printBufferToStoreDebug();
     #endif
   }
-  startWritingBufferByISR();
 }
 
 #ifdef SAVE_DEBUG

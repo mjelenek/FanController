@@ -5,7 +5,7 @@
 #if defined(__AVR__)
 
 #include <avr/eeprom.h>
-#include <avr/crc16.h>
+#include <util/crc16.h>
 
 template <class CEEPROMData> class EEPROMStore
 {
@@ -80,7 +80,7 @@ private:
 };
 
 
-#define BUFF_STORE_SIZE 7
+#define BUFF_STORE_SIZE 6
 struct DataToStore
   {
     volatile void* eeprom_data;
@@ -121,6 +121,11 @@ byte nextIndexInBuffer(byte index){
   return index;
 }
 
+// enable interrupt and start writing bufferToStore
+void startWritingBufferByISR(){
+  EECR |= (1<<EERIE);   //enable the eeprom ready interrupt.  It will now take over all the data
+}
+
 // actually write pointers to bufferToStore
 char eeprom_interrupt_write_block (void* source, void* dest, byte num_bytes)
 {
@@ -142,12 +147,8 @@ char eeprom_interrupt_write_block (void* source, void* dest, byte num_bytes)
   eeprom_busy = 1; 
   
   //now the interrupt will do the rest of the job.
+  startWritingBufferByISR();
   return(0);
-}
-
-// enable interrupt and start writing bufferToStore
-void startWritingBufferByISR(){
-  EECR |= (1<<EERIE);   //enable the eeprom ready interrupt.  It will now take over all the data
 }
 
 //-------------------------------------------------------------------------------------------------------------------------
