@@ -103,27 +103,27 @@ void countRPMs(){
 
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000001) > 0) || (i == (254 - 64))){
     rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
-//    pidUpdateDirect(0, *ConfigurationPWM[0]);
+//    pidUpdateDirect(0, *ConfigurationPWM(0]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000010) > 0) || (i == (255 - 64))){
     rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
-//    pidUpdateDirect(1, *ConfigurationPWM[1]);
+//    pidUpdateDirect(1, *ConfigurationPWM(1]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000100) > 0) || (i == (254 - 32))){
     rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
-//    pidUpdateDirect(2, *ConfigurationPWM[2]);
+//    pidUpdateDirect(2, *ConfigurationPWM(2]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00001000) > 0) || (i == (255 - 32))){
     rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
-//    pidUpdateDirect(3, *ConfigurationPWM[3]);
+//    pidUpdateDirect(3, *ConfigurationPWM(3]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00010000) > 0) || (i == 254)){
     rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
-//    pidUpdateDirect(4, *ConfigurationPWM[4]);
+//    pidUpdateDirect(4, *ConfigurationPWM(4]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00100000) > 0) || (i == 255)){
     rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
-//    pidUpdateDirect(5, *ConfigurationPWM[5]);
+//    pidUpdateDirect(5, *ConfigurationPWM(5]);
   }
 }
 

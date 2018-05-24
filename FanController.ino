@@ -236,10 +236,12 @@ EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
   EEPROMStore<CEEPROMPWM>(&EEPROPWM3),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM4),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM5)};
-
+/*
 PWMConfiguration *ConfigurationPWM[] = {&ConfigurationPWMHolder[0].Data.m_UserData, &ConfigurationPWMHolder[1].Data.m_UserData,
                                         &ConfigurationPWMHolder[2].Data.m_UserData, &ConfigurationPWMHolder[3].Data.m_UserData,
                                         &ConfigurationPWMHolder[4].Data.m_UserData, &ConfigurationPWMHolder[5].Data.m_UserData};
+*/
+#define ConfigurationPWM(i) ConfigurationPWMHolder[i].Data.m_UserData
 
 class ThermistorDefinition
 {
@@ -361,12 +363,12 @@ double inputPid;
 double setpointPid[6];
 //Specify the links and initial tuning parameters
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM[0] -> kp / 200, (double)ConfigurationPWM[0] -> ki / 200, (double)ConfigurationPWM[0] -> kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM[1] -> kp / 200, (double)ConfigurationPWM[1] -> ki / 200, (double)ConfigurationPWM[1] -> kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM[2] -> kp / 200, (double)ConfigurationPWM[2] -> ki / 200, (double)ConfigurationPWM[2] -> kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM[3] -> kp / 200, (double)ConfigurationPWM[3] -> ki / 200, (double)ConfigurationPWM[3] -> kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM[4] -> kp / 200, (double)ConfigurationPWM[4] -> ki / 200, (double)ConfigurationPWM[4] -> kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM[5] -> kp / 200, (double)ConfigurationPWM[5] -> ki / 200, (double)ConfigurationPWM[5] -> kd / 200, P_ON_E, DIRECT)
+  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM(0).kp / 200, (double)ConfigurationPWM(0).ki / 200, (double)ConfigurationPWM(0).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM(1).kp / 200, (double)ConfigurationPWM(1).ki / 200, (double)ConfigurationPWM(1).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM(2).kp / 200, (double)ConfigurationPWM(2).ki / 200, (double)ConfigurationPWM(2).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM(3).kp / 200, (double)ConfigurationPWM(3).ki / 200, (double)ConfigurationPWM(3).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM(4).kp / 200, (double)ConfigurationPWM(4).ki / 200, (double)ConfigurationPWM(4).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200, P_ON_E, DIRECT)
 };
 
 void printlnPwmDrive(PWMConfiguration &conf);

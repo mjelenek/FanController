@@ -55,7 +55,7 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
   unsigned short sensorValue;
   byte pwmOld = pwm[fanNumber];
   if(pwmDisabled[fanNumber] == 0){
-    PWMConfiguration &conf = *ConfigurationPWM[fanNumber];
+    PWMConfiguration &conf = ConfigurationPWM(fanNumber);
     // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
     switch (conf.pwmDrive) {
       case 0:
@@ -95,7 +95,7 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
   if(pwmOld != pwm[fanNumber]){
     analogWrite(PWMOUT[fanNumber], 255 - pwm[fanNumber]);
   }
-  pidUpdate(fanNumber, *ConfigurationPWM[fanNumber]);
+  pidUpdate(fanNumber, ConfigurationPWM(fanNumber));
 }
 
 byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION){

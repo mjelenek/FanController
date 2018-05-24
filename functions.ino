@@ -26,9 +26,9 @@ void guistat1(){
   Serial.print(F("!"));
   Serial.write(106);
   Serial.print(F("gui1"));
-  ConfigurationPWM[0] -> guiStat();
-  ConfigurationPWM[1] -> guiStat();
-  ConfigurationPWM[2] -> guiStat();
+  ConfigurationPWM(0).guiStat();
+  ConfigurationPWM(1).guiStat();
+  ConfigurationPWM(2).guiStat();
   Serial.print(F("#"));
 }
 
@@ -36,9 +36,9 @@ void guistat2(){
   Serial.print(F("!"));
   Serial.write(106);
   Serial.print(F("gui2"));
-  ConfigurationPWM[3] -> guiStat();
-  ConfigurationPWM[4] -> guiStat();
-  ConfigurationPWM[5] -> guiStat();
+  ConfigurationPWM(3).guiStat();
+  ConfigurationPWM(4).guiStat();
+  ConfigurationPWM(5).guiStat();
   Serial.print(F("#"));
 }
 
@@ -153,7 +153,7 @@ void setPwmConfiguration(CommandParameter &parameters){
   byte pwm4 = parameters.NextParameterAsInteger( 0 );
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM[pwmChannel] -> set(pwmDrive, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
+    ConfigurationPWM(pwmChannel).set(pwmDrive, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
 #ifdef USE_PWM_CACHE
     cacheRMPbyTemp[pwmChannel].clear();
 #endif    
@@ -191,9 +191,9 @@ void setPidConfiguration(CommandParameter &parameters){
   unsigned short rpm4 = parameters.NextParameterAsInteger( 0 );
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM[pwmChannel] -> setPid(constRPM, kp, ki, kd, minPidPwm, t0, rpm0, t1, rpm1, t2, rpm2, t3, rpm3, t4, rpm4);
+    ConfigurationPWM(pwmChannel).setPid(constRPM, kp, ki, kd, minPidPwm, t0, rpm0, t1, rpm1, t2, rpm2, t3, rpm3, t4, rpm4);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
-    pid[pwmChannel].SetOutputLimits(ConfigurationPWM[pwmChannel] -> minPidPwm, 255);
+    pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
 #ifdef USE_PWM_CACHE
     cacheRMPbyTemp[pwmChannel].clear();
 #endif    
