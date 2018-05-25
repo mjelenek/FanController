@@ -6,7 +6,7 @@ ISR(PCINT0_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PINB0)){
-    if(*rmpToMainboard == 3){
+    if(rmpToMainboard == 3){
       if(state & (1 << PINB0)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime3, fanRpmSensorTimes3, now);
@@ -14,7 +14,7 @@ ISR(PCINT0_vect){
   }
 
   if(changed & (1 << PINB4)){
-    if(*rmpToMainboard == 4){
+    if(rmpToMainboard == 4){
       if(state & (1 << PINB4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime4, fanRpmSensorTimes4, now);
@@ -28,7 +28,7 @@ ISR(PCINT0_vect){
 ISR(PCINT1_vect){
   unsigned long now = micros();
   byte state = PINC & (1 << PINC5);
-  if(*rmpToMainboard == 5){
+  if(rmpToMainboard == 5){
     if(state) LED_OUT_SET;
   }
   writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  now);
@@ -43,7 +43,7 @@ ISR(PCINT2_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PIND2)){
-    if(*rmpToMainboard == 0){
+    if(rmpToMainboard == 0){
       if(state & (1 << PIND2)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime0, fanRpmSensorTimes0, now);
@@ -51,7 +51,7 @@ ISR(PCINT2_vect){
   }
 
   if(changed & (1 << PIND4)){
-    if(*rmpToMainboard == 1){
+    if(rmpToMainboard == 1){
       if(state & (1 << PIND4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime1, fanRpmSensorTimes1, now);
@@ -59,7 +59,7 @@ ISR(PCINT2_vect){
   }
 
   if(changed & (1 << PIND7)){
-    if(*rmpToMainboard == 2){
+    if(rmpToMainboard == 2){
       if(state & (1 << PIND7)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime2, fanRpmSensorTimes2, now);
@@ -103,27 +103,21 @@ void countRPMs(){
 
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000001) > 0) || (i == (254 - 64))){
     rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
-//    pidUpdateDirect(0, *ConfigurationPWM(0]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000010) > 0) || (i == (255 - 64))){
     rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
-//    pidUpdateDirect(1, *ConfigurationPWM(1]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000100) > 0) || (i == (254 - 32))){
     rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
-//    pidUpdateDirect(2, *ConfigurationPWM(2]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00001000) > 0) || (i == (255 - 32))){
     rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
-//    pidUpdateDirect(3, *ConfigurationPWM(3]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00010000) > 0) || (i == 254)){
     rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
-//    pidUpdateDirect(4, *ConfigurationPWM(4]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00100000) > 0) || (i == 255)){
     rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
-//    pidUpdateDirect(5, *ConfigurationPWM(5]);
   }
 }
 

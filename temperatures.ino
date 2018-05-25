@@ -1,11 +1,12 @@
 #ifndef TEMPERATURES_DEBUG
+/*
 void countT0(){
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
   unsigned short sensorValueAveraged = sensorValue6Averaged;
   ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
 
-  T0Connected = (sensorValueAveraged > 10);
-  if(T0Connected == true){
+  TConnected[0] = (sensorValueAveraged > 10);
+  if(TConnected[0] == true){
 #ifdef USE_TEMP_CACHE
     T0int = cacheT0.get(sensorValueAveraged);
     if(T0int == 0){
@@ -15,7 +16,7 @@ void countT0(){
       cacheT0.put(sensorValueAveraged, T0int);
     }
 #endif
-    T0WithHysteresisInt = countHysteresisTemperature(T0WithHysteresisInt, T0int);
+    TWithHysteresisInt[0] = countHysteresisTemperature(TWithHysteresisInt[0], T0int);
   } else {
     T0int = 0;
   }
@@ -26,8 +27,8 @@ void countT1(){
   unsigned short sensorValueAveraged = sensorValue7Averaged;
   ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
 
-  T1Connected = (sensorValueAveraged > 10);
-  if(T1Connected == true){
+  TConnected[1] = (sensorValueAveraged > 10);
+  if(TConnected[1] == true){
 #ifdef USE_TEMP_CACHE
     T1int = cacheT1.get(sensorValueAveraged);
     if(T1int == 0){
@@ -37,23 +38,39 @@ void countT1(){
       cacheT1.put(sensorValueAveraged, T1int);
     }
 #endif
-    T1WithHysteresisInt = countHysteresisTemperature(T1WithHysteresisInt, T1int);
+    TWithHysteresisInt[1] = countHysteresisTemperature(TWithHysteresisInt[1], T1int);
   } else {
     T1int = 0;
   }
 }
+*/
+void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
+  ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
+  unsigned short sensorValueAveraged = *sensorValuePointer;
+  ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
 
-#else
-void countT0(){
-  T0Connected = 1;
-  T0int = (int)((millis() / 100) % 600) + 100;
-  T0WithHysteresisInt = countHysteresisTemperature(T0WithHysteresisInt, T0int);
+  TConnected[tNumber] = (sensorValueAveraged > 10);
+  if(TConnected[tNumber]){
+#ifdef USE_TEMP_CACHE
+    Tint[tNumber] = cacheT[tNumber].get(sensorValueAveraged);
+    if(Tint[tNumber] == 0){
+#endif
+      Tint[tNumber] = countTemperature(RTkoeficient[tNumber] / sensorValueAveraged - RT[tNumber], thermistors + tNumber);
+#ifdef USE_TEMP_CACHE
+      cacheT[tNumber].put(sensorValueAveraged, Tint[tNumber]);
+    }
+#endif
+    TWithHysteresisInt[tNumber] = countHysteresisTemperature(TWithHysteresisInt[tNumber], Tint[tNumber]);
+  } else {
+    Tint[tNumber] = 0;
+  }
 }
 
-void countT1(){
-  T1Connected = 1;
-  T1int = 700 - (int)((millis() / 100) % 600);
-  T1WithHysteresisInt = countHysteresisTemperature(T1WithHysteresisInt, T1int);
+#else
+void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
+  TConnected[tNumber] = true;
+  Tint[tNumber] = 700 - (int)((millis() / 100) % (600 - tNumber * 20));
+  TWithHysteresisInt[tNumber] = countHysteresisTemperature(TWithHysteresisInt[tNumber], Tint[tNumber]);
 }
 #endif
 
@@ -69,11 +86,11 @@ int countTemperature(unsigned long thermistorResistance, ThermistorDefinition *t
 }
 
 int countHysteresisTemperature(int tWithHysteresisInt, int tInt){
-  if((tInt - tWithHysteresisInt) > *hysteresis){
-    return(tInt - *hysteresis);
+  if((tInt - tWithHysteresisInt) > hysteresis){
+    return(tInt - hysteresis);
   }
-  if((tWithHysteresisInt - tInt) > *hysteresis){
-    return(tInt + *hysteresis);
+  if((tWithHysteresisInt - tInt) > hysteresis){
+    return(tInt + hysteresis);
   }
   return tWithHysteresisInt;
 }

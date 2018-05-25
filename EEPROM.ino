@@ -1,6 +1,6 @@
 void loadConfiguration(){
   ControllerConfigurationHolder.Load();
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     ConfigurationPWMHolder[i].Load();
   }
 }
@@ -15,7 +15,7 @@ void saveConfiguration(){
   Serial.print(F("After save configuration - "));
   printBufferToStoreDebug();
   #endif
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     ConfigurationPWMHolder[i].Save();
     #ifdef SAVE_DEBUG
     Serial.print(F("After save "));

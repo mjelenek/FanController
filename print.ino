@@ -1,21 +1,21 @@
 void printStatus(){
   Serial.print(F("T0:"));
-  if (T0Connected){
-    Serial.print(T0int / 10);
+  if (TConnected[0]){
+    Serial.print(Tint[0] / 10);
     Serial.print(F("."));
-    Serial.print(T0int % 10);
+    Serial.print(Tint[0] % 10);
   } else {
     Serial.print(F("N/A"));
   }
   Serial.print(F(" T1:"));
-  if (T1Connected){
-    Serial.print(T1int / 10);
+  if (TConnected[1]){
+    Serial.print(Tint[1] / 10);
     Serial.print(F("."));
-    Serial.println(T1int % 10);
+    Serial.println(Tint[1] % 10);
   } else {
     Serial.println(F("N/A"));
   }
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i <= 5; i++){
     Serial.print(F(" RPM"));
     Serial.print(i);
     Serial.print(F(":"));
@@ -26,21 +26,21 @@ void printStatus(){
 
 void printFullStatus(){
   printStatus();
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F(" PWM"));
     Serial.print(i);
     Serial.print(F(":"));
     Serial.print(pwm[i]);
   }
   Serial.println(F(""));
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F(" pwm"));
     Serial.print(i);
     Serial.print(F("Drive: "));
     printlnPwmDrive(ConfigurationPWMHolder[i].Data.m_UserData);
   }
   Serial.print(F(" hysteresis: "));
-  Serial.println(*hysteresis);
+  Serial.println(hysteresis);
 }  
   
 

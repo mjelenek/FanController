@@ -12,11 +12,11 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(17);
+  Serial.write(NUMBER_OF_THERMISTORS * 5 + 7);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
-  Serial.write(*rmpToMainboard);
-  Serial.write(*hysteresis);
+  Serial.write(rmpToMainboard);
+  Serial.write(hysteresis);
   thermistors -> sendDefinition();
   (thermistors+1) -> sendDefinition();
   Serial.print(F("#"));
@@ -67,19 +67,16 @@ void guiDisable(){
 
 void guiUpdate(){
   Serial.print(F("!"));
-  Serial.write(24);
+  Serial.write(4 + NUMBER_OF_THERMISTORS * 4 + NUMBER_OF_FANS * 2);
   Serial.print(F("guiU"));
 
-  serialWriteInt(rpm[0]);
-  serialWriteInt(rpm[1]);
-  serialWriteInt(rpm[2]);
-  serialWriteInt(rpm[3]);
-  serialWriteInt(rpm[4]);
-  serialWriteInt(rpm[5]);
-  serialWriteInt(T0int);
-  serialWriteInt(T1int);
-  serialWriteInt(T0WithHysteresisInt);
-  serialWriteInt(T1WithHysteresisInt);
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    serialWriteInt(rpm[i]);
+  }
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    serialWriteInt(Tint[i]);
+    serialWriteInt(TWithHysteresisInt[i]);
+  }
   Serial.print(F("#"));
 }
 
@@ -235,11 +232,11 @@ void setConfiguration(CommandParameter &parameters){
   byte h = parameters.NextParameterAsInteger();
 
   if(select >= 0 && select <= 5){
-    *rmpToMainboard = select;
+    rmpToMainboard = select;
   }
   
   if(h >= 0 && h <= 100){
-    *hysteresis = h;
+    hysteresis = h;
   }
 }
 
@@ -255,33 +252,31 @@ void setThermistor(CommandParameter &parameters){
   (thermistors + thermistorNumber) -> Set(tempNominal, resistanceNominal, bCoefficient);
 
  #ifdef USE_TEMP_CACHE
-    cacheT0.clear();
-    cacheT1.clear();
+    cacheT[thermistorNumber].clear();
  #endif    
 }
 
 void cacheStatus(){
 #ifdef USE_TEMP_CACHE
 if(gui){
-  cacheT0.printStatus();
-  cacheT1.printStatus();
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    cacheT[i].printStatus();
+  }
 } else {
-  Serial.println(F("cache T0"));
-  cacheT0.printStatus();
-  Serial.println(F("cache T1"));
-  cacheT1.printStatus();
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    Serial.print(F("cache T"));
+    Serial.println(i);
+    cacheT[i].printStatus();
+  }
 }
 #endif
 #ifdef USE_PWM_CACHE
 if(gui){
-  cacheRMPbyTemp[0].printStatus();
-  cacheRMPbyTemp[1].printStatus();
-  cacheRMPbyTemp[2].printStatus();
-  cacheRMPbyTemp[3].printStatus();
-  cacheRMPbyTemp[4].printStatus();
-  cacheRMPbyTemp[5].printStatus();
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    cacheRMPbyTemp[i].printStatus();
+  }
 } else {
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F("cache RPMbyTemp["));
     Serial.print(i);
     Serial.println(F("]"));

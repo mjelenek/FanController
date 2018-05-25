@@ -89,23 +89,24 @@ void setTimers(){
 
 void init_thermistors(){
 // VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
-  RT0koeficient = (unsigned long)RT0 * 1023;
-  RT1koeficient = (unsigned long)RT1 * 1023;
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    RTkoeficient[i] = (unsigned long)RT[i] * 1023;
+  }
 
   Serial.print(F("koeficientT0:"));
-  Serial.print(RT0koeficient);
+  Serial.print(RTkoeficient[0]);
   Serial.print(F(", koeficientT1:"));
-  Serial.println(RT1koeficient);
+  Serial.println(RTkoeficient[1]);
 
   delay(5);  //wait for read values from ADC;
-  countT0();
-  countT1();
-  if(T0Connected){
+  countT(0, &sensorValue6Averaged);  
+  countT(1, &sensorValue7Averaged);  
+  if(TConnected[0]){
     Serial.print(F("T0 connected"));
   } else {
     Serial.print(F("T0 not connected"));
   }
-  if(T1Connected){
+  if(TConnected[1]){
     Serial.println(F(", T1 connected"));
   } else {
     Serial.println(F(", T1 not connected"));
@@ -140,7 +141,7 @@ void init_adc()
 }
 
 void init_pid(){
-  for(int i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);
 //    pid[i].SetSampleTime(62000);                     // will be computed every 64ms
     pid[i].SetSampleTime(120000);                     // will be computed every 128ms
@@ -160,7 +161,7 @@ void init_pid(){
 
 void printTempProfile(){
   for(int i = 0; i <= 1024; i++){
-      unsigned long thermistorResistance = RT0koeficient / i - RT0;
+      unsigned long thermistorResistance = RTkoeficient[0] / i - RT[0];
       unsigned int t = countTemperature(thermistorResistance, thermistors);
       short tShort = (short)t;
       Serial.print(i);
