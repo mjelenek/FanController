@@ -101,7 +101,9 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 // sensor to mainboard
 #define rmpToMainboard ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
-ThermistorDefinition *thermistors = ControllerConfigurationHolder.Data.m_UserData.thermistors;
+#define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
+
+//ThermistorDefinition *thermistors = ControllerConfigurationHolder.Data.m_UserData.thermistors;
  
 byte pwm[NUMBER_OF_FANS];
 byte pwmDisabled[NUMBER_OF_FANS];

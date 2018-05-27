@@ -55,7 +55,7 @@ void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
     Tint[tNumber] = cacheT[tNumber].get(sensorValueAveraged);
     if(Tint[tNumber] == 0){
 #endif
-      Tint[tNumber] = countTemperature(RTkoeficient[tNumber] / sensorValueAveraged - RT[tNumber], thermistors + tNumber);
+      Tint[tNumber] = countTemperature(RTkoeficient[tNumber] / sensorValueAveraged - RT[tNumber], thermistors(tNumber));
 #ifdef USE_TEMP_CACHE
       cacheT[tNumber].put(sensorValueAveraged, Tint[tNumber]);
     }
@@ -74,12 +74,12 @@ void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
 }
 #endif
 
-int countTemperature(unsigned long thermistorResistance, ThermistorDefinition *tDef){
+int countTemperature(unsigned long thermistorResistance, ThermistorDefinition tDef){
   float steinhart2;
-  steinhart2 = (float)thermistorResistance / tDef -> resistanceNominal;// (R/Ro)
+  steinhart2 = (float)thermistorResistance / tDef.resistanceNominal;// (R/Ro)
   steinhart2 = log(steinhart2);                                        // ln(R/Ro)
-  steinhart2 /= tDef -> bCoefficient;                                  // 1/B * ln(R/Ro)
-  steinhart2 += 1.0 / (tDef -> tempNominal + 273.15);                  // + (1/To)
+  steinhart2 /= tDef.bCoefficient;                                  // 1/B * ln(R/Ro)
+  steinhart2 += 1.0 / (tDef.tempNominal + 273.15);                  // + (1/To)
   steinhart2 = 1.0 / steinhart2;                                       // Invert
   steinhart2 -= 273.15;                                                // convert to C
   return (int)(steinhart2 * 10);

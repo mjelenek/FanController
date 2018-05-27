@@ -17,8 +17,9 @@ void configuration(){
   Serial.write((byte)HWversion);
   Serial.write(rmpToMainboard);
   Serial.write(hysteresis);
-  thermistors -> sendDefinition();
-  (thermistors+1) -> sendDefinition();
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    thermistors(i).sendDefinition();
+  }
   Serial.print(F("#"));
 }
 
@@ -249,7 +250,7 @@ void setThermistor(CommandParameter &parameters){
   byte tempNominal = parameters.NextParameterAsInteger(25);
   unsigned short resistanceNominal = parameters.NextParameterAsInteger(10000);
   unsigned short bCoefficient = parameters.NextParameterAsInteger(3950);
-  (thermistors + thermistorNumber) -> Set(tempNominal, resistanceNominal, bCoefficient);
+  (thermistors(thermistorNumber)).Set(tempNominal, resistanceNominal, bCoefficient);
 
  #ifdef USE_TEMP_CACHE
     cacheT[thermistorNumber].clear();

@@ -162,7 +162,7 @@ void init_pid(){
 void printTempProfile(){
   for(int i = 0; i <= 1024; i++){
       unsigned long thermistorResistance = RTkoeficient[0] / i - RT[0];
-      unsigned int t = countTemperature(thermistorResistance, thermistors);
+      unsigned int t = countTemperature(thermistorResistance, thermistors(0));
       short tShort = (short)t;
       Serial.print(i);
       Serial.print(" - ");
@@ -204,7 +204,7 @@ void measureInterrupts(){
 unsigned int doSomeMath(unsigned int x){
   unsigned int result = 0;  
   for(unsigned int i = x; i <= (x + 2000); i++){
-    result = result + countTemperature(i, thermistors);
+    result = result + countTemperature(i, thermistors(0));
   }
   return result;
 }
