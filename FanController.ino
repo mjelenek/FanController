@@ -163,6 +163,7 @@ PID pid[] = {
   PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200, P_ON_E, DIRECT)
 };
 
+int countEffectiveTemperature(byte tSelect);
 void printlnPwmDrive(PWMConfiguration &conf);
 void printStatus();
 void printFullStatus();
@@ -181,10 +182,13 @@ byte getNewPwm(PWMConfiguration &conf, byte pwmOld, unsigned short sensorValueAv
 byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION);
 byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
 void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
+byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature);
+boolean pidCompute(byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();
+void measureInterrupts();
 
 #ifdef TIMING_DEBUG
 CommandHandler<22, 70, 0> SerialCommandHandler; // 22 commands, max length of command 70, 0 variables

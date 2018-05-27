@@ -69,7 +69,7 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
         break;
       case 2:
         if(TIME_TO_COMPUTE_PWM){
-          pwm[fanNumber] = getNewPwmByPowerCurve(conf, pwmOld USE_FAN_NUMBER);       
+          pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  
         }
         break;
       case 3:
@@ -79,7 +79,7 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
         break;
       case 4:
         if(TIME_TO_COMPUTE_PWM){
-          setpointPidByRpmCurve(conf, pwmOld, fanNumber);
+          setpointPid[fanNumber] = countExpectedRPM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);
         }
         if(TIME_TO_COMPUTE_PWM_BY_PID){
           if(pidCompute(fanNumber)){
@@ -98,79 +98,12 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
   pidUpdate(fanNumber, ConfigurationPWM(fanNumber));
 }
 
-byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION){
-  // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
-  switch (conf.tSelect) {
-    case 0:
-      if(TConnected[0]){
-        return countPWM(conf, TWithHysteresisInt[0] USE_FAN_NUMBER);
-      }
-      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
-    case 1:
-      if(TConnected[1]){
-        return countPWM(conf, TWithHysteresisInt[1] USE_FAN_NUMBER);
-      }
-      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
-    case 2:
-      if(TConnected[0] && TConnected[1]){
-        return countPWM(conf, (TWithHysteresisInt[0] + TWithHysteresisInt[1]) >> 1 USE_FAN_NUMBER);
-      }
-      if(TConnected[0]){
-        return countPWM(conf, TWithHysteresisInt[0] USE_FAN_NUMBER);
-      }
-      if(TConnected[1]){
-        return countPWM(conf, TWithHysteresisInt[1] USE_FAN_NUMBER);
-      }
-      return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
-  }
-  return conf.pwm[getTemperaturePartSelect(conf.tPwm, MAX_ALLOWED_TEMP) + 1];
-}
-
 byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
   setpointPid[fanNumber] = conf.constRpm;
   if(pidCompute(fanNumber)){
     return (byte)outputPid;
   }
   return pwmOld;
-}
-
-void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
-  // compute once every 32 cycles (64ms)
-  // compute setpointPid
-  // tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
-  switch (conf.tSelect) {
-    case 0:
-      if(TConnected[0]){
-        setpointPid[fanNumber] = countExpectedRPM(conf, TWithHysteresisInt[0] USE_FAN_NUMBER);
-      } else {
-        setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
-      }
-      break;
-    case 1:
-      if(TConnected[1]){
-        setpointPid[fanNumber] = countExpectedRPM(conf, TWithHysteresisInt[1] USE_FAN_NUMBER);
-      } else {
-        setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
-      }
-      break;
-    case 2:
-      if(TConnected[0] && TConnected[1]){
-        setpointPid[fanNumber] = countExpectedRPM(conf, (TWithHysteresisInt[0] + TWithHysteresisInt[1]) >> 1 USE_FAN_NUMBER);
-        break;
-      }
-      if(TConnected[0]){
-        setpointPid[fanNumber] = countExpectedRPM(conf, TWithHysteresisInt[0] USE_FAN_NUMBER);
-        break;
-      }
-      if(TConnected[1]){
-        setpointPid[fanNumber] = countExpectedRPM(conf, TWithHysteresisInt[1] USE_FAN_NUMBER);
-        break;
-      }
-      setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
-      break;
-    default:
-      setpointPid[fanNumber] = conf.rpm[getTemperaturePartSelect(conf.tRpm, MAX_ALLOWED_TEMP) + 1];
-  }
 }
 
 byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature){
