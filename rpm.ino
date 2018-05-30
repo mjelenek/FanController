@@ -9,7 +9,7 @@ ISR(PCINT0_vect){
     if(rmpToMainboard == 3){
       if(state & (1 << PINB0)) LED_OUT_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime3, fanRpmSensorTimes3, now);
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[3], fanRpmSensorTimes[3], now);
     lastFanRpmSensorTimeUpdated |= B00001000;
   }
 
@@ -17,7 +17,7 @@ ISR(PCINT0_vect){
     if(rmpToMainboard == 4){
       if(state & (1 << PINB4)) LED_OUT_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime4, fanRpmSensorTimes4, now);
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[4], fanRpmSensorTimes[4], now);
     lastFanRpmSensorTimeUpdated |= B00010000;
   }
 
@@ -31,7 +31,7 @@ ISR(PCINT1_vect){
   if(rmpToMainboard == 5){
     if(state) LED_OUT_SET;
   }
-  writeLastFanRpmSensorTime(&lastFanRpmSensorTime5, fanRpmSensorTimes5,  now);
+  writeLastFanRpmSensorTime(&lastFanRpmSensorTime[5], fanRpmSensorTimes[5],  now);
   lastFanRpmSensorTimeUpdated |= B00100000;
 }
 
@@ -46,7 +46,7 @@ ISR(PCINT2_vect){
     if(rmpToMainboard == 0){
       if(state & (1 << PIND2)) LED_OUT_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime0, fanRpmSensorTimes0, now);
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[0], fanRpmSensorTimes[0], now);
     lastFanRpmSensorTimeUpdated |= B00000001;
   }
 
@@ -54,7 +54,7 @@ ISR(PCINT2_vect){
     if(rmpToMainboard == 1){
       if(state & (1 << PIND4)) LED_OUT_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime1, fanRpmSensorTimes1, now);
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[1], fanRpmSensorTimes[1], now);
     lastFanRpmSensorTimeUpdated |= B00000010;
   }
 
@@ -62,7 +62,7 @@ ISR(PCINT2_vect){
     if(rmpToMainboard == 2){
       if(state & (1 << PIND7)) LED_OUT_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime2, fanRpmSensorTimes2, now);
+    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[2], fanRpmSensorTimes[2], now);
     lastFanRpmSensorTimeUpdated |= B00000100;
   }
 
@@ -102,22 +102,22 @@ void countRPMs(){
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000001) > 0) || (i == (254 - 64))){
-    rpm[0] = countRPM(lastFanRpmSensorTime0, fanRpmSensorTimes0);
+    rpm[0] = countRPM(lastFanRpmSensorTime[0], fanRpmSensorTimes[0]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000010) > 0) || (i == (255 - 64))){
-    rpm[1] = countRPM(lastFanRpmSensorTime1, fanRpmSensorTimes1);
+    rpm[1] = countRPM(lastFanRpmSensorTime[1], fanRpmSensorTimes[1]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00000100) > 0) || (i == (254 - 32))){
-    rpm[2] = countRPM(lastFanRpmSensorTime2, fanRpmSensorTimes2);
+    rpm[2] = countRPM(lastFanRpmSensorTime[2], fanRpmSensorTimes[2]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00001000) > 0) || (i == (255 - 32))){
-    rpm[3] = countRPM(lastFanRpmSensorTime3, fanRpmSensorTimes3);
+    rpm[3] = countRPM(lastFanRpmSensorTime[3], fanRpmSensorTimes[3]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00010000) > 0) || (i == 254)){
-    rpm[4] = countRPM(lastFanRpmSensorTime4, fanRpmSensorTimes4);
+    rpm[4] = countRPM(lastFanRpmSensorTime[4], fanRpmSensorTimes[4]);
   }
   if(((lastFanRpmSensorTimeUpdatedLocal & B00100000) > 0) || (i == 255)){
-    rpm[5] = countRPM(lastFanRpmSensorTime5, fanRpmSensorTimes5);
+    rpm[5] = countRPM(lastFanRpmSensorTime[5], fanRpmSensorTimes[5]);
   }
 }
 

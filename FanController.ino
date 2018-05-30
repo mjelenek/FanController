@@ -134,18 +134,8 @@ volatile uint16_t sensorValue6Averaged = 0;
 volatile uint16_t sensorValue7Averaged = 0;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
-volatile unsigned long fanRpmSensorTimes0[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile unsigned long fanRpmSensorTimes1[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile unsigned long fanRpmSensorTimes2[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile unsigned long fanRpmSensorTimes3[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile unsigned long fanRpmSensorTimes4[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile unsigned long fanRpmSensorTimes5[FAN_RPM_SENSOR_TIMES_FIELD];
-volatile byte lastFanRpmSensorTime0;
-volatile byte lastFanRpmSensorTime1;
-volatile byte lastFanRpmSensorTime2;
-volatile byte lastFanRpmSensorTime3;
-volatile byte lastFanRpmSensorTime4;
-volatile byte lastFanRpmSensorTime5;
+volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
+volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
 volatile byte lastFanRpmSensorTimeUpdated;
 double rpm[NUMBER_OF_FANS];
 
