@@ -78,15 +78,15 @@ typedef struct CEEPROMPWM
   PWMConfiguration m_UserData;
 };
 
-CEEPROMPWM EEMEM EEPROPWM0, EEPROPWM1, EEPROPWM2, EEPROPWM3, EEPROPWM4, EEPROPWM5;
+CEEPROMPWM EEMEM EEPROPWM[NUMBER_OF_FANS];
 
 EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM0),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM1),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM2),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM3),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM4),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM5)};
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[0]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[1]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[2]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[3]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[4]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[5])};
 #define ConfigurationPWM(i) ConfigurationPWMHolder[i].Data.m_UserData
 
 typedef struct CEEPROMC
@@ -102,8 +102,6 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 #define rmpToMainboard ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
 #define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
-
-//ThermistorDefinition *thermistors = ControllerConfigurationHolder.Data.m_UserData.thermistors;
  
 byte pwm[NUMBER_OF_FANS];
 byte pwmDisabled[NUMBER_OF_FANS];
