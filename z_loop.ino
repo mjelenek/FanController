@@ -1,14 +1,14 @@
 void loop(){
-  part_32 = i & B00011111; // cycles from 0 to 31;
+  part_64 = i & B00111111; // cycles from 0 to 63;
 
   // tasks executed every iteration (2ms)
   countRPMs();
   setPwm();
 
-  // one case each 32 iterations (64ms)
-  // 3, 7, 11, 15, 19, 23 is occupied by calculating PWM
-  // 4, 8, 12, 16, 20, 24 is occupied by calculating PID
-  switch (part_32) {
+  // one case each 64 iterations (128ms)
+  // 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53) is occupied by calculating PWM
+  // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54) is occupied by calculating PID
+  switch (part_64) {
     case 1:
       countT(0, &sensorValue6Averaged);  
       break;
@@ -19,6 +19,10 @@ void loop(){
     case 13:
     case 21:
     case 29:
+    case 37:
+    case 45:
+    case 53:
+    case 61:
       SerialCommandHandler.Process();
       break;
     default:
@@ -47,7 +51,7 @@ void loop(){
 #endif
 
   if(zpozdeni >= WARN_MICROSECONDS){
-    printDelay(part_32, zpozdeni);
+    printDelay(part_64, zpozdeni);
   }
   if(zpozdeni < ITERATION_MICROSECONDS){
     delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
@@ -108,7 +112,7 @@ void timingDebug(){
     }
 
     if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
-      printDelay(part_32, zpozdeni);
+      printDelay(part_64, zpozdeni);
     }
 
     timeInCode = timeInCode + zpozdeni;

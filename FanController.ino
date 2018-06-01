@@ -112,7 +112,7 @@ unsigned short zpozdeni;
 byte gui = 0;  // enable gui
 byte i = 0;
 byte j = 0;
-byte part_32;  // cycles from 0 to 31;
+byte part_64;  // cycles from 0 to 63;
 byte updatesRTToSend[NUMBER_OF_FANS];
 
 unsigned long RTkoeficient[NUMBER_OF_THERMISTORS];
@@ -134,7 +134,7 @@ volatile uint16_t sensorValue7Averaged = 0;
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
 volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
-volatile byte lastFanRpmSensorTimeUpdated;
+volatile boolean lastFanRpmSensorTimeUpdated[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
 // Define Variables PIDs will be connecting to

@@ -46,10 +46,10 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
 }
 #endif
 
-// 3, 7, 11, 15, 19, 23
-#define TIME_TO_COMPUTE_PWM part_32 == ((fanNumber << 2) + 3)
-// 4, 8, 12, 16, 20, 24
-#define TIME_TO_COMPUTE_PWM_BY_PID part_32 == ((fanNumber << 2) + 4)
+// 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53)
+#define TIME_TO_COMPUTE_PWM part_64 == ((fanNumber << 2) + 3)
+// 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54)
+#define TIME_TO_COMPUTE_PWM_BY_PID part_64 == ((fanNumber << 2) + 4)
 
 void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
   unsigned short sensorValue;
