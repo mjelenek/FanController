@@ -10,7 +10,7 @@ ISR(PCINT0_vect){
       if(state & (1 << PINB0)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[3], fanRpmSensorTimes[3], now);
-    lastFanRpmSensorTimeUpdated |= B00001000;
+    lastFanRpmSensorTimeUpdated[3] = true;
   }
 
   if(changed & (1 << PINB4)){
@@ -18,7 +18,7 @@ ISR(PCINT0_vect){
       if(state & (1 << PINB4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[4], fanRpmSensorTimes[4], now);
-    lastFanRpmSensorTimeUpdated |= B00010000;
+    lastFanRpmSensorTimeUpdated[4] = true;
   }
 
   lastState = state;
@@ -32,7 +32,7 @@ ISR(PCINT1_vect){
     if(state) LED_OUT_SET;
   }
   writeLastFanRpmSensorTime(&lastFanRpmSensorTime[5], fanRpmSensorTimes[5],  now);
-  lastFanRpmSensorTimeUpdated |= B00100000;
+  lastFanRpmSensorTimeUpdated[5] = true;
 }
 
 // change pin PD2, PD4, PD7
@@ -47,7 +47,7 @@ ISR(PCINT2_vect){
       if(state & (1 << PIND2)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[0], fanRpmSensorTimes[0], now);
-    lastFanRpmSensorTimeUpdated |= B00000001;
+    lastFanRpmSensorTimeUpdated[0] = true;
   }
 
   if(changed & (1 << PIND4)){
@@ -55,7 +55,7 @@ ISR(PCINT2_vect){
       if(state & (1 << PIND4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[1], fanRpmSensorTimes[1], now);
-    lastFanRpmSensorTimeUpdated |= B00000010;
+    lastFanRpmSensorTimeUpdated[1] = true;
   }
 
   if(changed & (1 << PIND7)){
@@ -63,7 +63,7 @@ ISR(PCINT2_vect){
       if(state & (1 << PIND7)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[2], fanRpmSensorTimes[2], now);
-    lastFanRpmSensorTimeUpdated |= B00000100;
+    lastFanRpmSensorTimeUpdated[2] = true;
   }
 
   lastState = state;
@@ -95,29 +95,21 @@ double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[
   return (60000000 / (time0 - time1));
 }
 
+// 255, 254, 253, 252, 191, 190 ...(189, 188, 127, 126, 125, 124, 63, 62)
+//#define TIME_TO_COMPUTE_RPM(fanNumber) i == (255 - ((fanNumber >> 2) << 6) - (fanNumber & B00000011))
+//#define TIME_TO_COMPUTE_RPM(fanNumber) i == (255 - fanNumber)
+byte TIME_TO_COMPUTE_RPM[] = {255, 254, 253, 252, 191, 190, 189, 188, 127, 126, 125, 124, 63, 62};
 void countRPMs(){
+  boolean lastFanRpmSensorTimeUpdatedLocal[NUMBER_OF_FANS];
   PCICR = 0;                            // disable pin change interrupts
-  byte lastFanRpmSensorTimeUpdatedLocal = lastFanRpmSensorTimeUpdated;
-  lastFanRpmSensorTimeUpdated = 0;
+  memcpy(&lastFanRpmSensorTimeUpdatedLocal, &lastFanRpmSensorTimeUpdated, NUMBER_OF_FANS);
+  memset(&lastFanRpmSensorTimeUpdated, 0, NUMBER_OF_FANS);
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00000001) > 0) || (i == (254 - 64))){
-    rpm[0] = countRPM(lastFanRpmSensorTime[0], fanRpmSensorTimes[0]);
-  }
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00000010) > 0) || (i == (255 - 64))){
-    rpm[1] = countRPM(lastFanRpmSensorTime[1], fanRpmSensorTimes[1]);
-  }
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00000100) > 0) || (i == (254 - 32))){
-    rpm[2] = countRPM(lastFanRpmSensorTime[2], fanRpmSensorTimes[2]);
-  }
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00001000) > 0) || (i == (255 - 32))){
-    rpm[3] = countRPM(lastFanRpmSensorTime[3], fanRpmSensorTimes[3]);
-  }
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00010000) > 0) || (i == 254)){
-    rpm[4] = countRPM(lastFanRpmSensorTime[4], fanRpmSensorTimes[4]);
-  }
-  if(((lastFanRpmSensorTimeUpdatedLocal & B00100000) > 0) || (i == 255)){
-    rpm[5] = countRPM(lastFanRpmSensorTime[5], fanRpmSensorTimes[5]);
+  for(byte x = 0; x < NUMBER_OF_FANS; x++){
+    if((lastFanRpmSensorTimeUpdatedLocal[x]) || (i == TIME_TO_COMPUTE_RPM[x])){
+      rpm[x] = countRPM(lastFanRpmSensorTime[x], fanRpmSensorTimes[x]);
+    }
   }
 }
 
