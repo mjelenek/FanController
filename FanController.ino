@@ -195,8 +195,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
   SerialCommandHandler.AddCommand(F("conf"), configuration);
-  SerialCommandHandler.AddCommand(F("guistat1"), guistat1);
-  SerialCommandHandler.AddCommand(F("guistat2"), guistat2);
+  SerialCommandHandler.AddCommand(F("guistat"), guistat);
   SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
   SerialCommandHandler.AddCommand(F("save"), saveConfiguration);

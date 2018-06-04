@@ -23,23 +23,30 @@ void configuration(){
   Serial.print(F("#"));
 }
 
-void guistat1(){
-  Serial.print(F("!"));
-  Serial.write(106);
-  Serial.print(F("gui1"));
-  ConfigurationPWM(0).guiStat();
-  ConfigurationPWM(1).guiStat();
-  ConfigurationPWM(2).guiStat();
-  Serial.print(F("#"));
-}
+void guistat(CommandParameter &parameters){
+  byte confToSend[NUMBER_OF_FANS];
+  byte numberOfBytesToSend = 4;
+  byte numberOfConfigurationsToSend = 0;
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    byte confNumber = parameters.NextParameterAsInteger( 255 );
+    confToSend[i] = confNumber;
+    if(confNumber < NUMBER_OF_FANS){
+      numberOfConfigurationsToSend++;
+      numberOfBytesToSend++;
+      numberOfBytesToSend += sizeof(PWMConfiguration);
+    }
+  }
 
-void guistat2(){
   Serial.print(F("!"));
-  Serial.write(106);
-  Serial.print(F("gui2"));
-  ConfigurationPWM(3).guiStat();
-  ConfigurationPWM(4).guiStat();
-  ConfigurationPWM(5).guiStat();
+  Serial.write(numberOfBytesToSend);
+  Serial.print(F("gui"));
+  Serial.write(numberOfConfigurationsToSend);
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    if(confToSend[i] < NUMBER_OF_FANS){
+      Serial.write(confToSend[i]);
+      ConfigurationPWM(confToSend[i]).guiStat();
+    }
+  }
   Serial.print(F("#"));
 }
 
@@ -288,6 +295,33 @@ if(gui){
 }
 
 #ifdef FREE_MEMORY_DEBUG
+int getPointerToStartOfFreeMemory(){
+  extern int  __bss_end;
+  extern int* __brkval;
+  if (reinterpret_cast<int>(__brkval) == 0) {
+    // if no heap use from end of bss section
+    if(!gui){
+      Serial.println(F("from end of bss"));
+    }
+    return reinterpret_cast<int>(&__bss_end);
+  } else {
+    // use from top of stack to heap
+    if(!gui){
+      Serial.println(F("from top of stack to heap"));
+    }
+    return reinterpret_cast<int>(__brkval);
+  }
+}
+
+void fillFreeMemoryByZeroes(){
+  int memPointer = getPointerToStartOfFreeMemory();
+  int free_memory;
+  free_memory = reinterpret_cast<int>(&free_memory) - memPointer;
+  while(memPointer < &free_memory) {
+    (*(byte*)(memPointer++)) = 0;
+  }
+}
+
 void freeMem(CommandParameter &parameters)
 {
   int f = parameters.NextParameterAsInteger();
@@ -296,19 +330,16 @@ void freeMem(CommandParameter &parameters)
     Serial.println(fibbonacci(f));
   }
   
-  int memPointer;
-  extern int  __bss_end;
-  extern int* __brkval;
   int notUsedMemory = 0;
+  int memPointer = getPointerToStartOfFreeMemory();
   int free_memory;
-  if (reinterpret_cast<int>(__brkval) == 0) {
-    // if no heap use from end of bss section
-    free_memory = reinterpret_cast<int>(&free_memory) - reinterpret_cast<int>(&__bss_end);
-    memPointer = reinterpret_cast<int>(&__bss_end);
-  } else {
-    // use from top of stack to heap
-    free_memory = reinterpret_cast<int>(&free_memory) - reinterpret_cast<int>(__brkval);
-    memPointer = reinterpret_cast<int>(__brkval);
+  free_memory = reinterpret_cast<int>(&free_memory) - memPointer;
+
+  if(!gui){
+    Serial.print(F("memPointer address: "));
+    Serial.println(memPointer);
+    Serial.print(F("free memory address: "));
+    Serial.println(reinterpret_cast<int>(&free_memory));
   }
   while(memPointer < &free_memory) {
     if((*(byte*)(memPointer++)) == 0){

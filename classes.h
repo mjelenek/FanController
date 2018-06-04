@@ -162,7 +162,7 @@ class ThermistorDefinition
   {
     tempNominal = 25;
     resistanceNominal = 10000;
-    bCoefficient = 3950;
+    bCoefficient = 3850;
   }
 
   void Set(unsigned char t, unsigned short r, unsigned short b){

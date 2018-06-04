@@ -1,21 +1,17 @@
 void printStatus(){
-  Serial.print(F("T0:"));
-  if (TConnected[0]){
-    Serial.print(Tint[0] / 10);
-    Serial.print(F("."));
-    Serial.print(Tint[0] % 10);
-  } else {
-    Serial.print(F("N/A"));
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    Serial.print(F(" T"));
+    Serial.print(i);
+    Serial.print(F(":"));
+    if (TConnected[i]){
+      Serial.print(Tint[i] / 10);
+      Serial.print(F("."));
+      Serial.println(Tint[i] % 10);
+    } else {
+      Serial.println(F("N/A"));
+    }
   }
-  Serial.print(F(" T1:"));
-  if (TConnected[1]){
-    Serial.print(Tint[1] / 10);
-    Serial.print(F("."));
-    Serial.println(Tint[1] % 10);
-  } else {
-    Serial.println(F("N/A"));
-  }
-  for(byte i = 0; i <= 5; i++){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F(" RPM"));
     Serial.print(i);
     Serial.print(F(":"));

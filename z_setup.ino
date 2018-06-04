@@ -8,6 +8,10 @@ void setup() {
 //welcome
   Serial.println(F("Starting..."));
 
+#ifdef FREE_MEMORY_DEBUG
+  fillFreeMemoryByZeroes();
+#endif
+
   setPinsIO();
 
   setTimers();
@@ -93,10 +97,13 @@ void init_thermistors(){
     RTkoeficient[i] = (unsigned long)RT[i] * 1023;
   }
 
-  Serial.print(F("koeficientT0:"));
-  Serial.print(RTkoeficient[0]);
-  Serial.print(F(", koeficientT1:"));
-  Serial.println(RTkoeficient[1]);
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    Serial.print(F("koeficientT"));
+    Serial.print(i);
+    Serial.print(F(":"));
+    Serial.print(RTkoeficient[i]);
+    Serial.println("");
+  }
 
   delay(5);  //wait for read values from ADC;
   countT(0, &sensorValue6Averaged);  
@@ -143,7 +150,6 @@ void init_adc()
 void init_pid(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);
-//    pid[i].SetSampleTime(62000);                     // will be computed every 64ms
     pid[i].SetSampleTime(120000);                     // will be computed every 128ms
 
     switch (ConfigurationPWM(i).pwmDrive) {
