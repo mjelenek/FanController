@@ -3,7 +3,12 @@
 #include "EEPROMStoreISR.h"
 #include "classes.h"
 
-#define HWversion 1.0
+#define HWversion 1
+
+#if HWversion == 1
+  #include "ArduinoNanoV1.h"
+#else
+#endif
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
@@ -40,35 +45,6 @@ byte timeCountingStartFlag = 0;
 #define ITERATION_MICROSECONDS 2000
 #define WARN_MICROSECONDS 1600
 #define DELAY_THRESHOLD 10000
-
-#define NUMBER_OF_THERMISTORS 2
-#define NUMBER_OF_FANS 6
-
-//by multimeter
-//#define ANALOGREFERENCEVOLTAGE 3.3
-// resistance of resistor in series with thermistor(value measured by multimeter)
-unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990};
-
-#define RPMSENSOR0 7
-#define RPMSENSOR1 8
-#define RPMSENSOR2 2
-#define RPMSENSOR3 4
-#define RPMSENSOR4 12
-#define RPMSENSOR5 19   // A5
-
-//PWM output pins
-#define PWM0 3  //OC2B
-#define PWM1 5  //OC0B
-#define PWM2 6  //OC0A
-#define PWM3 9  //OC1A
-#define PWM4 10 //OC1B
-#define PWM5 11 //OC2A
-byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
-
-#define LED_OUT 13
-#define LED_OUT_1 PORTB |= _BV(PB5)
-#define LED_OUT_0 PORTB &= ~_BV(PB5)
-#define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
 
 #define MAX_ALLOWED_TEMP 100
 
@@ -119,17 +95,6 @@ unsigned long RTkoeficient[NUMBER_OF_THERMISTORS];
 boolean TConnected[NUMBER_OF_THERMISTORS];
 int Tint[NUMBER_OF_THERMISTORS];
 int TWithHysteresisInt[NUMBER_OF_THERMISTORS];
-
-
-// ADC values from mainboard
-volatile uint16_t sensorValue0Averaged = 0;
-volatile uint16_t sensorValue1Averaged = 0;
-volatile uint16_t sensorValue2Averaged = 0;
-volatile uint16_t sensorValue3Averaged = 0;
-volatile uint16_t sensorValue4Averaged = 0;
-// ADC values from thermistors
-volatile uint16_t sensorValue6Averaged = 0;
-volatile uint16_t sensorValue7Averaged = 0;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];

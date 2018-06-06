@@ -1,4 +1,5 @@
 // ADC conversion complete interrupt handler
+#if HWversion == 1
 static byte adcIndexStatic = 0;
 ISR(ADC_vect)
 {
@@ -66,4 +67,5 @@ ISR(ADC_vect)
 
   ADCSRA |= (1 << ADSC);             // Start next conversion
 }
+#endif
 

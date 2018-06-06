@@ -236,15 +236,15 @@ void sendPidUpdates(CommandParameter &parameters){
 void setConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
 
-  byte select = parameters.NextParameterAsInteger();
   byte h = parameters.NextParameterAsInteger();
+  byte select = parameters.NextParameterAsInteger();
+
+  if(h >= 0 && h <= 100){
+    hysteresis = h;
+  }
 
   if(select >= 0 && select <= 5){
     rmpToMainboard = select;
-  }
-  
-  if(h >= 0 && h <= 100){
-    hysteresis = h;
   }
 }
 
