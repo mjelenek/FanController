@@ -51,7 +51,7 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
 // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54)
 #define TIME_TO_COMPUTE_PWM_BY_PID part_64 == ((fanNumber << 2) + 4)
 
-void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
+void setPwm(byte fanNumber){
   unsigned short sensorValue;
   byte pwmOld = pwm[fanNumber];
   if(pwmDisabled[fanNumber] == 0){
@@ -60,9 +60,9 @@ void setPwm(byte fanNumber, unsigned short *sensorValueVolatile){
     switch (conf.pwmDrive) {
       case 0:
         ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
-        sensorValue = *sensorValueVolatile;
+        sensorValue = powerInADCAveraged[conf.powerInNumber];
         ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
-        pwm[fanNumber] = sensorValue >> 2;            // map 0-1023 to 0-255
+        pwm[fanNumber] = sensorValue >> 2;    // map 0-1023 to 0-255
         break;
       case 1:
         pwm[fanNumber] = conf.constPwm;
@@ -115,12 +115,9 @@ byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature){
 }
 
 void setPwm(){
-  setPwm(0, &sensorValue4Averaged);
-  setPwm(1, &sensorValue3Averaged);
-  setPwm(2, &sensorValue2Averaged);
-  setPwm(3, &sensorValue1Averaged);
-  setPwm(4, &sensorValue0Averaged);
-  setPwm(5, &sensorValue0Averaged);
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    setPwm(i);
+  }
 }
 
 void decrementPwmDisabled(){

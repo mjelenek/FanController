@@ -10,10 +10,10 @@ void loop(){
   // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54) is occupied by calculating PID
   switch (part_64) {
     case 1:
-      countT(0, &sensorValue6Averaged);  
+      countT(0);  
       break;
     case 2:
-      countT(1, &sensorValue7Averaged);  
+      countT(1);  
       break;
     case 5:
     case 13:

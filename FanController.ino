@@ -1,14 +1,15 @@
 #include "PID_v1.h"
 #include "CommandHandler.h"
 #include "EEPROMStoreISR.h"
-#include "classes.h"
 
 #define HWversion 1
-
 #if HWversion == 1
   #include "ArduinoNanoV1.h"
 #else
 #endif
+
+#include "classes.h"
+
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG

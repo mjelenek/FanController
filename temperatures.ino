@@ -1,7 +1,7 @@
 #ifndef TEMPERATURES_DEBUG
-void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
+void countT(byte tNumber){
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
-  unsigned short sensorValueAveraged = *sensorValuePointer;
+  unsigned short sensorValueAveraged = thermistorADCAveraged[tNumber];
   ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
 
   TConnected[tNumber] = (sensorValueAveraged > 10);

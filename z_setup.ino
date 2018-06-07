@@ -52,8 +52,8 @@ void init_thermistors(){
   }
 
   delay(5);  //wait for read values from ADC;
-  countT(0, &sensorValue6Averaged);  
-  countT(1, &sensorValue7Averaged);  
+  countT(0);  
+  countT(1);  
   if(TConnected[0]){
     Serial.print(F("T0 connected"));
   } else {
@@ -79,18 +79,6 @@ void init_pcint()
 
   // PORTB, PORTC, PORTD
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
-}
-
-void init_adc()
-{
-  DIDR0 = B11011111;                                   // Disable digital input buffer for ADC pins
-  
-  ADMUX = 0;                                          // VREF is EXTERNAL, channel 0
-  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) // prescaler to 128
-         | (1 << ADATE)                               // ADC Auto Trigger Enable
-         | (1 << ADIE)                                // Enable ADC conversion complete interrupt
-         | (1 << ADEN)                                // Enable ADC
-         | (1 << ADSC);                               // Start conversion
 }
 
 void init_pid(){

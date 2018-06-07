@@ -1,5 +1,6 @@
 #define NUMBER_OF_THERMISTORS 2
 #define NUMBER_OF_FANS 6
+#define NUMBER_OF_MAINBOARD_CONNECTORS 5
 
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
@@ -27,15 +28,11 @@ byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 #define LED_OUT_0 PORTB &= ~_BV(PB5)
 #define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
 
+
 // ADC values from mainboard
-volatile uint16_t sensorValue0Averaged = 0;
-volatile uint16_t sensorValue1Averaged = 0;
-volatile uint16_t sensorValue2Averaged = 0;
-volatile uint16_t sensorValue3Averaged = 0;
-volatile uint16_t sensorValue4Averaged = 0;
+volatile uint16_t powerInADCAveraged[NUMBER_OF_MAINBOARD_CONNECTORS];
 // ADC values from thermistors
-volatile uint16_t sensorValue6Averaged = 0;
-volatile uint16_t sensorValue7Averaged = 0;
+volatile uint16_t thermistorADCAveraged[NUMBER_OF_THERMISTORS];
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);

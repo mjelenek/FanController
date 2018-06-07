@@ -1,6 +1,19 @@
 // ADC conversion complete interrupt handler
 #if HWversion == 1
 static byte adcIndexStatic = 0;
+
+void init_adc()
+{
+  DIDR0 = B11011111;                                   // Disable digital input buffer for ADC pins
+  
+  ADMUX = 0;                                          // VREF is EXTERNAL, channel 0
+  ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) // prescaler to 128
+         | (1 << ADATE)                               // ADC Auto Trigger Enable
+         | (1 << ADIE)                                // Enable ADC conversion complete interrupt
+         | (1 << ADEN)                                // Enable ADC
+         | (1 << ADSC);                               // Start conversion
+}
+
 ISR(ADC_vect)
 {
   // copy these to local variables so they can be stored in registers
@@ -15,43 +28,43 @@ ISR(ADC_vect)
     case 0:
       break;
     case 1:
-      sensorValue0Averaged = ((sensorValue0Averaged + sensorValue) >> 1);
+      powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 1;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 2:
       break;
     case 3:
-      sensorValue1Averaged = ((sensorValue1Averaged + sensorValue) >> 1);
+      powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
       ADMUX = 2;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 4:
       break;
     case 5:
-      sensorValue2Averaged = ((sensorValue2Averaged + sensorValue) >> 1);
+      powerInADCAveraged[2] = ((powerInADCAveraged[2] + sensorValue) >> 1);
       ADMUX = 3;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 6:
       break;
     case 7:
-      sensorValue3Averaged = ((sensorValue3Averaged + sensorValue) >> 1);
+      powerInADCAveraged[3] = ((powerInADCAveraged[3] + sensorValue) >> 1);
       ADMUX = 4;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 8:
       break;
     case 9:
-      sensorValue4Averaged = ((sensorValue4Averaged + sensorValue) >> 1);
+      powerInADCAveraged[4] = ((powerInADCAveraged[4] + sensorValue) >> 1);
       ADMUX = 6;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 10:
       break;
     case 11:
-      sensorValue6Averaged = ((sensorValue6Averaged + sensorValue) >> 1);
+      thermistorADCAveraged[0] = ((thermistorADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 7;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 12:
       break;
     case 13:
-      sensorValue7Averaged = ((sensorValue7Averaged + sensorValue) >> 1);
+      thermistorADCAveraged[1] = ((thermistorADCAveraged[1] + sensorValue) >> 1);
       adcIndex = -1;
       ADMUX = 0;                    // select next ADC channel, VREF is EXTERNAL
       break;

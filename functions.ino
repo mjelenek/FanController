@@ -144,6 +144,7 @@ void setPwmConfiguration(CommandParameter &parameters){
   
   byte pwmChannel = parameters.NextParameterAsInteger();
   byte pwmDrive = parameters.NextParameterAsInteger();
+  byte powerInNumber = parameters.NextParameterAsInteger();
   byte constPwm = parameters.NextParameterAsInteger();
   byte tSelect =  parameters.NextParameterAsInteger();
   byte t0 = parameters.NextParameterAsInteger( 0 );
@@ -158,7 +159,7 @@ void setPwmConfiguration(CommandParameter &parameters){
   byte pwm4 = parameters.NextParameterAsInteger( 0 );
 
   if(pwmChannel >= 0 && pwmChannel <= 5){
-    ConfigurationPWM(pwmChannel).set(pwmDrive, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
+    ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
 #ifdef USE_PWM_CACHE
     cacheRMPbyTemp[pwmChannel].clear();
 #endif    

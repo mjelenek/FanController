@@ -5,6 +5,8 @@ class PWMConfiguration
 public:
   // 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   byte pwmDrive;
+  // number of input connector from motherboard when pwmDrive == 0. Value must be between 0 and NUMBER_OF_MAINBOARD_CONNECTORS
+  byte powerInNumber;
   // pwm when pwmDrive == 1
   byte constPwm;
   // settings when pwmDrive == 2 or pwmDrive == 4
@@ -26,6 +28,7 @@ public:
   void Reset()
   {
     pwmDrive = 1;
+    powerInNumber = 0;
     constPwm = 120;
     tSelect = 0;
     tPwm[0] = 32;
@@ -44,13 +47,16 @@ public:
     minPidPwm = 15;
   }
 
-  void set(byte pwmDrive1, byte constPwm1, byte tSelect1,
+  void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1,
     byte t0, byte pwm0,
     byte t1, byte pwm1,
     byte t2, byte pwm2,
     byte t3, byte pwm3,
     byte t4, byte pwm4)
   {
+    if(powerInNumber1 >= 0 && powerInNumber1 < NUMBER_OF_MAINBOARD_CONNECTORS){
+      powerInNumber = powerInNumber1;
+    }
     if(pwmDrive1 >= 0 && pwmDrive1 <= 4){
       pwmDrive = pwmDrive1;
     }
@@ -130,6 +136,7 @@ public:
 
   void guiStat(){
     Serial.write(pwmDrive);
+    Serial.write(powerInNumber);
     Serial.write(constPwm);
     Serial.write(tSelect);
     for(byte i = 0; i <= 4; i++){
