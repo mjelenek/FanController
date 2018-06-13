@@ -178,6 +178,7 @@ void printHelp(){
   Serial.println(F("save - save fan configurations into internal memory"));
   Serial.println(F("setConf - set configuration(TODO)"));
   Serial.println(F("setThermistor - set thermistor parameters(TODO)"));
+  Serial.println(F("setTemp - set fake temperature of thermistor param1 to value param2. If param2 == 0, unset fake temperature."));
   Serial.println(F("disableFan param1 param2 ... paramN - disable rotation of fan [param1, param3, param5...] for [param2, param4, param6...] seconds"));
   Serial.println(F("cacheStatus - print current state of caches with temperature values computed from thermistors"));
 #ifdef TIMING_DEBUG

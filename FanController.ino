@@ -10,10 +10,8 @@
 
 #include "classes.h"
 
-
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
-//#define TEMPERATURES_DEBUG
 #define FREE_MEMORY_DEBUG
 
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
@@ -47,7 +45,7 @@ byte timeCountingStartFlag = 0;
 #define WARN_MICROSECONDS 1600
 #define DELAY_THRESHOLD 10000
 
-#define MAX_ALLOWED_TEMP 100
+#define MAX_ALLOWED_TEMP 60
 
 typedef struct CEEPROMPWM
 {
@@ -96,6 +94,7 @@ unsigned long RTkoeficient[NUMBER_OF_THERMISTORS];
 boolean TConnected[NUMBER_OF_THERMISTORS];
 int Tint[NUMBER_OF_THERMISTORS];
 int TWithHysteresisInt[NUMBER_OF_THERMISTORS];
+unsigned char fakeTemp[NUMBER_OF_THERMISTORS];
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
@@ -145,9 +144,9 @@ void init_pid();
 void measureInterrupts();
 
 #ifdef TIMING_DEBUG
-CommandHandler<22, 70, 0> SerialCommandHandler; // 22 commands, max length of command 70, 0 variables
+CommandHandler<23, 70, 0> SerialCommandHandler; // 23 commands, max length of command 70, 0 variables
 #else
-CommandHandler<18, 70, 0> SerialCommandHandler; // 18 commands, max length of command 70, 0 variables
+CommandHandler<19, 70, 0> SerialCommandHandler; // 19 commands, max length of command 70, 0 variables
 #endif
 
 void setSerialCommandHandler(){
@@ -158,6 +157,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
   SerialCommandHandler.AddCommand(F("setConf"), setConfiguration);
   SerialCommandHandler.AddCommand(F("setThermistor"), setThermistor);
+  SerialCommandHandler.AddCommand(F("setTemp"), setTemp);
   SerialCommandHandler.AddCommand(F("s"), printStatus);
   SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
   SerialCommandHandler.AddCommand(F("conf"), configuration);

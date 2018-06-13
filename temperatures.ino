@@ -1,5 +1,11 @@
-#ifndef TEMPERATURES_DEBUG
 void countT(byte tNumber){
+  if(fakeTemp[tNumber] > 0){
+    TConnected[tNumber] = true;
+    Tint[tNumber] = fakeTemp[tNumber] * 10;
+    TWithHysteresisInt[tNumber] = Tint[tNumber];
+    return;
+  }
+  
   ADCSRA &= ~(1 << ADIE);  // Disable ADC conversion complete interrupt
   unsigned short sensorValueAveraged = thermistorADCAveraged[tNumber];
   ADCSRA |= (1 << ADIE);  // Enable ADC conversion complete interrupt
@@ -20,14 +26,6 @@ void countT(byte tNumber){
     Tint[tNumber] = 0;
   }
 }
-
-#else
-void countT(byte tNumber, volatile uint16_t *sensorValuePointer){
-  TConnected[tNumber] = true;
-  Tint[tNumber] = 700 - (int)((millis() / 100) % (600 - tNumber * 20));
-  TWithHysteresisInt[tNumber] = countHysteresisTemperature(TWithHysteresisInt[tNumber], Tint[tNumber]);
-}
-#endif
 
 int countTemperature(unsigned long thermistorResistance, ThermistorDefinition tDef){
   float steinhart2;

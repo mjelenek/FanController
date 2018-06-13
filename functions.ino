@@ -82,7 +82,11 @@ void guiUpdate(){
     serialWriteInt(rpm[i]);
   }
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
-    serialWriteInt(Tint[i]);
+    if(fakeTemp[i] > 0){
+      serialWriteInt(Tint[i] + 10000);
+    } else {
+      serialWriteInt(Tint[i]);
+    }
     serialWriteInt(TWithHysteresisInt[i]);
   }
   Serial.print(F("#"));
@@ -263,6 +267,16 @@ void setThermistor(CommandParameter &parameters){
  #ifdef USE_TEMP_CACHE
     cacheT[thermistorNumber].clear();
  #endif    
+}
+
+void setTemp(CommandParameter &parameters){
+  byte thermistorNumber = parameters.NextParameterAsInteger(255);
+  if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
+  
+  unsigned char fakeTemperature = parameters.NextParameterAsInteger(0);
+  if(fakeTemperature >= 0 && fakeTemperature <= MAX_ALLOWED_TEMP){
+    fakeTemp[thermistorNumber] = fakeTemperature;
+  }
 }
 
 void cacheStatus(){
