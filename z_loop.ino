@@ -2,33 +2,29 @@ void loop(){
   part_64 = i & B00111111; // cycles from 0 to 63;
 
   // tasks executed every iteration (2ms)
+  countT();
   countRPMs();
   setPwm();
-
+  checkSerialCommand();
   // one case each 64 iterations (128ms)
-  // 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53) is occupied by calculating PWM
-  // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54) is occupied by calculating PID
+  // 1,     9 (... 17,         25,     33)                            is occupied by calculating temperature
+  //    6,     14,     22,         30,     38,     46,     54, 62     is occupied by SerialCommandHandler
+  // 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53)        is occupied by calculating PWM
+  // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54)        is occupied by calculating PID
+/*
   switch (part_64) {
-    case 1:
-      countT(0);  
-      break;
-    case 2:
-      countT(1);  
-      break;
-    case 5:
-    case 13:
-    case 21:
-    case 29:
-    case 37:
-    case 45:
-    case 53:
+    case 10:
+    case 18:
+    case 26:
+    case 34:
+    case 42:
+    case 50:
     case 61:
-      SerialCommandHandler.Process();
       break;
     default:
       ;
   }
-
+*/
   if(i == 0){
     j++;
     if(gui){

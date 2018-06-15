@@ -3,14 +3,22 @@ void printStatus(){
     Serial.print(F(" T"));
     Serial.print(i);
     Serial.print(F(":"));
-    if (TConnected[i]){
-      Serial.print(Tint[i] / 10);
-      Serial.print(F("."));
-      Serial.println(Tint[i] % 10);
+    if(fakeTemp[i] == 0){
+      if (TConnected[i]){
+        Serial.print(Tint[i] / 10);
+        Serial.print(F("."));
+        Serial.print(Tint[i] % 10);
+      } else {
+        Serial.print(F("N/A"));
+      }
     } else {
-      Serial.println(F("N/A"));
+        Serial.print(Tint[i] / 10);
+        Serial.print(F("."));
+        Serial.print(Tint[i] % 10);
+        Serial.print(F(" (fake value)"));
     }
   }
+  Serial.println(F(""));
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F(" RPM"));
     Serial.print(i);

@@ -1,13 +1,15 @@
+#define HWversion 1
 #include "PID_v1.h"
 #include "CommandHandler.h"
-#include "EEPROMStoreISR.h"
 
-#define HWversion 1
 #if HWversion == 1
   #include "ArduinoNanoV1.h"
-#else
+#endif
+#if HWversion == 2
+  #include "Meduino2560.h"
 #endif
 
+#include "EEPROMStoreISR.h"
 #include "classes.h"
 
 #define TIMING_DEBUG
@@ -55,6 +57,7 @@ typedef struct CEEPROMPWM
 
 CEEPROMPWM EEMEM EEPROPWM[NUMBER_OF_FANS];
 
+#if HWversion == 1
 EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[0]),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[1]),
@@ -62,6 +65,24 @@ EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[3]),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[4]),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[5])};
+#endif
+#if HWversion == 2
+EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[0]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[1]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[2]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[3]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[4]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[5]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[6]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[7]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[8]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[9]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[10]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[11]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[12]),
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[13])};
+#endif
 #define ConfigurationPWM(i) ConfigurationPWMHolder[i].Data.m_UserData
 
 typedef struct CEEPROMC
@@ -90,6 +111,11 @@ byte j = 0;
 byte part_64;  // cycles from 0 to 63;
 byte updatesRTToSend[NUMBER_OF_FANS];
 
+// ADC values from mainboard
+volatile uint16_t powerInADCAveraged[NUMBER_OF_MAINBOARD_CONNECTORS];
+// ADC values from thermistors
+volatile uint16_t thermistorADCAveraged[NUMBER_OF_THERMISTORS];
+
 unsigned long RTkoeficient[NUMBER_OF_THERMISTORS];
 boolean TConnected[NUMBER_OF_THERMISTORS];
 int Tint[NUMBER_OF_THERMISTORS];
@@ -107,6 +133,7 @@ double outputPid;
 double inputPid;
 double setpointPid[NUMBER_OF_FANS];
 //Specify the links and initial tuning parameters
+#if HWversion == 1
 PID pid[] = {
   PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM(0).kp / 200, (double)ConfigurationPWM(0).ki / 200, (double)ConfigurationPWM(0).kd / 200, P_ON_E, DIRECT),
   PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM(1).kp / 200, (double)ConfigurationPWM(1).ki / 200, (double)ConfigurationPWM(1).kd / 200, P_ON_E, DIRECT),
@@ -115,7 +142,28 @@ PID pid[] = {
   PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM(4).kp / 200, (double)ConfigurationPWM(4).ki / 200, (double)ConfigurationPWM(4).kd / 200, P_ON_E, DIRECT),
   PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200, P_ON_E, DIRECT)
 };
+#endif
+#if HWversion == 2
+PID pid[] = {
+  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM(0).kp / 200, (double)ConfigurationPWM(0).ki / 200, (double)ConfigurationPWM(0).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM(1).kp / 200, (double)ConfigurationPWM(1).ki / 200, (double)ConfigurationPWM(1).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM(2).kp / 200, (double)ConfigurationPWM(2).ki / 200, (double)ConfigurationPWM(2).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM(3).kp / 200, (double)ConfigurationPWM(3).ki / 200, (double)ConfigurationPWM(3).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM(4).kp / 200, (double)ConfigurationPWM(4).ki / 200, (double)ConfigurationPWM(4).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[6], (double)ConfigurationPWM(6).kp / 200, (double)ConfigurationPWM(6).ki / 200, (double)ConfigurationPWM(6).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[7], (double)ConfigurationPWM(7).kp / 200, (double)ConfigurationPWM(7).ki / 200, (double)ConfigurationPWM(7).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[8], (double)ConfigurationPWM(8).kp / 200, (double)ConfigurationPWM(8).ki / 200, (double)ConfigurationPWM(8).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[9], (double)ConfigurationPWM(9).kp / 200, (double)ConfigurationPWM(9).ki / 200, (double)ConfigurationPWM(9).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[10], (double)ConfigurationPWM(10).kp / 200, (double)ConfigurationPWM(10).ki / 200, (double)ConfigurationPWM(10).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[11], (double)ConfigurationPWM(11).kp / 200, (double)ConfigurationPWM(11).ki / 200, (double)ConfigurationPWM(11).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[12], (double)ConfigurationPWM(12).kp / 200, (double)ConfigurationPWM(12).ki / 200, (double)ConfigurationPWM(12).kd / 200, P_ON_E, DIRECT),
+  PID(&inputPid, &outputPid, &setpointPid[13], (double)ConfigurationPWM(13).kp / 200, (double)ConfigurationPWM(13).ki / 200, (double)ConfigurationPWM(13).kd / 200, P_ON_E, DIRECT)
+};
+#endif
 
+void countT();
+void countT(byte tNumber);
 int countEffectiveTemperature(byte tSelect);
 void printlnPwmDrive(PWMConfiguration &conf);
 void printStatus();

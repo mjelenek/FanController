@@ -1,4 +1,4 @@
-// change pin PD2
+// external interrupt on pin PD2
 ISR(INT0_vect){
   unsigned long now = micros();
 

@@ -53,18 +53,18 @@ void init_thermistors(){
     Serial.println("");
   }
 
-  delay(5);  //wait for read values from ADC;
-  countT(0);  
-  countT(1);  
-  if(TConnected[0]){
-    Serial.print(F("T0 connected"));
-  } else {
-    Serial.print(F("T0 not connected"));
+  delay(20);  //wait for read values from ADC;
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    countT(i);  
   }
-  if(TConnected[1]){
-    Serial.println(F(", T1 connected"));
-  } else {
-    Serial.println(F(", T1 not connected"));
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    Serial.print(F("T"));
+    Serial.print(i);
+    if(TConnected[i]){
+      Serial.println(F(" connected"));
+    } else {
+      Serial.println(F(" not connected"));
+    }
   }
 }
 
@@ -82,8 +82,8 @@ void init_pcint()
   // PC5
   PCMSK1 = (1 << PCINT13);
 
-  // PD2, PD4, PD7
-  PCMSK2 = /*(1 << PCINT18) |*/ (1 << PCINT20) | (1 << PCINT23);
+  // PD4, PD7
+  PCMSK2 = (1 << PCINT20) | (1 << PCINT23);
 
   // PORTB, PORTC, PORTD
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts

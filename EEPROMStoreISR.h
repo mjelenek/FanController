@@ -80,7 +80,7 @@ private:
 };
 
 
-#define BUFF_STORE_SIZE 6
+#define BUFF_STORE_SIZE NUMBER_OF_FANS + 1
 struct DataToStore
   {
     volatile void* eeprom_data;

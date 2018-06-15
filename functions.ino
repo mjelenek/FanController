@@ -12,9 +12,10 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_THERMISTORS * 5 + 7);
+  Serial.write(NUMBER_OF_THERMISTORS * 5 + 8);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
+  Serial.write(NUMBER_OF_FANS);
   Serial.write(rmpToMainboard);
   Serial.write(hysteresis);
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
@@ -75,12 +76,14 @@ void guiDisable(){
 
 void guiUpdate(){
   Serial.print(F("!"));
-  Serial.write(4 + NUMBER_OF_THERMISTORS * 4 + NUMBER_OF_FANS * 2);
+  Serial.write(4 + 2 + NUMBER_OF_THERMISTORS * 4 + NUMBER_OF_FANS * 2);
   Serial.print(F("guiU"));
 
+  Serial.write(NUMBER_OF_FANS);
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     serialWriteInt(rpm[i]);
   }
+  Serial.write(NUMBER_OF_THERMISTORS);
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     if(fakeTemp[i] > 0){
       serialWriteInt(Tint[i] + 10000);
@@ -389,6 +392,13 @@ int fibbonacci(int input){
   return (fibbonacci(input - 1) + fibbonacci(input - 2));
 }
 #endif
+
+void checkSerialCommand(){
+  // true if part_64 == 6, 14, 22, 30, 38, 46, 54, 62
+  if(part_64 & B00000110){
+    SerialCommandHandler.Process();
+  }
+}
 
 void Cmd_Unknown()
 {
