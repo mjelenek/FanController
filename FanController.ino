@@ -1,4 +1,10 @@
+#if defined(ARDUINO_AVR_NANO)
 #define HWversion 1
+#endif
+#if defined(ARDUINO_AVR_MEGA2560)
+#define HWversion 2
+#endif
+
 #include "PID_v1.h"
 #include "CommandHandler.h"
 
@@ -88,14 +94,14 @@ EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
 typedef struct CEEPROMC
 {
   uint16_t m_uChecksum;
-  ControllerConfiguration<NUMBER_OF_THERMISTORS> m_UserData;
+  ControllerConfiguration<NUMBER_OF_THERMISTORS, NUMBER_OF_RPM_TO_MAINBOARD> m_UserData;
 };
 
 CEEPROMC EEMEM EEPROMConf;
 
 EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 // sensor to mainboard
-#define rmpToMainboard ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard
+#define rmpToMainboard(i) ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard[i]
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
 #define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
  

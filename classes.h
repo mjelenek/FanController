@@ -188,11 +188,11 @@ class ThermistorDefinition
   }
 };
 
-template <byte numberOfThermistors> class ControllerConfiguration
+template <byte numberOfThermistors, byte numberOfRpmToMainboard> class ControllerConfiguration
 {
 public:
   // sensor to mainboard
-  byte rmpToMainboard;
+  byte rmpToMainboard[numberOfRpmToMainboard];
   // hysteresis * 10°C -> value 10 means +- 1°C
   byte hysteresis;
   //Thermistor definitions
@@ -200,7 +200,7 @@ public:
   
   void Reset()
   {
-    rmpToMainboard = 5;
+    rmpToMainboard[0] = 5;
     hysteresis = 10;
     for(byte i = 0; i < numberOfThermistors; i++){
       thermistors[i].Reset();

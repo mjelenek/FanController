@@ -12,11 +12,14 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_THERMISTORS * 5 + 8);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 8);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
   Serial.write(NUMBER_OF_FANS);
-  Serial.write(rmpToMainboard);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD);
+  for(byte i = 0; i < NUMBER_OF_RPM_TO_MAINBOARD; i++){
+    Serial.write(rmpToMainboard(i));
+  }
   Serial.write(hysteresis);
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     thermistors(i).sendDefinition();
@@ -245,14 +248,20 @@ void setConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
 
   byte h = parameters.NextParameterAsInteger();
-  byte select = parameters.NextParameterAsInteger();
 
   if(h >= 0 && h <= 100){
     hysteresis = h;
   }
 
-  if(select >= 0 && select <= 5){
-    rmpToMainboard = select;
+  byte select = parameters.NextParameterAsInteger( 255 );
+
+  byte i = 0;
+  while(1){
+    if(select >= 0 && select <= NUMBER_OF_MAINBOARD_CONNECTORS && i < NUMBER_OF_RPM_TO_MAINBOARD){
+      rmpToMainboard(i++) = select;
+    } else {
+      return;
+    }
   }
 }
 

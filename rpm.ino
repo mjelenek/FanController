@@ -2,7 +2,7 @@
 ISR(INT0_vect){
   unsigned long now = micros();
 
-  if(rmpToMainboard == 0){
+  if(rmpToMainboard(0) == 0){
     byte state = PIND;
     if(state & (1 << PIND2)) LED_OUT_SET;
   }
@@ -18,7 +18,7 @@ ISR(PCINT0_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PINB0)){
-    if(rmpToMainboard == 3){
+    if(rmpToMainboard(0) == 3){
       if(state & (1 << PINB0)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[3], fanRpmSensorTimes[3], now);
@@ -26,7 +26,7 @@ ISR(PCINT0_vect){
   }
 
   if(changed & (1 << PINB4)){
-    if(rmpToMainboard == 4){
+    if(rmpToMainboard(0) == 4){
       if(state & (1 << PINB4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[4], fanRpmSensorTimes[4], now);
@@ -40,7 +40,7 @@ ISR(PCINT0_vect){
 ISR(PCINT1_vect){
   unsigned long now = micros();
   byte state = PINC & (1 << PINC5);
-  if(rmpToMainboard == 5){
+  if(rmpToMainboard(0) == 5){
     if(state) LED_OUT_SET;
   }
   writeLastFanRpmSensorTime(&lastFanRpmSensorTime[5], fanRpmSensorTimes[5],  now);
@@ -55,7 +55,7 @@ ISR(PCINT2_vect){
   byte changed = state ^ lastState;
 
   if(changed & (1 << PIND4)){
-    if(rmpToMainboard == 1){
+    if(rmpToMainboard(0) == 1){
       if(state & (1 << PIND4)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[1], fanRpmSensorTimes[1], now);
@@ -63,7 +63,7 @@ ISR(PCINT2_vect){
   }
 
   if(changed & (1 << PIND7)){
-    if(rmpToMainboard == 2){
+    if(rmpToMainboard(0) == 2){
       if(state & (1 << PIND7)) LED_OUT_SET;
     }
     writeLastFanRpmSensorTime(&lastFanRpmSensorTime[2], fanRpmSensorTimes[2], now);
