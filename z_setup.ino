@@ -68,27 +68,6 @@ void init_thermistors(){
   }
 }
 
-void init_extint()
-{
-  EICRA |= (1 << ISC00);
-  EIMSK |= (1 << INT0);
-}
-
-void init_pcint()
-{
-  // PB0, PB4
-  PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
-
-  // PC5
-  PCMSK1 = (1 << PCINT13);
-
-  // PD4, PD7
-  PCMSK2 = (1 << PCINT20) | (1 << PCINT23);
-
-  // PORTB, PORTC, PORTD
-  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
-}
-
 void init_pid(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);

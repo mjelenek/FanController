@@ -253,11 +253,10 @@ void setConfiguration(CommandParameter &parameters){
     hysteresis = h;
   }
 
-  byte select = parameters.NextParameterAsInteger( 255 );
-
   byte i = 0;
   while(1){
-    if(select >= 0 && select <= NUMBER_OF_MAINBOARD_CONNECTORS && i < NUMBER_OF_RPM_TO_MAINBOARD){
+    byte select = parameters.NextParameterAsInteger( 255 );
+    if(select >= 0 && select < NUMBER_OF_MAINBOARD_CONNECTORS && i < NUMBER_OF_RPM_TO_MAINBOARD){
       rmpToMainboard(i++) = select;
     } else {
       return;

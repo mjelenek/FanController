@@ -24,10 +24,10 @@ unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define PWM5 11 //OC2A
 byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 
-#define LED_OUT 13
-#define LED_OUT_1 PORTB |= _BV(PB5)
-#define LED_OUT_0 PORTB &= ~_BV(PB5)
-#define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
+#define TACH0 13
+#define TACH0_1 PORTB |= _BV(PB5)
+#define TACH0_0 PORTB &= ~_BV(PB5)
+#define TACH0_SET {TACH0_1;} else {TACH0_0;}
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
@@ -37,7 +37,7 @@ void setPinsIO(){
   pinMode(RPMSENSOR4, INPUT);
   pinMode(RPMSENSOR5, INPUT);
 
-  pinMode(LED_OUT, OUTPUT);
+  pinMode(TACH0, OUTPUT);
 
   pinMode(PWM0, OUTPUT);
   pinMode(PWM1, OUTPUT);
@@ -45,6 +45,27 @@ void setPinsIO(){
   pinMode(PWM3, OUTPUT);
   pinMode(PWM4, OUTPUT);
   pinMode(PWM5, OUTPUT);
+}
+
+void init_extint()
+{
+  EICRA |= (1 << ISC00);
+  EIMSK |= (1 << INT0);
+}
+
+void init_pcint()
+{
+  // PB0, PB4
+  PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
+
+  // PC5
+  PCMSK1 = (1 << PCINT13);
+
+  // PD4, PD7
+  PCMSK2 = (1 << PCINT20) | (1 << PCINT23);
+
+  // PORTB, PORTC, PORTD
+  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 }
 
 void setTimers(){

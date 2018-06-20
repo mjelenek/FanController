@@ -1,5 +1,5 @@
 #define NUMBER_OF_THERMISTORS 5
-#define NUMBER_OF_FANS 14
+#define NUMBER_OF_FANS 12
 #define NUMBER_OF_MAINBOARD_CONNECTORS 4
 #define NUMBER_OF_RPM_TO_MAINBOARD 4
 
@@ -8,20 +8,20 @@
 // resistance of resistor in series with thermistor(value measured by multimeter)
 unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990, 9990, 9990, 9990};
 
-#define RPMSENSOR0 7
-#define RPMSENSOR1 8
-#define RPMSENSOR2 2
-#define RPMSENSOR3 4
-#define RPMSENSOR4 12
-#define RPMSENSOR5 19
-#define RPMSENSOR6 19
-#define RPMSENSOR7 19
-#define RPMSENSOR8 19
-#define RPMSENSOR9 19
-#define RPMSENSOR10 19
-#define RPMSENSOR11 19
-#define RPMSENSOR12 19
-#define RPMSENSOR13 19
+#define RPMSENSOR0 21  //INT0
+#define RPMSENSOR1 20  //INT1
+#define RPMSENSOR2 19  //INT2
+#define RPMSENSOR3 18  //INT3
+#define RPMSENSOR4 2   //INT4
+#define RPMSENSOR5 3   //INT5
+#define RPMSENSOR6 15  //PCINT9/PJ0
+#define RPMSENSOR7 14  //PCINT10/PJ1
+#define RPMSENSOR8 53  //PCINT0/PB0
+#define RPMSENSOR9 52  //PCINT1/PB1
+#define RPMSENSOR10 83 //PCINT22/PK7/ADC15
+#define RPMSENSOR11 82 //PCINT23/PK6/ADC14
+
+
 
 //PWM output pins
 #define PWM0 13  //OC1C
@@ -33,17 +33,33 @@ unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990, 9990, 9990, 9990};
 #define PWM6 7   //OC4B
 #define PWM7 6   //OC4A
 #define PWM8 5   //OC3A
-#define PWM9 3   //OC3C
-#define PWM10 2  //OC3B
-#define PWM11 46 //OC5A
-#define PWM12 45 //OC5B
-#define PWM13 44 //OC5C
-byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PWM8, PWM9, PWM10, PWM11, PWM12, PWM13};
+#define PWM9 46  //OC5A
+#define PWM10 45 //OC5B
+#define PWM11 44 //OC5C
 
-#define LED_OUT 13
-#define LED_OUT_1 PORTB |= _BV(PB5)
-#define LED_OUT_0 PORTB &= ~_BV(PB5)
-#define LED_OUT_SET {LED_OUT_1;} else {LED_OUT_0;}
+byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PWM8, PWM9, PWM10, PWM11};
+
+//TACH output pins
+#define TACH0 39 //PG2
+#define TACH1 37 //PC7
+#define TACH2 35 //PC5
+#define TACH3 33 //PC3
+
+#define TACH0_1 PORTG |= _BV(PG2)
+#define TACH0_0 PORTG &= ~_BV(PG2)
+#define TACH0_SET {TACH0_1;} else {TACH0_0;}
+
+#define TACH1_1 PORTC |= _BV(PC7)
+#define TACH1_0 PORTC &= ~_BV(PC7)
+#define TACH1_SET {TACH1_1;} else {TACH1_0;}
+
+#define TACH2_1 PORTC |= _BV(PC5)
+#define TACH2_0 PORTC &= ~_BV(PC5)
+#define TACH2_SET {TACH2_1;} else {TACH2_0;}
+
+#define TACH3_1 PORTC |= _BV(PC3)
+#define TACH3_0 PORTC &= ~_BV(PC3)
+#define TACH3_SET {TACH3_1;} else {TACH3_0;}
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
@@ -58,10 +74,11 @@ void setPinsIO(){
   pinMode(RPMSENSOR9, INPUT);
   pinMode(RPMSENSOR10, INPUT);
   pinMode(RPMSENSOR11, INPUT);
-  pinMode(RPMSENSOR12, INPUT);
-  pinMode(RPMSENSOR13, INPUT);
 
-  pinMode(LED_OUT, OUTPUT);
+  pinMode(TACH0, OUTPUT);
+  pinMode(TACH1, OUTPUT);
+  pinMode(TACH2, OUTPUT);
+  pinMode(TACH3, OUTPUT);
 
   pinMode(PWM0, OUTPUT);
   pinMode(PWM1, OUTPUT);
@@ -75,8 +92,29 @@ void setPinsIO(){
   pinMode(PWM9, OUTPUT);
   pinMode(PWM10, OUTPUT);
   pinMode(PWM11, OUTPUT);
-  pinMode(PWM12, OUTPUT);
-  pinMode(PWM13, OUTPUT);
+}
+
+void init_extint()
+{
+  EICRA |= (1 << ISC00);
+  EIMSK |= (1 << INT0);
+}
+
+void init_pcint()
+{
+  /*
+  // PB0, PB4
+  PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
+
+  // PC5
+  PCMSK1 = (1 << PCINT13);
+
+  // PD4, PD7
+  PCMSK2 = (1 << PCINT20) | (1 << PCINT23);
+
+  // PORTB, PORTC, PORTD
+  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+*/
 }
 
 void setTimers(){

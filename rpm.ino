@@ -4,10 +4,9 @@ ISR(INT0_vect){
 
   if(rmpToMainboard(0) == 0){
     byte state = PIND;
-    if(state & (1 << PIND2)) LED_OUT_SET;
+    if(state & (1 << PIND2)) TACH0_SET;
   }
-  writeLastFanRpmSensorTime(&lastFanRpmSensorTime[0], fanRpmSensorTimes[0], now);
-  lastFanRpmSensorTimeUpdated[0] = true;
+  writeLastFanRpmSensorTimeMacro(0);
 }
 
 // change pin PB0, PB4
@@ -19,18 +18,16 @@ ISR(PCINT0_vect){
 
   if(changed & (1 << PINB0)){
     if(rmpToMainboard(0) == 3){
-      if(state & (1 << PINB0)) LED_OUT_SET;
+      if(state & (1 << PINB0)) TACH0_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[3], fanRpmSensorTimes[3], now);
-    lastFanRpmSensorTimeUpdated[3] = true;
+    writeLastFanRpmSensorTimeMacro(3);
   }
 
   if(changed & (1 << PINB4)){
     if(rmpToMainboard(0) == 4){
-      if(state & (1 << PINB4)) LED_OUT_SET;
+      if(state & (1 << PINB4)) TACH0_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[4], fanRpmSensorTimes[4], now);
-    lastFanRpmSensorTimeUpdated[4] = true;
+    writeLastFanRpmSensorTimeMacro(4);
   }
 
   lastState = state;
@@ -41,10 +38,9 @@ ISR(PCINT1_vect){
   unsigned long now = micros();
   byte state = PINC & (1 << PINC5);
   if(rmpToMainboard(0) == 5){
-    if(state) LED_OUT_SET;
+    if(state) TACH0_SET;
   }
-  writeLastFanRpmSensorTime(&lastFanRpmSensorTime[5], fanRpmSensorTimes[5],  now);
-  lastFanRpmSensorTimeUpdated[5] = true;
+  writeLastFanRpmSensorTimeMacro(5);
 }
 
 // change pin PD4, PD7
@@ -56,18 +52,16 @@ ISR(PCINT2_vect){
 
   if(changed & (1 << PIND4)){
     if(rmpToMainboard(0) == 1){
-      if(state & (1 << PIND4)) LED_OUT_SET;
+      if(state & (1 << PIND4)) TACH0_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[1], fanRpmSensorTimes[1], now);
-    lastFanRpmSensorTimeUpdated[1] = true;
+    writeLastFanRpmSensorTimeMacro(1);
   }
 
   if(changed & (1 << PIND7)){
     if(rmpToMainboard(0) == 2){
-      if(state & (1 << PIND7)) LED_OUT_SET;
+      if(state & (1 << PIND7)) TACH0_SET;
     }
-    writeLastFanRpmSensorTime(&lastFanRpmSensorTime[2], fanRpmSensorTimes[2], now);
-    lastFanRpmSensorTimeUpdated[2] = true;
+    writeLastFanRpmSensorTimeMacro(2);
   }
 
   lastState = state;

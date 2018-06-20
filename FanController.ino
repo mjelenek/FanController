@@ -35,7 +35,7 @@
 #endif
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 800
+#define WARN_MICROSECONDS_DEBUG 700
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;
@@ -85,9 +85,7 @@ EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[8]),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[9]),
   EEPROMStore<CEEPROMPWM>(&EEPROPWM[10]),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM[11]),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM[12]),
-  EEPROMStore<CEEPROMPWM>(&EEPROPWM[13])};
+  EEPROMStore<CEEPROMPWM>(&EEPROPWM[11])};
 #endif
 #define ConfigurationPWM(i) ConfigurationPWMHolder[i].Data.m_UserData
 
@@ -134,6 +132,9 @@ volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
 volatile boolean lastFanRpmSensorTimeUpdated[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
+#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);\
+  lastFanRpmSensorTimeUpdated[i] = true;
+
 // Define Variables PIDs will be connecting to
 double outputPid;
 double inputPid;
@@ -162,9 +163,7 @@ PID pid[] = {
   PID(&inputPid, &outputPid, &setpointPid[8], (double)ConfigurationPWM(8).kp / 200, (double)ConfigurationPWM(8).ki / 200, (double)ConfigurationPWM(8).kd / 200, P_ON_E, DIRECT),
   PID(&inputPid, &outputPid, &setpointPid[9], (double)ConfigurationPWM(9).kp / 200, (double)ConfigurationPWM(9).ki / 200, (double)ConfigurationPWM(9).kd / 200, P_ON_E, DIRECT),
   PID(&inputPid, &outputPid, &setpointPid[10], (double)ConfigurationPWM(10).kp / 200, (double)ConfigurationPWM(10).ki / 200, (double)ConfigurationPWM(10).kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[11], (double)ConfigurationPWM(11).kp / 200, (double)ConfigurationPWM(11).ki / 200, (double)ConfigurationPWM(11).kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[12], (double)ConfigurationPWM(12).kp / 200, (double)ConfigurationPWM(12).ki / 200, (double)ConfigurationPWM(12).kd / 200, P_ON_E, DIRECT),
-  PID(&inputPid, &outputPid, &setpointPid[13], (double)ConfigurationPWM(13).kp / 200, (double)ConfigurationPWM(13).ki / 200, (double)ConfigurationPWM(13).kd / 200, P_ON_E, DIRECT)
+  PID(&inputPid, &outputPid, &setpointPid[11], (double)ConfigurationPWM(11).kp / 200, (double)ConfigurationPWM(11).ki / 200, (double)ConfigurationPWM(11).kd / 200, P_ON_E, DIRECT)
 };
 #endif
 
