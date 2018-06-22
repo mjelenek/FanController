@@ -33,23 +33,22 @@ void guistat(CommandParameter &parameters){
   byte numberOfConfigurationsToSend = 0;
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     byte confNumber = parameters.NextParameterAsInteger( 255 );
-    confToSend[i] = confNumber;
-    if(confNumber < NUMBER_OF_FANS){
-      numberOfConfigurationsToSend++;
-      numberOfBytesToSend++;
-      numberOfBytesToSend += sizeof(PWMConfiguration);
+    if(confNumber >= NUMBER_OF_FANS){
+      break;
     }
+    confToSend[i] = confNumber;
+    numberOfConfigurationsToSend++;
+    numberOfBytesToSend++;
+    numberOfBytesToSend += sizeof(PWMConfiguration);
   }
 
   Serial.print(F("!"));
   Serial.write(numberOfBytesToSend);
   Serial.print(F("gui"));
   Serial.write(numberOfConfigurationsToSend);
-  for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    if(confToSend[i] < NUMBER_OF_FANS){
-      Serial.write(confToSend[i]);
-      ConfigurationPWM(confToSend[i]).guiStat();
-    }
+  for(byte i = 0; i < numberOfConfigurationsToSend; i++){
+    Serial.write(confToSend[i]);
+    ConfigurationPWM(confToSend[i]).guiStat();
   }
   Serial.print(F("#"));
 }
@@ -168,7 +167,7 @@ void setPwmConfiguration(CommandParameter &parameters){
   byte t4 = parameters.NextParameterAsInteger( 0 );
   byte pwm4 = parameters.NextParameterAsInteger( 0 );
 
-  if(pwmChannel >= 0 && pwmChannel <= 5){
+  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
 #ifdef USE_PWM_CACHE
     cacheRMPbyTemp[pwmChannel].clear();
@@ -206,7 +205,7 @@ void setPidConfiguration(CommandParameter &parameters){
   byte t4 = parameters.NextParameterAsInteger( 0 );
   unsigned short rpm4 = parameters.NextParameterAsInteger( 0 );
 
-  if(pwmChannel >= 0 && pwmChannel <= 5){
+  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).setPid(constRPM, kp, ki, kd, minPidPwm, t0, rpm0, t1, rpm1, t2, rpm2, t3, rpm3, t4, rpm4);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
     pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
@@ -224,7 +223,7 @@ void disableFan(CommandParameter &parameters){
     if(pwmChannel == 255 || delayParam == 255)
       return;
 
-    if(pwmChannel >= 0 && pwmChannel <= 5){
+    if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
       pwmDisabled[pwmChannel] = delayParam;
     }
   }
@@ -238,7 +237,7 @@ void sendPidUpdates(CommandParameter &parameters){
     if(pwmChannel == 255 || numberOfUpdates == 255)
       return;
 
-    if(pwmChannel >= 0 && pwmChannel <= 5){
+    if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
       updatesRTToSend[pwmChannel] = numberOfUpdates;
     }
   }
