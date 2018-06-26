@@ -93,7 +93,7 @@ void setPwm(byte fanNumber){
   }
 
   if(pwmOld != pwm[fanNumber]){
-    analogWrite(PWMOUT[fanNumber], 255 - pwm[fanNumber]);
+    writeAnalogValue(PWMOUT[fanNumber], 255 - pwm[fanNumber]);
   }
   pidUpdate(fanNumber, ConfigurationPWM(fanNumber));
 }

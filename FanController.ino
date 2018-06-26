@@ -9,10 +9,10 @@
 #include "CommandHandler.h"
 
 #if HWversion == 1
-  #include "ArduinoNanoV1.h"
+  #include "Definition_NanoV1.h"
 #endif
 #if HWversion == 2
-  #include "Meduino2560.h"
+  #include "Definition_Meduino2560.h"
 #endif
 
 #include "EEPROMStoreISR.h"
@@ -35,7 +35,7 @@
 #endif
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 700
+#define WARN_MICROSECONDS_DEBUG 1000
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;

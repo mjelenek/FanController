@@ -127,13 +127,13 @@ ISR(ADC_vect)
     case 10:
       break;
     case 11:
-      powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
+      thermistorADCAveraged[5] = ((thermistorADCAveraged[5] + sensorValue) >> 1);
       ADMUX = 7;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 12:
       break;
     case 13:
-      powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
+      powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
       adcIndex = -1;
       ADMUX = 0;                    // select next ADC channel, VREF is EXTERNAL
       break;

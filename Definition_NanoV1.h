@@ -1,65 +1,33 @@
-#define NUMBER_OF_THERMISTORS 5
-#define NUMBER_OF_FANS 12
-#define NUMBER_OF_MAINBOARD_CONNECTORS 4
-#define NUMBER_OF_RPM_TO_MAINBOARD 4
+#define NUMBER_OF_THERMISTORS 2
+#define NUMBER_OF_FANS 6
+#define NUMBER_OF_MAINBOARD_CONNECTORS 5
+#define NUMBER_OF_RPM_TO_MAINBOARD 1
 
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990, 9990, 9990, 9990};
+unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990};
 
-#define RPMSENSOR0 21  //INT0
-#define RPMSENSOR1 20  //INT1
-#define RPMSENSOR2 19  //INT2
-#define RPMSENSOR3 18  //INT3
-#define RPMSENSOR4 2   //INT4
-#define RPMSENSOR5 3   //INT5
-#define RPMSENSOR6 15  //PCINT9/PJ0
-#define RPMSENSOR7 14  //PCINT10/PJ1
-#define RPMSENSOR8 53  //PCINT0/PB0
-#define RPMSENSOR9 52  //PCINT1/PB1
-#define RPMSENSOR10 83 //PCINT22/PK7/ADC15
-#define RPMSENSOR11 82 //PCINT23/PK6/ADC14
-
-
+#define RPMSENSOR0 7
+#define RPMSENSOR1 8
+#define RPMSENSOR2 2
+#define RPMSENSOR3 4
+#define RPMSENSOR4 12
+#define RPMSENSOR5 19   // A5
 
 //PWM output pins
-#define PWM0 13  //OC1C
-#define PWM1 12  //OC1B
-#define PWM2 11  //OC1A
-#define PWM3 10  //OC2A
-#define PWM4 9   //OC2B
-#define PWM5 8   //OC4C
-#define PWM6 7   //OC4B
-#define PWM7 6   //OC4A
-#define PWM8 5   //OC3A
-#define PWM9 46  //OC5A
-#define PWM10 45 //OC5B
-#define PWM11 44 //OC5C
+#define PWM0 3  //OC2B
+#define PWM1 5  //OC0B
+#define PWM2 6  //OC0A
+#define PWM3 9  //OC1A
+#define PWM4 10 //OC1B
+#define PWM5 11 //OC2A
+uint8_t PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 
-byte PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PWM8, PWM9, PWM10, PWM11};
-
-//TACH output pins
-#define TACH0 39 //PG2
-#define TACH1 37 //PC7
-#define TACH2 35 //PC5
-#define TACH3 33 //PC3
-
-#define TACH0_1 PORTG |= _BV(PG2)
-#define TACH0_0 PORTG &= ~_BV(PG2)
+#define TACH0 13
+#define TACH0_1 PORTB |= _BV(PB5)
+#define TACH0_0 PORTB &= ~_BV(PB5)
 #define TACH0_SET {TACH0_1;} else {TACH0_0;}
-
-#define TACH1_1 PORTC |= _BV(PC7)
-#define TACH1_0 PORTC &= ~_BV(PC7)
-#define TACH1_SET {TACH1_1;} else {TACH1_0;}
-
-#define TACH2_1 PORTC |= _BV(PC5)
-#define TACH2_0 PORTC &= ~_BV(PC5)
-#define TACH2_SET {TACH2_1;} else {TACH2_0;}
-
-#define TACH3_1 PORTC |= _BV(PC3)
-#define TACH3_0 PORTC &= ~_BV(PC3)
-#define TACH3_SET {TACH3_1;} else {TACH3_0;}
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
@@ -68,17 +36,8 @@ void setPinsIO(){
   pinMode(RPMSENSOR3, INPUT);
   pinMode(RPMSENSOR4, INPUT);
   pinMode(RPMSENSOR5, INPUT);
-  pinMode(RPMSENSOR6, INPUT);
-  pinMode(RPMSENSOR7, INPUT);
-  pinMode(RPMSENSOR8, INPUT);
-  pinMode(RPMSENSOR9, INPUT);
-  pinMode(RPMSENSOR10, INPUT);
-  pinMode(RPMSENSOR11, INPUT);
 
   pinMode(TACH0, OUTPUT);
-  pinMode(TACH1, OUTPUT);
-  pinMode(TACH2, OUTPUT);
-  pinMode(TACH3, OUTPUT);
 
   pinMode(PWM0, OUTPUT);
   pinMode(PWM1, OUTPUT);
@@ -86,12 +45,6 @@ void setPinsIO(){
   pinMode(PWM3, OUTPUT);
   pinMode(PWM4, OUTPUT);
   pinMode(PWM5, OUTPUT);
-  pinMode(PWM6, OUTPUT);
-  pinMode(PWM7, OUTPUT);
-  pinMode(PWM8, OUTPUT);
-  pinMode(PWM9, OUTPUT);
-  pinMode(PWM10, OUTPUT);
-  pinMode(PWM11, OUTPUT);
 }
 
 void init_extint()
@@ -102,7 +55,6 @@ void init_extint()
 
 void init_pcint()
 {
-  /*
   // PB0, PB4
   PCMSK0 = (1 << PCINT0) | (1 << PCINT4);
 
@@ -114,7 +66,16 @@ void init_pcint()
 
   // PORTB, PORTC, PORTD
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
-*/
+}
+
+void disableRpmIRS(){
+  EIMSK = 0;                            // disable external interrupt
+  PCICR = 0;                            // disable pin change interrupts
+}
+
+void enableRpmIRS(){
+  EIMSK |= (1 << INT0);                               // enable external interrupt
+  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
 }
 
 void setTimers(){
@@ -137,23 +98,54 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-  //TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
+  //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
    
   //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
-  //TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000011;    // set timer 2 divisor to    32 for PWM frequency of   980.39 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000100;    // set timer 2 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR2B = TCCR2B & B11111000 | B00000101;    // set timer 2 divisor to   128 for PWM frequency of   245.10 Hz
-  TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
+  //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
-
-  TCCR3B = TCCR3B & B11111000 | B00000100;    // set timer 3 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  TCCR4B = TCCR4B & B11111000 | B00000100;    // set timer 4 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  TCCR5B = TCCR5B & B11111000 | B00000100;    // set timer 5 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
+  
+  // connect timers to output pins
+  TCCR0A |= (1 << COM0A1) | (1 << COM0B1);
+  TCCR1A |= (1 << COM1A1) | (1 << COM1B1);
+  TCCR2A |= (1 << COM2A1) | (1 << COM2B1);
 }
+
+void writeAnalogValue(uint8_t pin, int val) {
+  switch(pin) {
+    case 3:
+      OCR2B = val; // set pwm duty
+      break;
+    case 5:
+      OCR0B = val; // set pwm duty
+      break;
+    case 6:
+      OCR0A = val; // set pwm duty
+      break;
+    case 9:
+      OCR1A = val; // set pwm duty
+      break;
+    case 10:
+      OCR1B = val; // set pwm duty
+      break;
+    case 11:
+      OCR2A = val; // set pwm duty
+      break;
+    default:
+      if (val < 128) {
+        digitalWrite(pin, LOW);
+      } else {
+        digitalWrite(pin, HIGH);
+      }
+  }
+}
+
 
