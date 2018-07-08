@@ -7,16 +7,19 @@ public:
   byte pwmDrive;
   // number of input connector from motherboard when pwmDrive == 0. Value must be between 0 and NUMBER_OF_MAINBOARD_CONNECTORS
   byte powerInNumber;
+  // settings when pwmDrive == 0: map input value to pwm
+  //byte powerInValue[5];
+  //byte powerInPwm[5];
   // pwm when pwmDrive == 1
   byte constPwm;
   // settings when pwmDrive == 2 or pwmDrive == 4
   byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
-  // settings when pwmDrive == 2
+  // settings when pwmDrive == 2: map temperature to pwm
   byte tPwm[5];
   byte pwm[5];
   // settings when pwmDrive == 3
   unsigned short constRpm;
-  // settings when pwmDrive == 4
+  // settings when pwmDrive == 4: map temperature to rpm
   byte tRpm[5];
   unsigned short rpm[5];
   // pid parameters, real value is parameter / 200

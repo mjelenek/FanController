@@ -6,7 +6,7 @@
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990};
+const unsigned long PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -22,7 +22,7 @@ unsigned short RT[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define PWM3 9  //OC1A
 #define PWM4 10 //OC1B
 #define PWM5 11 //OC2A
-uint8_t PWMOUT[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
+const uint8_t PROGMEM PWMOUT_PGM[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 
 #define TACH0 13
 #define TACH0_1 PORTB |= _BV(PB5)
@@ -46,6 +46,9 @@ void setPinsIO(){
   pinMode(PWM4, OUTPUT);
   pinMode(PWM5, OUTPUT);
 }
+
+#define RT(P) ( pgm_read_dword( RT_PGM + (P) ) )
+#define PWMOUT(P) ( pgm_read_byte( PWMOUT_PGM + (P) ) )
 
 void init_extint()
 {

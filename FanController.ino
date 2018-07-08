@@ -35,7 +35,7 @@
 #endif
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 1000
+#define WARN_MICROSECONDS_DEBUG 1200
 unsigned long timeInCode;
 unsigned long timeTotal;
 unsigned int to400;
@@ -102,7 +102,7 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 #define rmpToMainboard(i) ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard[i]
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
 #define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
- 
+
 byte pwm[NUMBER_OF_FANS];
 byte pwmDisabled[NUMBER_OF_FANS];
 
@@ -120,7 +120,6 @@ volatile uint16_t powerInADCAveraged[NUMBER_OF_MAINBOARD_CONNECTORS];
 // ADC values from thermistors
 volatile uint16_t thermistorADCAveraged[NUMBER_OF_THERMISTORS];
 
-unsigned long RTkoeficient[NUMBER_OF_THERMISTORS];
 boolean TConnected[NUMBER_OF_THERMISTORS];
 int Tint[NUMBER_OF_THERMISTORS];
 int TWithHysteresisInt[NUMBER_OF_THERMISTORS];

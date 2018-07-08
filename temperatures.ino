@@ -24,7 +24,9 @@ void countT(byte tNumber){
     Tint[tNumber] = cacheT[tNumber].get(sensorValueAveraged);
     if(Tint[tNumber] == 0){
 #endif
-      Tint[tNumber] = countTemperature(RTkoeficient[tNumber] / sensorValueAveraged - RT[tNumber], thermistors(tNumber));
+      unsigned long RT = RT(tNumber);
+      unsigned long RTkoeficient = (RT << 10) - RT;
+      Tint[tNumber] = countTemperature(RTkoeficient / sensorValueAveraged - RT, thermistors(tNumber));
 #ifdef USE_TEMP_CACHE
       cacheT[tNumber].put(sensorValueAveraged, Tint[tNumber]);
     }

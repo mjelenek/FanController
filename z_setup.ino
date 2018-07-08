@@ -40,19 +40,6 @@ void setup() {
 }
 
 void init_thermistors(){
-// VOLTAGETHERMISTOR == ANALOGREFERENCEVOLTAGE
-  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
-    RTkoeficient[i] = (unsigned long)RT[i] * 1023;
-  }
-
-  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
-    Serial.print(F("koeficientT"));
-    Serial.print(i);
-    Serial.print(F(":"));
-    Serial.print(RTkoeficient[i]);
-    Serial.println("");
-  }
-
   delay(20);  //wait for read values from ADC;
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     countT(i);  
@@ -88,8 +75,9 @@ void init_pid(){
 
 void printTempProfile(){
   for(int i = 0; i <= 1024; i++){
-      unsigned long thermistorResistance = RTkoeficient[0] / i - RT[0];
-      unsigned int t = countTemperature(thermistorResistance, thermistors(0));
+      unsigned long RT = RT(0);
+      unsigned long RTkoeficient = (RT << 10) - RT;
+      unsigned int t = countTemperature(RTkoeficient / i - RT, thermistors(0));
       short tShort = (short)t;
       Serial.print(i);
       Serial.print(" - ");
@@ -99,14 +87,14 @@ void printTempProfile(){
 
 void measureInterrupts(){
   delay(20);
-  PCICR = 0;                            // disable pin change interrupts
+  disableRpmIRS();                      // disable pin change interrupts
   ADCSRA &= ~(1 << ADIE);               // disable ADC conversion complete interrupt
   unsigned long start = micros();
   unsigned int a = doSomeMath(100);
   now = micros();
   unsigned long m1 = now - start;
 
-  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+  enableRpmIRS();                       // enable pin change interrupts
   ADCSRA |= (1 << ADIE);                // enable ADC conversion complete interrupt
   delay(10);
   start = micros();
