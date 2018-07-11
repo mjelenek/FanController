@@ -12,11 +12,14 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 8);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 11);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
   Serial.write(NUMBER_OF_FANS);
   Serial.write(NUMBER_OF_RPM_TO_MAINBOARD);
+  Serial.write(CURVE_ANALOG_POINTS);
+  Serial.write(CURVE_PWM_POINTS);
+  Serial.write(CURVE_RPM_POINTS);
   for(byte i = 0; i < NUMBER_OF_RPM_TO_MAINBOARD; i++){
     Serial.write(rmpToMainboard(i));
   }
@@ -148,30 +151,23 @@ unsigned short roundRPM(double rpm){
   return rpmRounded * 10;
 }
 
-void setPwmConfiguration(CommandParameter &parameters){
+void setFanConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
   byte pwmChannel = parameters.NextParameterAsInteger();
   byte pwmDrive = parameters.NextParameterAsInteger();
   byte powerInNumber = parameters.NextParameterAsInteger();
   byte constPwm = parameters.NextParameterAsInteger();
+  unsigned short constRPM = parameters.NextParameterAsInteger();
   byte tSelect =  parameters.NextParameterAsInteger();
-  byte t0 = parameters.NextParameterAsInteger( 0 );
-  byte pwm0 = parameters.NextParameterAsInteger( 0 );
-  byte t1 = parameters.NextParameterAsInteger( 0 );
-  byte pwm1 = parameters.NextParameterAsInteger( 0 );
-  byte t2 = parameters.NextParameterAsInteger( 0 );
-  byte pwm2 = parameters.NextParameterAsInteger( 0 );
-  byte t3 = parameters.NextParameterAsInteger( 0 );
-  byte pwm3 = parameters.NextParameterAsInteger( 0 );
-  byte t4 = parameters.NextParameterAsInteger( 0 );
-  byte pwm4 = parameters.NextParameterAsInteger( 0 );
-
+  byte kp = parameters.NextParameterAsInteger();
+  byte ki = parameters.NextParameterAsInteger();
+  byte kd = parameters.NextParameterAsInteger();
+  byte minPidPwm = parameters.NextParameterAsInteger();
   if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
-    ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, t0, pwm0, t1, pwm1, t2, pwm2, t3, pwm3, t4, pwm4);
-#ifdef USE_PWM_CACHE
-    cacheRMPbyTemp[pwmChannel].clear();
-#endif    
+    ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, constRPM, kp, ki, kd, minPidPwm);
+    pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
+    pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
     switch (pwmDrive) {
     case 0:
     case 1:
@@ -182,35 +178,44 @@ void setPwmConfiguration(CommandParameter &parameters){
     case 4:
       pid[pwmChannel].SetMode(AUTOMATIC);
     }
+#ifdef USE_PWM_CACHE
+    cacheFan[pwmChannel].clear();
+#endif    
   }
 }
 
-void setPidConfiguration(CommandParameter &parameters){
+void setPwmCurve(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
   byte pwmChannel = parameters.NextParameterAsInteger();
-  unsigned short constRPM = parameters.NextParameterAsInteger();
-  byte kp = parameters.NextParameterAsInteger();
-  byte ki = parameters.NextParameterAsInteger();
-  byte kd = parameters.NextParameterAsInteger();
-  byte minPidPwm = parameters.NextParameterAsInteger();
-  byte t0 = parameters.NextParameterAsInteger( 0 );
-  unsigned short rpm0 = parameters.NextParameterAsInteger( 0 );
-  byte t1 = parameters.NextParameterAsInteger( 0 );
-  unsigned short rpm1 = parameters.NextParameterAsInteger( 0 );
-  byte t2 = parameters.NextParameterAsInteger( 0 );
-  unsigned short rpm2 = parameters.NextParameterAsInteger( 0 );
-  byte t3 = parameters.NextParameterAsInteger( 0 );
-  unsigned short rpm3 = parameters.NextParameterAsInteger( 0 );
-  byte t4 = parameters.NextParameterAsInteger( 0 );
-  unsigned short rpm4 = parameters.NextParameterAsInteger( 0 );
-
+  byte t[CURVE_PWM_POINTS];
+  byte pwm[CURVE_PWM_POINTS];
+  for(byte i = 0; i < CURVE_PWM_POINTS; i++){
+    t[i] = parameters.NextParameterAsInteger( 0 );
+    pwm[i] = parameters.NextParameterAsInteger( 0 );
+  }
   if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
-    ConfigurationPWM(pwmChannel).setPid(constRPM, kp, ki, kd, minPidPwm, t0, rpm0, t1, rpm1, t2, rpm2, t3, rpm3, t4, rpm4);
-    pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
-    pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
+    ConfigurationPWM(pwmChannel).setPWMCurve(CURVE_PWM_POINTS, t, pwm);
 #ifdef USE_PWM_CACHE
-    cacheRMPbyTemp[pwmChannel].clear();
+    cacheFan[pwmChannel].clear();
+#endif    
+  }
+}
+
+void setRpmCurve(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
+  
+  byte pwmChannel = parameters.NextParameterAsInteger();
+  byte t[CURVE_RPM_POINTS];
+  unsigned short rpm[CURVE_RPM_POINTS];
+  for(byte i = 0; i < CURVE_RPM_POINTS; i++){
+    t[i] = parameters.NextParameterAsInteger( 0 );
+    rpm[i] = parameters.NextParameterAsInteger( 0 );
+  }
+  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+    ConfigurationPWM(pwmChannel).setRPMCurve(CURVE_RPM_POINTS, t, rpm);
+#ifdef USE_PWM_CACHE
+    cacheFan[pwmChannel].clear();
 #endif    
   }
 }
@@ -306,14 +311,14 @@ if(gui){
 #ifdef USE_PWM_CACHE
 if(gui){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    cacheRMPbyTemp[i].printStatus();
+    cacheFan[i].printStatus();
   }
 } else {
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F("cache RPMbyTemp["));
     Serial.print(i);
     Serial.println(F("]"));
-    cacheRMPbyTemp[i].printStatus();
+    cacheFan[i].printStatus();
   }
 }
 #endif

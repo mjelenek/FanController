@@ -1,5 +1,5 @@
 byte countPWM(PWMConfiguration &conf, unsigned int temperature){
-  byte tPartSelect = getTemperaturePartSelect(conf.tPwm, temperature);
+  byte tPartSelect = getTemperaturePartSelect(conf.tPwm, temperature, CURVE_PWM_POINTS);
   unsigned int temperatureTarget = conf.tPwm[tPartSelect] * 10;
   if(temperature <= temperatureTarget){
     return conf.pwm[tPartSelect];
@@ -13,17 +13,17 @@ byte countPWM(PWMConfiguration &conf, unsigned int temperature){
 
 #ifdef USE_PWM_CACHE
 byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
-    byte pwm = cacheRMPbyTemp[fanNumber].get(temperature);
+    byte pwm = cacheFan[fanNumber].get(temperature);
     if(pwm == 0){
       pwm = countPWM(conf, temperature);
-      cacheRMPbyTemp[fanNumber].put(temperature, pwm);
+      cacheFan[fanNumber].put(temperature, pwm);
     }
   return pwm;
 }
 #endif
 
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature){
-  byte tPartSelect = getTemperaturePartSelect(conf.tRpm, temperature);
+  byte tPartSelect = getTemperaturePartSelect(conf.tRpm, temperature, CURVE_RPM_POINTS);
   unsigned short temperatureTarget = conf.tRpm[tPartSelect] * 10;
   if(temperature <= temperatureTarget){
     return conf.rpm[tPartSelect];
@@ -37,10 +37,10 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
 
 #ifdef USE_PWM_CACHE
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
-    unsigned short rpm = cacheRMPbyTemp[fanNumber].get(temperature);
+    unsigned short rpm = cacheFan[fanNumber].get(temperature);
     if(rpm == 0){
       rpm = countExpectedRPM(conf, temperature);
-      cacheRMPbyTemp[fanNumber].put(temperature, rpm);
+      cacheFan[fanNumber].put(temperature, rpm);
     }
   return rpm;
 }
@@ -62,6 +62,7 @@ void setPwm(byte fanNumber){
         ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
         sensorValue = powerInADCAveraged[conf.powerInNumber];
         ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
+        
         pwm[fanNumber] = sensorValue >> 2;    // map 0-1023 to 0-255
         break;
       case 1:
@@ -106,9 +107,17 @@ byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
   return pwmOld;
 }
 
-byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature){
+byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature, byte len){
   byte i = 0;
-  while (i < 3 && temperatures[i+2] != 0 && (temperatures[i+1] * 10) <= temperature){
+  while (i < (len - 2) && temperatures[i+2] != 0 && ((unsigned short)temperatures[i+1] * 10) <= temperature){
+    i++;
+  }
+  return i;
+}
+
+byte getPowerInPartSelect(unsigned short powerInPoints[], unsigned short powerIn){
+  byte i = 0;
+  while (i < (CURVE_ANALOG_POINTS - 2) && powerInPoints[i+2] != 0 && powerInPoints[i+1] <= powerIn){
     i++;
   }
   return i;

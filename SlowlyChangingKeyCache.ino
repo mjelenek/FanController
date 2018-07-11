@@ -92,6 +92,6 @@ SlowlyChangingKeyCache<int, 6> cacheT[NUMBER_OF_THERMISTORS]; // 64 records ~ 6Â
 #endif
 
 #ifdef USE_PWM_CACHE
-SlowlyChangingKeyCache<unsigned short, 2> cacheRMPbyTemp[NUMBER_OF_FANS]; // 4 records
+SlowlyChangingKeyCache<unsigned short, 2> cacheFan[NUMBER_OF_FANS]; // 4 records
 #endif
 

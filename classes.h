@@ -8,20 +8,20 @@ public:
   // number of input connector from motherboard when pwmDrive == 0. Value must be between 0 and NUMBER_OF_MAINBOARD_CONNECTORS
   byte powerInNumber;
   // settings when pwmDrive == 0: map input value to pwm
-  //byte powerInValue[5];
-  //byte powerInPwm[5];
+  unsigned short powerInValue[CURVE_ANALOG_POINTS];
+  byte powerInPwm[CURVE_ANALOG_POINTS];
   // pwm when pwmDrive == 1
   byte constPwm;
   // settings when pwmDrive == 2 or pwmDrive == 4
   byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
   // settings when pwmDrive == 2: map temperature to pwm
-  byte tPwm[5];
-  byte pwm[5];
+  byte tPwm[CURVE_PWM_POINTS];
+  byte pwm[CURVE_PWM_POINTS];
   // settings when pwmDrive == 3
   unsigned short constRpm;
   // settings when pwmDrive == 4: map temperature to rpm
-  byte tRpm[5];
-  unsigned short rpm[5];
+  byte tRpm[CURVE_RPM_POINTS];
+  unsigned short rpm[CURVE_RPM_POINTS];
   // pid parameters, real value is parameter / 200
   byte kp;
   byte ki;
@@ -32,8 +32,14 @@ public:
   {
     pwmDrive = 1;
     powerInNumber = 0;
-    constPwm = 120;
     tSelect = 0;
+    powerInValue[0] = 0;
+    powerInPwm[0] = 0;
+    powerInValue[1] = 1023;
+    powerInPwm[1] = 255;
+    powerInValue[0] = 0;
+    constPwm = 120;
+    powerInPwm[0] = 0;
     tPwm[0] = 32;
     pwm[0] = 90;
     tPwm[1] = 50;
@@ -50,12 +56,7 @@ public:
     minPidPwm = 15;
   }
 
-  void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1,
-    byte t0, byte pwm0,
-    byte t1, byte pwm1,
-    byte t2, byte pwm2,
-    byte t3, byte pwm3,
-    byte t4, byte pwm4)
+  void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1, unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
   {
     if(powerInNumber1 >= 0 && powerInNumber1 < NUMBER_OF_MAINBOARD_CONNECTORS){
       powerInNumber = powerInNumber1;
@@ -67,87 +68,58 @@ public:
     if(tSelect1 >= 0 && tSelect1 <= 2){
       tSelect = tSelect1;
     }
-    if(t0 <= 60 && t0 <= t1){
-      tPwm[0] = t0;
-      pwm[0] = pwm0;
-    }
-    if(t1 <= 60 && t0 <= t1){
-      tPwm[1] = t1;
-      pwm[1] = pwm1;
-    }
-    tPwm[2] = tPwm[3] = tPwm[4] = 0;
-    pwm[2] = pwm[3] = pwm[4] = 0;
-    
-    if(t2 <= 60 && (t1 <= t2)){
-      tPwm[2] = t2;
-      pwm[2] = pwm2;
-    } else {
-      return;
-    }
-    if(t3 <= 60 && (t2 <= t3)){
-      tPwm[3] = t3;
-      pwm[3] = pwm3;
-    } else {
-      return;
-    }
-    if(t4 <= 60 && (t3 <= t4)){
-      tPwm[4] = t4;
-      pwm[4] = pwm4;
-    }
-  }
-
-  void setPid(unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1,
-    byte t0, unsigned short rpm0,
-    byte t1, unsigned short rpm1,
-    byte t2, unsigned short rpm2,
-    byte t3, unsigned short rpm3,
-    byte t4, unsigned short rpm4)
-  {
     constRpm = constRpm1;
     kp = kp1;
     ki = ki1;
     kd = kd1;
     minPidPwm = minPidPwm1;
-    if(t0 <= 60 && t0 <= t1){
-      tRpm[0] = t0;
-      rpm[0] = rpm0;
+  }
+
+  void setPWMCurve(byte count, byte tNew[], byte pwmNew[]){
+    if(count > CURVE_PWM_POINTS) return;
+    for(byte i = 0; i < CURVE_PWM_POINTS; i++){
+      tPwm[i] = 0;
+      pwm[i] = 0;
     }
-    if(t0 <= 60 && t0 <= t1){
-      tRpm[1] = t1;
-      rpm[1] = rpm1;
+    byte lastT = 0;
+    for(byte i = 0; i < count; i++){
+      if(tNew[i] <= MAX_ALLOWED_TEMP && lastT <= tNew[i]){
+        tPwm[i] = tNew[i];
+        pwm[i] = pwmNew[i];
+      }
     }
-    tRpm[2] = tRpm[3] = tRpm[4] = 0;
-    rpm[2] = rpm[3] = rpm[4] = 0;
-    
-    if(t2 <= 60 && t1 <= t2){
-      tRpm[2] = t2;
-      rpm[2] = rpm2;
-    } else {
-      return;
+  }
+
+  void setRPMCurve(byte count, byte tNew[], unsigned short rpmNew[]){
+    if(count > CURVE_RPM_POINTS) return;
+    for(byte i = 0; i < CURVE_RPM_POINTS; i++){
+      tRpm[i] = 0;
+      rpm[i] = 0;
     }
-    if(t3 <= 60 && t2 <= t3){
-      tRpm[3] = t3;
-      rpm[3] = rpm3;
-    } else {
-      return;
-    }
-    if(t4 <= 60 && t3 <= t4){
-      tRpm[4] = t4;
-      rpm[4] = rpm4;
+    byte lastT = 0;
+    for(byte i = 0; i < count; i++){
+      if(tNew[i] <= MAX_ALLOWED_TEMP && lastT <= tNew[i]){
+        tRpm[i] = tNew[i];
+        rpm[i] = rpmNew[i];
+      }
     }
   }
 
   void guiStat(){
     Serial.write(pwmDrive);
     Serial.write(powerInNumber);
+    for(byte i = 0; i < CURVE_ANALOG_POINTS; i++){
+      serialWriteInt(powerInValue[i]);
+      Serial.write(powerInPwm[i]);
+    }
     Serial.write(constPwm);
     Serial.write(tSelect);
-    for(byte i = 0; i <= 4; i++){
+    for(byte i = 0; i < CURVE_PWM_POINTS; i++){
       Serial.write(tPwm[i]);
       Serial.write(pwm[i]);
     }
     serialWriteInt(constRpm);
-    for(byte i = 0; i <= 4; i++){
+    for(byte i = 0; i < CURVE_RPM_POINTS; i++){
       Serial.write(tRpm[i]);
       serialWriteInt(rpm[i]);
     }
@@ -203,7 +175,6 @@ public:
   
   void Reset()
   {
-    rmpToMainboard[0] = 5;
     hysteresis = 10;
     for(byte i = 0; i < numberOfThermistors; i++){
       thermistors[i].Reset();

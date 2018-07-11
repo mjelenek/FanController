@@ -3,6 +3,10 @@
 #define NUMBER_OF_MAINBOARD_CONNECTORS 5
 #define NUMBER_OF_RPM_TO_MAINBOARD 1
 
+#define CURVE_ANALOG_POINTS 2
+#define CURVE_PWM_POINTS 5
+#define CURVE_RPM_POINTS 5
+
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)

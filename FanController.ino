@@ -16,7 +16,6 @@
 #endif
 
 #include "EEPROMStoreISR.h"
-#include "classes.h"
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
@@ -54,6 +53,8 @@ byte timeCountingStartFlag = 0;
 #define DELAY_THRESHOLD 10000
 
 #define MAX_ALLOWED_TEMP 60
+
+#include "classes.h"
 
 typedef struct CEEPROMPWM
 {
@@ -187,7 +188,7 @@ byte getNewPwm(PWMConfiguration &conf, byte pwmOld, unsigned short sensorValueAv
 byte getNewPwmByPowerCurve(PWMConfiguration &conf, byte pwmOld USE_FAN_NUMBER_DECLARATION);
 byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
 void setpointPidByRpmCurve(PWMConfiguration &conf, byte pwmOld, byte fanNumber);
-byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature);
+byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature, byte len);
 boolean pidCompute(byte fanNumber);
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf);
 byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
@@ -195,18 +196,15 @@ void readRPMsensors();
 void init_pid();
 void measureInterrupts();
 
-#ifdef TIMING_DEBUG
-CommandHandler<23, 70, 0> SerialCommandHandler; // 23 commands, max length of command 70, 0 variables
-#else
-CommandHandler<19, 70, 0> SerialCommandHandler; // 19 commands, max length of command 70, 0 variables
-#endif
+CommandHandler<23, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 23 commands, 0 variables
 
 void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("help"), printHelp);
   SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
-  SerialCommandHandler.AddCommand(F("setFan"), setPwmConfiguration);
-  SerialCommandHandler.AddCommand(F("setPid"), setPidConfiguration);
+  SerialCommandHandler.AddCommand(F("setFan"), setFanConfiguration);
+  SerialCommandHandler.AddCommand(F("setPwm"), setPwmCurve);
+  SerialCommandHandler.AddCommand(F("setRpm"), setRpmCurve);
   SerialCommandHandler.AddCommand(F("setConf"), setConfiguration);
   SerialCommandHandler.AddCommand(F("setThermistor"), setThermistor);
   SerialCommandHandler.AddCommand(F("setTemp"), setTemp);
