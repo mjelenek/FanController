@@ -75,6 +75,23 @@ public:
     minPidPwm = minPidPwm1;
   }
 
+  void setPowerInCurve(byte count, unsigned short pInNew[], byte pwmNew[]){
+    if(count > CURVE_ANALOG_POINTS) return;
+    for(byte i = 0; i < CURVE_ANALOG_POINTS; i++){
+      powerInValue[i] = 0;
+      powerInPwm[i] = 0;
+    }
+    byte lastPowerIn = 0;
+    for(byte i = 0; i < count; i++){
+      if(pInNew[i] <= 1023 && lastPowerIn <= pInNew[i]){
+        lastPowerIn = pInNew[i];
+        powerInValue[i] = pInNew[i];
+        powerInPwm[i] = pwmNew[i];
+      }
+    }
+  }
+
+
   void setPWMCurve(byte count, byte tNew[], byte pwmNew[]){
     if(count > CURVE_PWM_POINTS) return;
     for(byte i = 0; i < CURVE_PWM_POINTS; i++){
@@ -84,6 +101,7 @@ public:
     byte lastT = 0;
     for(byte i = 0; i < count; i++){
       if(tNew[i] <= MAX_ALLOWED_TEMP && lastT <= tNew[i]){
+        lastT = tNew[i];
         tPwm[i] = tNew[i];
         pwm[i] = pwmNew[i];
       }
@@ -99,6 +117,7 @@ public:
     byte lastT = 0;
     for(byte i = 0; i < count; i++){
       if(tNew[i] <= MAX_ALLOWED_TEMP && lastT <= tNew[i]){
+        lastT = tNew[i];
         tRpm[i] = tNew[i];
         rpm[i] = rpmNew[i];
       }

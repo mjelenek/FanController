@@ -184,6 +184,24 @@ void setFanConfiguration(CommandParameter &parameters){
   }
 }
 
+void setPowerInCurve(CommandParameter &parameters){
+  if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
+  
+  byte pwmChannel = parameters.NextParameterAsInteger();
+  unsigned short powerIn[CURVE_ANALOG_POINTS];
+  byte pwm[CURVE_ANALOG_POINTS];
+  for(byte i = 0; i < CURVE_ANALOG_POINTS; i++){
+    powerIn[i] = parameters.NextParameterAsInteger( 0 );
+    pwm[i] = parameters.NextParameterAsInteger( 0 );
+  }
+  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+    ConfigurationPWM(pwmChannel).setPowerInCurve(CURVE_ANALOG_POINTS, powerIn, pwm);
+#ifdef USE_PWM_CACHE
+    cacheFan[pwmChannel].clear();
+#endif    
+  }
+}
+
 void setPwmCurve(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
   
@@ -260,7 +278,7 @@ void setConfiguration(CommandParameter &parameters){
   byte i = 0;
   while(1){
     byte select = parameters.NextParameterAsInteger( 255 );
-    if(select >= 0 && select < NUMBER_OF_MAINBOARD_CONNECTORS && i < NUMBER_OF_RPM_TO_MAINBOARD){
+    if(select >= 0 && select < NUMBER_OF_FANS && i < NUMBER_OF_RPM_TO_MAINBOARD){
       rmpToMainboard(i++) = select;
     } else {
       return;

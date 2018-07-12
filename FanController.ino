@@ -132,9 +132,6 @@ volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
 volatile boolean lastFanRpmSensorTimeUpdated[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
-#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);\
-  lastFanRpmSensorTimeUpdated[i] = true;
-
 // Define Variables PIDs will be connecting to
 double outputPid;
 double inputPid;
@@ -178,10 +175,10 @@ void setPidConfiguration(CommandParameter &parameters);
 void disableFan(CommandParameter &parameters);
 void configure(CommandParameter &parameters);
 void sendPidUpates(CommandParameter &parameters);
-byte countPWM(PWMConfiguration &conf, unsigned int temperature);
+byte countPWM(PWMConfiguration &conf, unsigned int input);
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature);
 #ifdef USE_PWM_CACHE
-byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
+byte countPWM(PWMConfiguration &conf, unsigned int input, byte fanNumber);
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber);
 #endif
 byte getNewPwm(PWMConfiguration &conf, byte pwmOld, unsigned short sensorValueAveraged, byte fanNumber);
@@ -196,13 +193,14 @@ void readRPMsensors();
 void init_pid();
 void measureInterrupts();
 
-CommandHandler<23, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 23 commands, 0 variables
+CommandHandler<24, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 24 commands, 0 variables
 
 void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("help"), printHelp);
   SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
   SerialCommandHandler.AddCommand(F("setFan"), setFanConfiguration);
+  SerialCommandHandler.AddCommand(F("setPIn"), setPowerInCurve);
   SerialCommandHandler.AddCommand(F("setPwm"), setPwmCurve);
   SerialCommandHandler.AddCommand(F("setRpm"), setRpmCurve);
   SerialCommandHandler.AddCommand(F("setConf"), setConfiguration);

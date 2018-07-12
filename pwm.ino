@@ -1,38 +1,53 @@
-byte countPWM(PWMConfiguration &conf, unsigned int temperature){
-  byte tPartSelect = getTemperaturePartSelect(conf.tPwm, temperature, CURVE_PWM_POINTS);
-  unsigned int temperatureTarget = conf.tPwm[tPartSelect] * 10;
-  if(temperature <= temperatureTarget){
-    return conf.pwm[tPartSelect];
+byte countPWM(PWMConfiguration &conf, unsigned int input){
+  if(conf.pwmDrive == 0){
+    byte partSelect = getPowerInPartSelect(conf.powerInValue, input);
+    unsigned short powerInMin = conf.powerInValue[partSelect];
+    if(input <= powerInMin){
+      return conf.powerInPwm[partSelect];
+    }
+    unsigned short powerInMax = conf.powerInValue[partSelect + 1];
+    if(input >= powerInMax){
+      return conf.powerInPwm[partSelect + 1];
+    }
+    return ((long)(input - powerInMin) * ((int)conf.powerInPwm[partSelect + 1] - (int)conf.powerInPwm[partSelect])) / (powerInMax - powerInMin) + conf.powerInPwm[partSelect];
   }
-  unsigned int temperatureMax = conf.tPwm[tPartSelect + 1] * 10;
-  if(temperature >= temperatureMax){
-    return conf.pwm[tPartSelect + 1];
+  if(conf.pwmDrive == 2){
+    byte partSelect = getTemperaturePartSelect(conf.tPwm, input, CURVE_PWM_POINTS);
+    unsigned int temperatureTarget = conf.tPwm[partSelect] * 10;
+    if(input <= temperatureTarget){
+      return conf.pwm[partSelect];
+    }
+    unsigned int temperatureMax = conf.tPwm[partSelect + 1] * 10;
+    if(input >= temperatureMax){
+      return conf.pwm[partSelect + 1];
+    }
+    return ((long)(input - temperatureTarget) * ((int)conf.pwm[partSelect + 1] - (int)conf.pwm[partSelect])) / (temperatureMax - temperatureTarget) + conf.pwm[partSelect];
   }
-  return ((long)(temperature - temperatureTarget) * ((int)conf.pwm[tPartSelect + 1] - (int)conf.pwm[tPartSelect])) / (temperatureMax - temperatureTarget) + conf.pwm[tPartSelect];
+  return conf.constPwm;
 }
 
 #ifdef USE_PWM_CACHE
-byte countPWM(PWMConfiguration &conf, unsigned int temperature, byte fanNumber){
-    byte pwm = cacheFan[fanNumber].get(temperature);
+byte countPWM(PWMConfiguration &conf, unsigned int input, byte fanNumber){
+    byte pwm = cacheFan[fanNumber].get(input);
     if(pwm == 0){
-      pwm = countPWM(conf, temperature);
-      cacheFan[fanNumber].put(temperature, pwm);
+      pwm = countPWM(conf, input);
+      cacheFan[fanNumber].put(input, pwm);
     }
   return pwm;
 }
 #endif
 
 unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature){
-  byte tPartSelect = getTemperaturePartSelect(conf.tRpm, temperature, CURVE_RPM_POINTS);
-  unsigned short temperatureTarget = conf.tRpm[tPartSelect] * 10;
+  byte partSelect = getTemperaturePartSelect(conf.tRpm, temperature, CURVE_RPM_POINTS);
+  unsigned short temperatureTarget = conf.tRpm[partSelect] * 10;
   if(temperature <= temperatureTarget){
-    return conf.rpm[tPartSelect];
+    return conf.rpm[partSelect];
   }
-  unsigned short temperatureMax = conf.tRpm[tPartSelect + 1] * 10;
+  unsigned short temperatureMax = conf.tRpm[partSelect + 1] * 10;
   if(temperature >= temperatureMax){
-    return conf.rpm[tPartSelect + 1];
+    return conf.rpm[partSelect + 1];
   }
-  return (((long)(temperature - temperatureTarget)) * ((int)conf.rpm[tPartSelect + 1] - (int)conf.rpm[tPartSelect])) / (temperatureMax - temperatureTarget) + conf.rpm[tPartSelect];
+  return (((long)(temperature - temperatureTarget)) * ((int)conf.rpm[partSelect + 1] - (int)conf.rpm[partSelect])) / (temperatureMax - temperatureTarget) + conf.rpm[partSelect];
 }
 
 #ifdef USE_PWM_CACHE
@@ -63,11 +78,9 @@ void setPwm(byte fanNumber){
         sensorValue = powerInADCAveraged[conf.powerInNumber];
         ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
         
-        pwm[fanNumber] = sensorValue >> 2;    // map 0-1023 to 0-255
+        pwm[fanNumber] = countPWM(conf, sensorValue USE_FAN_NUMBER);
         break;
       case 1:
-        pwm[fanNumber] = conf.constPwm;
-        break;
       case 2:
         if(TIME_TO_COMPUTE_PWM){
           pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  

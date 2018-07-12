@@ -1,3 +1,6 @@
+#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);\
+  lastFanRpmSensorTimeUpdated[i] = true;
+
 #if HWversion == 1
   #include "ISR_Nano.h"
 #endif
