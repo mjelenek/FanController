@@ -1,11 +1,3 @@
-void countT(){
-  byte tNumber = part_64 >> 3;
-  // true if part_64 == 1, 9 (17, 25, 33 ...)
-  if(tNumber < NUMBER_OF_THERMISTORS && ((tNumber << 3) + 1 == part_64)){
-    countT(tNumber);
-  }
-}
-
 void countT(byte tNumber){
   if(fakeTemp[tNumber] > 0){
     TConnected[tNumber] = true;

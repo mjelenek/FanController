@@ -1,5 +1,5 @@
 // ADC conversion complete interrupt handler
-static byte adcIndexStatic = 0;
+static char adcIndexStatic = 0;
 
 void init_adc()
 {
@@ -18,7 +18,7 @@ ISR(ADC_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
-  byte adcIndex = adcIndexStatic;
+  char adcIndex = adcIndexStatic;
  
   // Read the AD conversion result
   uint16_t sensorValue = ADC;
@@ -28,13 +28,13 @@ ISR(ADC_vect)
     case 0:
       break;
     case 1:
-      powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
+      powerInADCAveraged[4] = ((powerInADCAveraged[4] + sensorValue) >> 1);
       ADMUX = 1;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 2:
       break;
     case 3:
-      powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
+      powerInADCAveraged[3] = ((powerInADCAveraged[3] + sensorValue) >> 1);
       ADMUX = 2;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 4:
@@ -46,13 +46,13 @@ ISR(ADC_vect)
     case 6:
       break;
     case 7:
-      powerInADCAveraged[3] = ((powerInADCAveraged[3] + sensorValue) >> 1);
+      powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
       ADMUX = 4;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 8:
       break;
     case 9:
-      powerInADCAveraged[4] = ((powerInADCAveraged[4] + sensorValue) >> 1);
+      powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 6;                    // select next ADC channel, VREF is EXTERNAL
       break;
     case 10:
@@ -87,7 +87,7 @@ ISR(ADC_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
-  byte adcIndex = adcIndexStatic;
+  char adcIndex = adcIndexStatic;
  
   // Read the AD conversion result
   uint16_t sensorValue = ADC;

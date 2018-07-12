@@ -34,22 +34,22 @@
 #endif
 
 #ifdef TIMING_DEBUG
-#define WARN_MICROSECONDS_DEBUG 1200
+#define WARN_MICROSECONDS_DEBUG 3000
 unsigned long timeInCode;
 unsigned long timeTotal;
-unsigned int to400;
-unsigned int to600;
-unsigned int to800;
 unsigned int to1000;
-unsigned int to1200;
-unsigned int over1200;
+unsigned int to1500;
+unsigned int to2000;
+unsigned int to2500;
+unsigned int to3000;
+unsigned int over3000;
 byte timeCounting = 0;
 byte timeCountingStartFlag = 0;
 #endif
 
 //one iteration microseconds
-#define ITERATION_MICROSECONDS 2000
-#define WARN_MICROSECONDS 1600
+#define ITERATION_MICROSECONDS 5000
+#define WARN_MICROSECONDS 4000
 #define DELAY_THRESHOLD 10000
 
 #define MAX_ALLOWED_TEMP 60
@@ -112,8 +112,6 @@ unsigned long now;
 unsigned short zpozdeni;
 byte gui = 0;  // enable gui
 byte i = 0;
-byte j = 0;
-byte part_64;  // cycles from 0 to 63;
 byte updatesRTToSend[NUMBER_OF_FANS];
 
 // ADC values from mainboard
@@ -129,7 +127,6 @@ unsigned char fakeTemp[NUMBER_OF_THERMISTORS];
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
 volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
-volatile boolean lastFanRpmSensorTimeUpdated[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
 // Define Variables PIDs will be connecting to
@@ -164,7 +161,6 @@ PID pid[] = {
 };
 #endif
 
-void countT();
 void countT(byte tNumber);
 int countEffectiveTemperature(byte tSelect);
 void printlnPwmDrive(PWMConfiguration &conf);

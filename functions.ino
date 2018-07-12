@@ -101,7 +101,7 @@ void guiUpdate(){
 }
 
 byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
-  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 2) + i) & B00011111) == 0){
+  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 1) + i) & B00011111) == 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
       if(conf.pwmDrive == 3){
@@ -422,13 +422,6 @@ int fibbonacci(int input){
   return (fibbonacci(input - 1) + fibbonacci(input - 2));
 }
 #endif
-
-void checkSerialCommand(){
-  // true if part_64 == 6, 14, 22, 30, 38, 46, 54, 62
-  if(part_64 & B00000110){
-    SerialCommandHandler.Process();
-  }
-}
 
 void Cmd_Unknown()
 {

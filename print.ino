@@ -207,37 +207,37 @@ void printTimingResult(){
     Serial.print(100 * (float)timeInCode / (float)timeTotal, 2);
     Serial.println(F("%"));
     Serial.print(F("Average delay: "));
-    Serial.println((unsigned long)timeInCode >> 9);
-    Serial.print(F("<400-"));
-    Serial.println(to400);
-    Serial.print(F("<600-"));
-    Serial.println(to600);
-    Serial.print(F("<800-"));
-    Serial.println(to800);
-    if(to1000 > 0){
-      Serial.print(F("<1000-"));
-      Serial.println(to1000);
+    Serial.println((unsigned long)timeInCode >> 8);
+    Serial.print(F("<1000-"));
+    Serial.println(to1000);
+    Serial.print(F("<1500-"));
+    Serial.println(to1500);
+    Serial.print(F("<2000-"));
+    Serial.println(to2000);
+    if(to2500 > 0){
+      Serial.print(F("<2500-"));
+      Serial.println(to2500);
     }
-    if(to1200 > 0){
-      Serial.print(F("<1200-"));
-      Serial.println(to1200);
+    if(to3000 > 0){
+      Serial.print(F("<3000-"));
+      Serial.println(to3000);
     }
-    if(over1200 > 0){
-      Serial.print(F(">1200-"));
-      Serial.println(over1200);
+    if(over3000 > 0){
+      Serial.print(F(">3000-"));
+      Serial.println(over3000);
     }
   } else {
     Serial.print(F("!"));
     Serial.write(24);
     Serial.print(F("timing"));
     serialWriteInt((unsigned int)(10000 * (float)timeInCode / (float)timeTotal));
-    serialWriteLong((unsigned long)timeInCode >> 9);
-    serialWriteInt(to400);
-    serialWriteInt(to600);
-    serialWriteInt(to800);
+    serialWriteLong((unsigned long)timeInCode >> 8);
     serialWriteInt(to1000);
-    serialWriteInt(to1200);
-    serialWriteInt(over1200);
+    serialWriteInt(to1500);
+    serialWriteInt(to2000);
+    serialWriteInt(to2500);
+    serialWriteInt(to3000);
+    serialWriteInt(over3000);
     Serial.print(F("#"));
   }
 }

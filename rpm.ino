@@ -1,5 +1,4 @@
-#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);\
-  lastFanRpmSensorTimeUpdated[i] = true;
+#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);
 
 #if HWversion == 1
   #include "ISR_Nano.h"
@@ -34,21 +33,9 @@ double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[
   return (60000000 / (time0 - time1));
 }
 
-// 255, 254, 253, 252, 191, 190 ...(189, 188, 127, 126, 125, 124, 63, 62)
-//#define TIME_TO_COMPUTE_RPM(fanNumber) i == (255 - ((fanNumber >> 2) << 6) - (fanNumber & B00000011))
-//#define TIME_TO_COMPUTE_RPM(fanNumber) i == (255 - fanNumber)
-byte TIME_TO_COMPUTE_RPM[] = {255, 254, 253, 252, 191, 190, 189, 188, 127, 126, 125, 124, 63, 62};
 void countRPMs(){
-  boolean lastFanRpmSensorTimeUpdatedLocal[NUMBER_OF_FANS];
-  disableRpmIRS();
-  memcpy(&lastFanRpmSensorTimeUpdatedLocal, &lastFanRpmSensorTimeUpdated, NUMBER_OF_FANS);
-  memset(&lastFanRpmSensorTimeUpdated, 0, NUMBER_OF_FANS);
-  enableRpmIRS();
-
   for(byte x = 0; x < NUMBER_OF_FANS; x++){
-    if((lastFanRpmSensorTimeUpdatedLocal[x]) || (i == TIME_TO_COMPUTE_RPM[x])){
-      rpm[x] = countRPM(lastFanRpmSensorTime[x], fanRpmSensorTimes[x]);
-    }
+    rpm[x] = countRPM(lastFanRpmSensorTime[x], fanRpmSensorTimes[x]);
   }
 }
 

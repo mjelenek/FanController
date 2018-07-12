@@ -61,11 +61,6 @@ unsigned short countExpectedRPM(PWMConfiguration &conf, unsigned int temperature
 }
 #endif
 
-// 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53)
-#define TIME_TO_COMPUTE_PWM part_64 == ((fanNumber << 2) + 3)
-// 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54)
-#define TIME_TO_COMPUTE_PWM_BY_PID part_64 == ((fanNumber << 2) + 4)
-
 void setPwm(byte fanNumber){
   unsigned short sensorValue;
   byte pwmOld = pwm[fanNumber];
@@ -82,23 +77,15 @@ void setPwm(byte fanNumber){
         break;
       case 1:
       case 2:
-        if(TIME_TO_COMPUTE_PWM){
-          pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  
-        }
+        pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  
         break;
       case 3:
-        if(TIME_TO_COMPUTE_PWM_BY_PID){
-          pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
-        }
+        pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
         break;
       case 4:
-        if(TIME_TO_COMPUTE_PWM){
-          setpointPid[fanNumber] = countExpectedRPM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);
-        }
-        if(TIME_TO_COMPUTE_PWM_BY_PID){
-          if(pidCompute(fanNumber)){
-             pwm[fanNumber] = (byte)outputPid;
-          }
+        setpointPid[fanNumber] = countExpectedRPM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);
+        if(pidCompute(fanNumber)){
+           pwm[fanNumber] = (byte)outputPid;
         }
         break;
     }

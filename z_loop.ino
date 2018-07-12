@@ -1,42 +1,17 @@
 void loop(){
-  part_64 = i & B00111111; // cycles from 0 to 63;
-
-  // tasks executed every iteration (2ms)
-  countT();
+  // tasks executed every iteration (5ms)
+  countT(i % NUMBER_OF_THERMISTORS);
   countRPMs();
   setPwm();
-  checkSerialCommand();
-  // one case each 64 iterations (128ms)
-  // 1,     9 (... 17,         25,     33)                            is occupied by calculating temperature
-  //    6,     14,     22,         30,     38,     46,     54, 62     is occupied by SerialCommandHandler
-  // 3, 7, 11, 15, 19, 23 (... 27, 31, 35, 39, 43, 47, 51, 53)        is occupied by calculating PWM
-  // 4, 8, 12, 16, 20, 24 (... 28, 32, 36, 40, 44, 48, 52, 54)        is occupied by calculating PID
-/*
-  switch (part_64) {
-    case 10:
-    case 18:
-    case 26:
-    case 34:
-    case 42:
-    case 50:
-    case 61:
-      break;
-    default:
-      ;
-  }
-*/
+  SerialCommandHandler.Process();
   if(i == 0){
-    j++;
     if(gui){
       guiUpdate();
     }
-    if(j == 2){
-      j = 0;
-      decrementPwmDisabled();
-      #ifdef TIMING_DEBUG
-        timingDebugStart();
-      #endif
-    }
+    decrementPwmDisabled();
+    #ifdef TIMING_DEBUG
+      timingDebugStart();
+    #endif
   }
 
   now = micros();
@@ -47,7 +22,7 @@ void loop(){
 #endif
 
   if(zpozdeni >= WARN_MICROSECONDS){
-    printDelay(part_64, zpozdeni);
+    printDelay(i, zpozdeni);
   }
   if(zpozdeni < ITERATION_MICROSECONDS){
     delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
@@ -57,7 +32,8 @@ void loop(){
     start = start + ITERATION_MICROSECONDS;
   } else {
     printDelayThreshold();
-    delay(6);  //wait for empty serial buffer, for 115200 b/s delay 6ms is enough
+    delay(100);       //wait for empty serial buffer and next pid iteration
+    init_pid();
     start = micros(); //too big delay, restart main loop timer
   }
 
@@ -77,38 +53,38 @@ void timingDebugStart(){
     timeCounting = 1;
     timeCountingStartFlag = 0;
     timeInCode = 0;
-    to400 = 0;
-    to600 = 0;
-    to800 = 0;
     to1000 = 0;
-    to1200 = 0;
-    over1200 = 0;
+    to1500 = 0;
+    to2000 = 0;
+    to2500 = 0;
+    to3000 = 0;
+    over3000 = 0;
     timeTotal = micros();
   }
 }
 
 void timingDebug(){
   if(timeCounting > 0){
-    if(zpozdeni < 400){
-      to400++;
-    } else
-    if(zpozdeni < 600){
-      to600++;
-    } else
-    if(zpozdeni < 800){
-      to800++;
-    } else
     if(zpozdeni < 1000){
       to1000++;
     } else
-    if(zpozdeni < 1200){
-      to1200++;
+    if(zpozdeni < 1500){
+      to1500++;
+    } else
+    if(zpozdeni < 2000){
+      to2000++;
+    } else
+    if(zpozdeni < 2500){
+      to2500++;
+    } else
+    if(zpozdeni < 3000){
+      to3000++;
     } else {
-      over1200++;
+      over3000++;
     }
 
     if(zpozdeni >= WARN_MICROSECONDS_DEBUG){
-      printDelay(part_64, zpozdeni);
+      printDelay(i, zpozdeni);
     }
 
     timeInCode = timeInCode + zpozdeni;

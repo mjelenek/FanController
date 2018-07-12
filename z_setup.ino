@@ -58,7 +58,7 @@ void init_thermistors(){
 void init_pid(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);
-    pid[i].SetSampleTime(120000);                     // will be computed every 128ms
+    pid[i].SetSampleTime(98000);                     // will be computed every 100ms
 
     switch (ConfigurationPWM(i).pwmDrive) {
     case 0:
@@ -70,6 +70,8 @@ void init_pid(){
     case 4:
       pid[i].SetMode(AUTOMATIC);
     }
+    pid[i].Compute();    
+    delayMicroseconds(ITERATION_MICROSECONDS);
   }
 }
 
