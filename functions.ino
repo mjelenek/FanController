@@ -12,10 +12,11 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 11);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 12);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
   Serial.write(NUMBER_OF_FANS);
+  Serial.write(NUMBER_OF_MAINBOARD_CONNECTORS);
   Serial.write(NUMBER_OF_RPM_TO_MAINBOARD);
   Serial.write(CURVE_ANALOG_POINTS);
   Serial.write(CURVE_PWM_POINTS);
@@ -81,7 +82,7 @@ void guiDisable(){
 
 void guiUpdate(){
   Serial.print(F("!"));
-  Serial.write(4 + 2 + NUMBER_OF_THERMISTORS * 4 + NUMBER_OF_FANS * 2);
+  Serial.write(4 + 3 + NUMBER_OF_MAINBOARD_CONNECTORS * 2 + NUMBER_OF_THERMISTORS * 4 + NUMBER_OF_FANS * 2);
   Serial.print(F("guiU"));
 
   Serial.write(NUMBER_OF_FANS);
@@ -96,6 +97,10 @@ void guiUpdate(){
       serialWriteInt(Tint[i]);
     }
     serialWriteInt(TWithHysteresisInt[i]);
+  }
+  Serial.write(NUMBER_OF_MAINBOARD_CONNECTORS);
+  for(byte i = 0; i < NUMBER_OF_MAINBOARD_CONNECTORS; i++){
+    serialWriteInt(powerInADCAveraged[i]);
   }
   Serial.print(F("#"));
 }

@@ -4,11 +4,15 @@ void loop(){
   countRPMs();
   setPwm();
   SerialCommandHandler.Process();
-  if(i == 0){
+
+  if(i == 0 || i == 128){
     if(gui){
       guiUpdate();
     }
     decrementPwmDisabled();
+  }
+
+  if(i == 0){
     #ifdef TIMING_DEBUG
       timingDebugStart();
     #endif
