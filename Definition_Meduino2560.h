@@ -66,16 +66,16 @@ const uint8_t PWMOUT_PGM[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PW
 #define TACH0_0 PORTG &= ~_BV(PG2)
 #define TACH0_SET {TACH0_1;} else {TACH0_0;}
 
-#define TACH1_1 PORTC |= _BV(PC7)
-#define TACH1_0 PORTC &= ~_BV(PC7)
+#define TACH1_1 PORTC |= _BV(PC4)
+#define TACH1_0 PORTC &= ~_BV(PC4)
 #define TACH1_SET {TACH1_1;} else {TACH1_0;}
 
-#define TACH2_1 PORTC |= _BV(PC5)
-#define TACH2_0 PORTC &= ~_BV(PC5)
+#define TACH2_1 PORTC |= _BV(PC2)
+#define TACH2_0 PORTC &= ~_BV(PC2)
 #define TACH2_SET {TACH2_1;} else {TACH2_0;}
 
-#define TACH3_1 PORTC |= _BV(PC3)
-#define TACH3_0 PORTC &= ~_BV(PC3)
+#define TACH3_1 PORTC |= _BV(PC0)
+#define TACH3_0 PORTC &= ~_BV(PC0)
 #define TACH3_SET {TACH3_1;} else {TACH3_0;}
 
 void setPinsIO(){
