@@ -5,9 +5,6 @@
 #define HWversion 2
 #endif
 
-#include "PID_v1.h"
-#include "CommandHandler.h"
-
 #if HWversion == 1
   #include "Definition_NanoV1.h"
 #endif
@@ -15,7 +12,9 @@
   #include "Definition_Meduino2560.h"
 #endif
 
-#include "EEPROMStoreISR.h"
+#include "lib/PID_v1.cpp"
+#include "lib/EEPROMStoreISR.h"
+#include "CommandHandler.h"
 
 #define TIMING_DEBUG
 //#define SAVE_DEBUG
