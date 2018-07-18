@@ -16,6 +16,8 @@ void setup() {
 
   setTimers();
 
+  setFanOutputsToZero();
+
   init_adc();
 
   init_thermistors();
@@ -39,6 +41,12 @@ void setup() {
   start = micros();
 }
 
+void setFanOutputsToZero(){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    writeAnalogValue(PWMOUT(i), 255);
+  }
+}
+ 
 void init_thermistors(){
   delay(20);  //wait for read values from ADC;
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
