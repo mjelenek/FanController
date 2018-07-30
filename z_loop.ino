@@ -18,6 +18,13 @@ void loop(){
     #endif
   }
 
+  #ifdef CALIBRATE_THERMISTORS
+  if((i && 3) == 0){ // every 20ms
+    calibrateRNominal();
+    calibrateB();
+  }
+  #endif
+
   now = micros();
   zpozdeni = now - start;
 

@@ -12,10 +12,11 @@ void serialWriteLong(unsigned long l){
 
 void configuration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 12);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 14);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
   Serial.write(NUMBER_OF_FANS);
+  Serial.write(NUMBER_OF_THERMISTORS);
   Serial.write(NUMBER_OF_MAINBOARD_CONNECTORS);
   Serial.write(NUMBER_OF_RPM_TO_MAINBOARD);
   Serial.write(CURVE_ANALOG_POINTS);
@@ -28,6 +29,7 @@ void configuration(){
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     thermistors(i).sendDefinition();
   }
+  Serial.write(profile);
   Serial.print(F("#"));
 }
 
@@ -425,6 +427,69 @@ int fibbonacci(int input){
   if(input == 1)
     return 1;
   return (fibbonacci(input - 1) + fibbonacci(input - 2));
+}
+#endif
+
+#ifdef CALIBRATE_THERMISTORS
+void setCalibrateRNominal(CommandParameter &parameters)
+{
+  tempNominal = parameters.NextParameterAsInteger( 255 );
+  while(1){
+    byte thermistorNumber = parameters.NextParameterAsInteger( 255 );
+
+    if(tempNominal == 255 || thermistorNumber == 255)
+      return;
+
+    if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
+      calibrateR[thermistorNumber] = 20;
+    }
+  }
+}
+
+void setCalibrateB(CommandParameter &parameters)
+{
+  tempNominal = parameters.NextParameterAsInteger( 255 );
+  while(1){
+    byte thermistorNumber = parameters.NextParameterAsInteger( 255 );
+
+    if(tempNominal == 255 || thermistorNumber == 255)
+      return;
+
+    if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
+      calibrateBeta[thermistorNumber] = 20;
+    }
+  }
+}
+
+void calibrateRNominal()
+{
+  int tempExpectedInt = tempNominal * 10;
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    if(calibrateR[i] > 0){
+      calibrateR[i]--;
+      int deltaT = Tint[i] - tempExpectedInt;
+      thermistors(i).resistanceNominal = thermistors(i).resistanceNominal - (10 * deltaT);
+      thermistors(i).tempNominal = tempNominal;
+      cacheT[i].clear();
+    }
+  }
+}
+
+void calibrateB()
+{
+  int tempExpectedInt = tempNominal * 10;
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    if(calibrateBeta[i] > 0){
+      calibrateBeta[i]--;
+      int deltaT = Tint[i] - tempExpectedInt;
+      if(tempNominal > thermistors(i).tempNominal){
+        thermistors(i).bCoefficient = thermistors(i).bCoefficient + (10 * deltaT);
+      } else {
+        thermistors(i).bCoefficient = thermistors(i).bCoefficient - (10 * deltaT);
+      }
+      cacheT[i].clear();
+    }
+  }
 }
 #endif
 

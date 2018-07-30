@@ -23,6 +23,7 @@
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
 #define USE_TEMP_CACHE
 #define USE_PWM_CACHE
+#define CALIBRATE_THERMISTORS
 
 #ifdef USE_PWM_CACHE
 #define USE_FAN_NUMBER_DECLARATION ,byte fanNumber
@@ -101,6 +102,7 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 // sensor to mainboard
 #define rmpToMainboard(i) ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard[i]
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
+#define profile ControllerConfigurationHolder.Data.m_UserData.profile
 #define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
 
 byte pwm[NUMBER_OF_FANS];
@@ -122,6 +124,13 @@ boolean TConnected[NUMBER_OF_THERMISTORS];
 int Tint[NUMBER_OF_THERMISTORS];
 int TWithHysteresisInt[NUMBER_OF_THERMISTORS];
 unsigned char fakeTemp[NUMBER_OF_THERMISTORS];
+
+#ifdef CALIBRATE_THERMISTORS
+byte calibrateR[NUMBER_OF_THERMISTORS];
+byte calibrateBeta[NUMBER_OF_THERMISTORS];
+unsigned char tempNominal;
+#endif
+
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
@@ -188,7 +197,7 @@ void readRPMsensors();
 void init_pid();
 void measureInterrupts();
 
-CommandHandler<24, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 24 commands, 0 variables
+CommandHandler<26, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 26 commands, 0 variables
 
 void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("help"), printHelp);
@@ -218,6 +227,10 @@ void setSerialCommandHandler(){
 #endif
 #ifdef FREE_MEMORY_DEBUG
   SerialCommandHandler.AddCommand(F("freemem"), freeMem);
+#endif
+#ifdef CALIBRATE_THERMISTORS
+  SerialCommandHandler.AddCommand(F("calibrateRNominal"), setCalibrateRNominal);
+  SerialCommandHandler.AddCommand(F("calibrateB"), setCalibrateB);
 #endif
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }

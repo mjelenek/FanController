@@ -13,7 +13,7 @@ public:
   // pwm when pwmDrive == 1
   byte constPwm;
   // settings when pwmDrive == 2 or pwmDrive == 4
-  byte tSelect; // select temperature sensor 0 - T0, 1 - T1, 2  - (T1+T2)/2
+  byte tSelect; //every bit represents one temperature. Count average value of thermistors signed by bit set to 1.
   // settings when pwmDrive == 2: map temperature to pwm
   byte tPwm[CURVE_PWM_POINTS];
   byte pwm[CURVE_PWM_POINTS];
@@ -32,7 +32,7 @@ public:
   {
     pwmDrive = 1;
     powerInNumber = 0;
-    tSelect = 0;
+    tSelect = 1;
     powerInValue[0] = 0;
     powerInPwm[0] = 0;
     powerInValue[1] = 1023;
@@ -53,7 +53,7 @@ public:
     kp = 40;
     ki = 30;
     kd = 5;
-    minPidPwm = 15;
+    minPidPwm = 20;
   }
 
   void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1, unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
@@ -65,7 +65,7 @@ public:
       pwmDrive = pwmDrive1;
     }
     constPwm = constPwm1;
-    if(tSelect1 >= 0 && tSelect1 <= 2){
+    if(tSelect1 >= 0 && tSelect1 < (1 << NUMBER_OF_THERMISTORS)){
       tSelect = tSelect1;
     }
     constRpm = constRpm1;
@@ -185,6 +185,8 @@ class ThermistorDefinition
 template <byte numberOfThermistors, byte numberOfRpmToMainboard> class ControllerConfiguration
 {
 public:
+  //settings profile
+  byte profile;
   // sensor to mainboard
   byte rmpToMainboard[numberOfRpmToMainboard];
   // hysteresis * 10°C -> value 10 means +- 1°C
@@ -194,7 +196,11 @@ public:
   
   void Reset()
   {
+    profile = 0;
     hysteresis = 10;
+    for(byte i = 0; i < numberOfRpmToMainboard; i++){
+      rmpToMainboard[i] = i;
+    }
     for(byte i = 0; i < numberOfThermistors; i++){
       thermistors[i].Reset();
     }
