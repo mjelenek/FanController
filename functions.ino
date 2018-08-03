@@ -276,7 +276,9 @@ void sendPidUpdates(CommandParameter &parameters){
 void setConfiguration(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
 
-  byte h = parameters.NextParameterAsInteger();
+  profile = parameters.NextParameterAsInteger( 0 );
+
+  byte h = parameters.NextParameterAsInteger( 10 );
 
   if(h >= 0 && h <= 100){
     hysteresis = h;
