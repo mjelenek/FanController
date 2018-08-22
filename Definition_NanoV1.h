@@ -86,6 +86,15 @@ void enableRpmIRS(){
 }
 
 void setTimers(){
+
+  TCCR0B = TCCR0B & B11111000;
+  TCCR1B = TCCR1B & B11111000;
+  TCCR2B = TCCR2B & B11111000;
+
+  TCNT0 = 0;
+  TCNT1 = 0;
+  TCNT2 = 0;
+  
   //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
   // put timer 0 in 8-bit fast hardware pwm mode
   //sbi(TCCR0A, WGM01);
@@ -103,6 +112,7 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
+  delayMicroseconds(10);
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
   TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
@@ -110,6 +120,7 @@ void setTimers(){
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
+  delayMicroseconds(10);
    
   //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
   TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
