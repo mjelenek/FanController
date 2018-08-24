@@ -75,10 +75,19 @@ void guiDisable(){
   void sendTime(){
     unsigned long us = micros();
     unsigned long ms = millis();
-    unsigned long s = ms / 1000;
-    Serial.println(us);    
-    Serial.println(ms);    
-    Serial.println(s);    
+    unsigned long s = seconds();
+    Serial.print(us);    
+    Serial.println(F("us"));    
+    Serial.print(ms);    
+    Serial.println(F("ms"));    
+    Serial.print(s);    
+    Serial.println(F("s"));    
+    s = s / 60;
+    Serial.print(s);    
+    Serial.println(F("min"));    
+    s = s / 60;
+    Serial.print(s);    
+    Serial.println(F("hod"));    
   }
 #endif
 

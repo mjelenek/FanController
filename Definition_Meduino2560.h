@@ -1,7 +1,7 @@
 #define NUMBER_OF_THERMISTORS 6
 #define NUMBER_OF_FANS 12
-#define NUMBER_OF_MAINBOARD_CONNECTORS 4
-#define NUMBER_OF_RPM_TO_MAINBOARD 4
+#define NUMBER_OF_MAINBOARD_CONNECTORS 6
+#define NUMBER_OF_RPM_TO_MAINBOARD 6
 
 #define CURVE_ANALOG_POINTS 5
 #define CURVE_PWM_POINTS 10
@@ -21,12 +21,12 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 #define RPMSENSOR5 21  //INT0/PD0
 #define RPMSENSOR6 20  //INT1/PD1
 #define RPMSENSOR7 19  //INT2/PD2
-#define RPMSENSOR8 83  //PCINT22/PK7/ADC15
-#define RPMSENSOR9 82  //PCINT23/PK6/ADC14
+#define RPMSENSOR8 51  //PCINT2/PB2
+#define RPMSENSOR9 50  //PCINT3/PB3
 #define RPMSENSOR10 53 //PCINT0/PB0
 #define RPMSENSOR11 52 //PCINT1/PB1
 
-//define input pin -> rpm
+//define input pin int -> rpm
 #define RPMSENSOR_INT0 5
 #define RPMSENSOR_INT1 6
 #define RPMSENSOR_INT2 7
@@ -35,48 +35,56 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 #define RPMSENSOR_INT5 4
 #define RPMSENSOR_PCINT0 10
 #define RPMSENSOR_PCINT1 11
+#define RPMSENSOR_PCINT2 8
+#define RPMSENSOR_PCINT3 9
 #define RPMSENSOR_PCINT9 2
 #define RPMSENSOR_PCINT10 1
-#define RPMSENSOR_PCINT23 9
-#define RPMSENSOR_PCINT22 8
 
 //PWM output pins
 #define PWM0 5    //OC3A
-#define PWM1 6    //OC4A
-#define PWM2 7    //OC4B
-#define PWM3 8    //OC4C
-#define PWM4 9    //OC2B
-#define PWM5 46   //OC5A
-#define PWM6 45   //OC5B
-#define PWM7 44   //OC5C
+#define PWM1 7    //OC4B
+#define PWM2 6    //OC4A
+#define PWM3 9    //OC2B
+#define PWM4 8    //OC4C
+#define PWM5 11   //OC1A
+#define PWM6 10   //OC2A
+#define PWM7 12   //OC1B
 #define PWM8 13   //OC1C
-#define PWM9 12   //OC1B
-#define PWM10 10  //OC2A
-#define PWM11 11  //OC1A
-
-const uint8_t PWMOUT_PGM[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5, PWM6, PWM7, PWM8, PWM9, PWM10, PWM11};
+#define PWM9 45   //OC5B
+#define PWM10 46  //OC5A
+#define PWM11 44  //OC5C
 
 //TACH output pins
-#define TACH0 39 //PG2
-#define TACH1 37 //PC0
-#define TACH2 35 //PC2
-#define TACH3 33 //PC4
+#define TACH0 43 //PL6
+#define TACH1 41 //PG0
+#define TACH2 39 //PG2
+#define TACH3 37 //PC0
+#define TACH4 35 //PC2
+#define TACH5 33 //PC4
 
-#define TACH0_1 PORTG |= _BV(PG2)
-#define TACH0_0 PORTG &= ~_BV(PG2)
+#define TACH0_1 PORTL |= _BV(PL6)
+#define TACH0_0 PORTL &= ~_BV(PL6)
 #define TACH0_SET {TACH0_1;} else {TACH0_0;}
 
-#define TACH1_1 PORTC |= _BV(PC0)
-#define TACH1_0 PORTC &= ~_BV(PC0)
+#define TACH1_1 PORTG |= _BV(PG0)
+#define TACH1_0 PORTG &= ~_BV(PG0)
 #define TACH1_SET {TACH1_1;} else {TACH1_0;}
 
-#define TACH2_1 PORTC |= _BV(PC2)
-#define TACH2_0 PORTC &= ~_BV(PC2)
+#define TACH2_1 PORTG |= _BV(PG2)
+#define TACH2_0 PORTG &= ~_BV(PG2)
 #define TACH2_SET {TACH2_1;} else {TACH2_0;}
 
-#define TACH3_1 PORTC |= _BV(PC4)
-#define TACH3_0 PORTC &= ~_BV(PC4)
+#define TACH3_1 PORTC |= _BV(PC0)
+#define TACH3_0 PORTC &= ~_BV(PC0)
 #define TACH3_SET {TACH3_1;} else {TACH3_0;}
+
+#define TACH4_1 PORTC |= _BV(PC2)
+#define TACH4_0 PORTC &= ~_BV(PC2)
+#define TACH4_SET {TACH4_1;} else {TACH4_0;}
+
+#define TACH5_1 PORTC |= _BV(PC4)
+#define TACH5_0 PORTC &= ~_BV(PC4)
+#define TACH5_SET {TACH5_1;} else {TACH5_0;}
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
@@ -96,6 +104,8 @@ void setPinsIO(){
   pinMode(TACH1, OUTPUT);
   pinMode(TACH2, OUTPUT);
   pinMode(TACH3, OUTPUT);
+  pinMode(TACH4, OUTPUT);
+  pinMode(TACH5, OUTPUT);
 
   pinMode(PWM0, OUTPUT);
   pinMode(PWM1, OUTPUT);
@@ -112,7 +122,6 @@ void setPinsIO(){
 }
 
 #define RT(P) RT_PGM[P]
-#define PWMOUT(P) PWMOUT_PGM[P]
 
 void init_extint()
 {
@@ -123,17 +132,14 @@ void init_extint()
 
 void init_pcint()
 {
-  // PB0, PB4
-  PCMSK0 = (1 << PCINT0) | (1 << PCINT1);
+  // PB0, PB1, PB2, PB3
+  PCMSK0 = (1 << PCINT0) | (1 << PCINT1) | (1 << PCINT2) | (1 << PCINT3);
 
   // PJ0, PJ1
   PCMSK1 = (1 << PCINT9) | (1 << PCINT10);
 
-  // PK6, PK7
-  PCMSK2 = (1 << PCINT22) | (1 << PCINT23);
-
-  // PORTB, PORTJ, PORTK
-  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+  // PORTB, PORTJ
+  PCICR = (1 << PCIE0) | (1 << PCIE1); // enable pin change interrupts
 
 }
 
@@ -223,59 +229,44 @@ void setTimers(){
   TCCR5A |= (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
 }
 
-void writeAnalogValue(uint8_t pin, int val) {
-  switch(pin) {
+void writePwmValue(byte fanNumber, int val) {
+  switch(fanNumber) {
+    case 0:
+      OCR3A = 255 - val; // set pwm duty
+      break;
+    case 1:
+      OCR4B = 255 - val; // set pwm duty
+      break;
     case 2:
-      OCR3B = val; // set pwm duty
+      OCR4A = 255 - val; // set pwm duty
       break;
     case 3:
-      OCR3C = val; // set pwm duty
+      OCR2B = 255 - val; // set pwm duty
       break;
     case 4:
-      OCR0B = val; // set pwm duty
+      OCR4C = 255 - val; // set pwm duty
       break;
     case 5:
-      OCR3A = val; // set pwm duty
+      OCR1A = 255 - val; // set pwm duty
       break;
     case 6:
-      OCR4A = val; // set pwm duty
+      OCR2A = 255 - val; // set pwm duty
       break;
     case 7:
-      OCR4B = val; // set pwm duty
+      OCR1B = 255 - val; // set pwm duty
       break;
     case 8:
-      OCR4C = val; // set pwm duty
+      OCR1C = 255 - val; // set pwm duty
       break;
     case 9:
-      OCR2B = val; // set pwm duty
+      OCR5B = 255 - val; // set pwm duty
       break;
     case 10:
-      OCR2A = val; // set pwm duty
-      break;
-    case 11:
-      OCR1A = val; // set pwm duty
-      break;
-    case 12:
-      OCR1B = val; // set pwm duty
-      break;
-    case 13:
-      OCR1C = val; // set pwm duty
-      break;
-    case 44:
-      OCR5C = val; // set pwm duty
-      break;
-    case 45:
-      OCR5B = val; // set pwm duty
-      break;
-    case 46:
       OCR5A = val; // set pwm duty
       break;
-    default:
-      if (val < 128) {
-        digitalWrite(pin, LOW);
-      } else {
-        digitalWrite(pin, HIGH);
-      }
+    case 11:
+      OCR5C = val; // set pwm duty
+      break;
   }
 }
 

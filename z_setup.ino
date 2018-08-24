@@ -43,7 +43,7 @@ void setup() {
 
 void setFanOutputsToZero(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    writeAnalogValue(PWMOUT(i), 255);
+    writePwmValue(i, 0);
   }
 }
  

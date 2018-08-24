@@ -19,6 +19,14 @@ const unsigned long PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define RPMSENSOR4 12
 #define RPMSENSOR5 19   // A5
 
+//define input pin int -> rpm
+#define RPMSENSOR_INT0 0
+#define RPMSENSOR_PCINT0 3
+#define RPMSENSOR_PCINT4 4
+#define RPMSENSOR_PCINT13 5
+#define RPMSENSOR_PCINT20 1
+#define RPMSENSOR_PCINT23 2
+
 //PWM output pins
 #define PWM0 3  //OC2B
 #define PWM1 5  //OC0B
@@ -26,7 +34,6 @@ const unsigned long PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define PWM3 9  //OC1A
 #define PWM4 10 //OC1B
 #define PWM5 11 //OC2A
-const uint8_t PROGMEM PWMOUT_PGM[] = {PWM0, PWM1, PWM2, PWM3, PWM4, PWM5};
 
 #define TACH0 13
 #define TACH0_1 PORTB |= _BV(PB5)
@@ -52,7 +59,6 @@ void setPinsIO(){
 }
 
 #define RT(P) ( pgm_read_dword( RT_PGM + (P) ) )
-#define PWMOUT(P) ( pgm_read_byte( PWMOUT_PGM + (P) ) )
 
 void init_extint()
 {
@@ -137,32 +143,26 @@ void setTimers(){
   TCCR2A |= (1 << COM2A1) | (1 << COM2B1);
 }
 
-void writeAnalogValue(uint8_t pin, int val) {
-  switch(pin) {
+void writePwmValue(byte fanNumber, int val) {
+  switch(fanNumber) {
+    case 0:
+      OCR2B = 255 - val; // set pwm duty
+      break;
+    case 1:
+      OCR0B = 255 - val; // set pwm duty
+      break;
+    case 2:
+      OCR0A = 255 - val; // set pwm duty
+      break;
     case 3:
-      OCR2B = val; // set pwm duty
+      OCR1A = 255 - val; // set pwm duty
+      break;
+    case 4:
+      OCR1B = 255 - val; // set pwm duty
       break;
     case 5:
-      OCR0B = val; // set pwm duty
+      OCR2A = 255 - val; // set pwm duty
       break;
-    case 6:
-      OCR0A = val; // set pwm duty
-      break;
-    case 9:
-      OCR1A = val; // set pwm duty
-      break;
-    case 10:
-      OCR1B = val; // set pwm duty
-      break;
-    case 11:
-      OCR2A = val; // set pwm duty
-      break;
-    default:
-      if (val < 128) {
-        digitalWrite(pin, LOW);
-      } else {
-        digitalWrite(pin, HIGH);
-      }
   }
 }
 

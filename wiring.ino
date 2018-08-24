@@ -32,6 +32,7 @@ volatile byte timer0_overflow_count0 = 0;
 volatile byte timer0_overflow_count1 = 0;
 volatile byte timer0_overflow_count2 = 0;
 volatile byte timer0_overflow_count3 = 0;
+volatile byte timer0_overflow_count4 = 0;
 #ifndef COUNT_MILLLIS_BY_DIVIDE_MICROS
 volatile byte timer0_millis0 = 0;
 volatile byte timer0_millis1 = 0;
@@ -75,7 +76,10 @@ ISR(TIMER0_OVF_vect)
     if(x == 0){
       x = ++timer0_overflow_count2;
       if(x == 0){
-        timer0_overflow_count3++;
+        x = ++timer0_overflow_count3;
+        if(x == 0){
+          timer0_overflow_count4++;
+        }
       }
     }
   }
@@ -132,6 +136,20 @@ unsigned long millis() {
   m = micros() / 1000;
 #endif
   return m;
+}
+
+unsigned long seconds() {
+  unsigned long m;
+  uint8_t oldSREG = SREG;
+  
+  cli();
+  m = timer0_overflow_count4;
+  m = (m << 8) + timer0_overflow_count3;
+  m = (m << 8) + timer0_overflow_count2;
+  m = (m << 8) + timer0_overflow_count1;
+  
+  SREG = oldSREG;
+  return ((m - (m >> 8) - (m >> 11)) / 122);
 }
 
 // end of settings for Timer0 set to frequency 31372.55 Hz
@@ -216,6 +234,11 @@ unsigned long micros() {
   
   return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
 }
+
+unsigned long seconds() {
+  return micros() / 1000;
+}
+
 #endif
 
 void delay(unsigned long ms)

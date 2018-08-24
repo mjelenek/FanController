@@ -13,6 +13,14 @@
   if(rmpToMainboard(3) == RPMSENSOR){\
     byte state = PIN;\
     if(state & (1 << PIN_NUM)) TACH3_SET;\
+  }\
+  if(rmpToMainboard(4) == RPMSENSOR){\
+    byte state = PIN;\
+    if(state & (1 << PIN_NUM)) TACH4_SET;\
+  }\
+  if(rmpToMainboard(5) == RPMSENSOR){\
+    byte state = PIN;\
+    if(state & (1 << PIN_NUM)) TACH5_SET;\
   }
 
 #define writeTachMacroState(RPMSENSOR, PIN_NUM)  if(rmpToMainboard(0) == RPMSENSOR){\
@@ -26,8 +34,13 @@
   }\
   if(rmpToMainboard(3) == RPMSENSOR){\
     if(state & (1 << PIN_NUM)) TACH3_SET;\
+  }\
+  if(rmpToMainboard(4) == RPMSENSOR){\
+    if(state & (1 << PIN_NUM)) TACH4_SET;\
+  }\
+  if(rmpToMainboard(5) == RPMSENSOR){\
+    if(state & (1 << PIN_NUM)) TACH5_SET;\
   }
-
 
 // external interrupt on pin PD0
 ISR(INT0_vect){
@@ -71,7 +84,7 @@ ISR(INT5_vect){
   writeLastFanRpmSensorTimeMacro(RPMSENSOR_INT5);
 }
 
-// change pin PB0, PB1
+// change pin PB0, PB1, PB2, PB3
 ISR(PCINT0_vect){
   static byte lastState;
   unsigned long now = micros();
@@ -86,6 +99,16 @@ ISR(PCINT0_vect){
   if(changed & (1 << PINB1)){
     writeTachMacroState(RPMSENSOR_PCINT1, PINB1)
     writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT1);
+  }
+
+  if(changed & (1 << PINB2)){
+    writeTachMacroState(RPMSENSOR_PCINT2, PINB2)
+    writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT2);
+  }
+
+  if(changed & (1 << PINB3)){
+    writeTachMacroState(RPMSENSOR_PCINT3, PINB3)
+    writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT3);
   }
 
   lastState = state;
@@ -106,26 +129,6 @@ ISR(PCINT1_vect){
   if(changed & (1 << PINJ1)){
     writeTachMacroState(RPMSENSOR_PCINT10, PINJ1)
     writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT10);
-  }
-
-  lastState = state;
-}
-
-// change pin PK6, PK7
-ISR(PCINT2_vect){
-  static byte lastState;
-  unsigned long now = micros();
-  byte state = PINK;
-  byte changed = state ^ lastState;
-
-  if(changed & (1 << PINK6)){
-    writeTachMacroState(RPMSENSOR_PCINT23, PINK6)
-    writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT23);
-  }
-
-  if(changed & (1 << PINK7)){
-    writeTachMacroState(RPMSENSOR_PCINT22, PINK7)
-    writeLastFanRpmSensorTimeMacro(RPMSENSOR_PCINT22);
   }
 
   lastState = state;

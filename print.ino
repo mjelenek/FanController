@@ -137,6 +137,7 @@ void printDelayThreshold(){
 }
 
 void printHelp(){
+  /*
   Serial.println(F("Available commands:"));
   Serial.println(F("s - print status in human readable format"));
   Serial.println(F("fs - print full status in human readable format"));
@@ -197,6 +198,7 @@ void printHelp(){
 #ifdef FREE_MEMORY_DEBUG
   Serial.println(F("freemem - print lowest measured free memory over the stack"));
 #endif
+  */
   Serial.println(F("help - this help"));
 }
 
