@@ -236,7 +236,7 @@ unsigned long micros() {
 }
 
 unsigned long seconds() {
-  return micros() / 1000;
+  return millis() / 1000;
 }
 
 #endif

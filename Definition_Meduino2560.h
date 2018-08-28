@@ -27,18 +27,18 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 #define RPMSENSOR11 52 //PCINT1/PB1
 
 //define input pin int -> rpm
-#define RPMSENSOR_INT0 5
-#define RPMSENSOR_INT1 6
-#define RPMSENSOR_INT2 7
-#define RPMSENSOR_INT3 0
-#define RPMSENSOR_INT4 3
-#define RPMSENSOR_INT5 4
+#define RPMSENSOR_INT0 6
+#define RPMSENSOR_INT1 7
+#define RPMSENSOR_INT2 4
+#define RPMSENSOR_INT3 5
+#define RPMSENSOR_INT4 1
+#define RPMSENSOR_INT5 0
 #define RPMSENSOR_PCINT0 10
 #define RPMSENSOR_PCINT1 11
 #define RPMSENSOR_PCINT2 8
 #define RPMSENSOR_PCINT3 9
-#define RPMSENSOR_PCINT9 2
-#define RPMSENSOR_PCINT10 1
+#define RPMSENSOR_PCINT9 3
+#define RPMSENSOR_PCINT10 2
 
 //PWM output pins
 #define PWM0 5    //OC3A
@@ -51,8 +51,8 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 #define PWM7 12   //OC1B
 #define PWM8 13   //OC1C
 #define PWM9 45   //OC5B
-#define PWM10 46  //OC5A
-#define PWM11 44  //OC5C
+#define PWM10 44  //OC5C
+#define PWM11 46  //OC5A
 
 //TACH output pins
 #define TACH0 43 //PL6
@@ -262,10 +262,10 @@ void writePwmValue(byte fanNumber, int val) {
       OCR5B = 255 - val; // set pwm duty
       break;
     case 10:
-      OCR5A = val; // set pwm duty
+      OCR5C = val; // set pwm duty
       break;
     case 11:
-      OCR5C = val; // set pwm duty
+      OCR5A = val; // set pwm duty
       break;
   }
 }
