@@ -481,7 +481,9 @@ void calibrateRNominal()
       int deltaT = Tint[i] - tempExpectedInt;
       thermistors(i).resistanceNominal = thermistors(i).resistanceNominal - (10 * deltaT);
       thermistors(i).tempNominal = tempNominal;
+#ifdef USE_TEMP_CACHE
       cacheT[i].clear();
+#endif
     }
   }
 }
@@ -498,7 +500,9 @@ void calibrateB()
       } else {
         thermistors(i).bCoefficient = thermistors(i).bCoefficient - (10 * deltaT);
       }
+#ifdef USE_TEMP_CACHE
       cacheT[i].clear();
+#endif
     }
   }
 }

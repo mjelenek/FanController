@@ -88,10 +88,10 @@ public:
 };
 
 #ifdef USE_TEMP_CACHE
-SlowlyChangingKeyCache<int, 6> cacheT[NUMBER_OF_THERMISTORS]; // 64 records ~ 6°C
+SlowlyChangingKeyCache<int, CACHE_T_SIZE> cacheT[NUMBER_OF_THERMISTORS];
 #endif
 
 #ifdef USE_PWM_CACHE
-SlowlyChangingKeyCache<unsigned short, 2> cacheFan[NUMBER_OF_FANS]; // 4 records
+SlowlyChangingKeyCache<unsigned short, CACHE_PWM_SIZE> cacheFan[NUMBER_OF_FANS];
 #endif
 

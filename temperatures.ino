@@ -49,38 +49,7 @@ int countHysteresisTemperature(int tWithHysteresisInt, int tInt){
   }
   return tWithHysteresisInt;
 }
-/*
-// tSelect: 0 - T0, 1 - T1, 2  - average value of T0 and T1
-int countEffectiveTemperature(byte tSelect){
-  switch (tSelect) {
-    case 0:
-      if(TConnected[0]){
-        return TWithHysteresisInt[0];
-      }
-      break;
-    case 1:
-      if(TConnected[1]){
-        return TWithHysteresisInt[1];
-      }
-      break;
-    case 2:
-      if(TConnected[0] && TConnected[1]){
-        return (TWithHysteresisInt[0] + TWithHysteresisInt[1]) >> 1;
-      }
-      if(TConnected[0]){
-        return TWithHysteresisInt[0];
-      }
-      if(TConnected[1]){
-        return TWithHysteresisInt[1];
-      }
-      return MAX_ALLOWED_TEMP;
-      break;
-    default:
-      return MAX_ALLOWED_TEMP;
-  }
-  return MAX_ALLOWED_TEMP;
-}
-*/
+
 // tSelect: every bit represents one temperature. Count average value of thermistors signed by bit set to 1.
 int countEffectiveTemperature(byte tSelect){
   if (tSelect == 0){

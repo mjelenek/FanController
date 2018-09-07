@@ -7,6 +7,11 @@
 #define CURVE_PWM_POINTS 10
 #define CURVE_RPM_POINTS 10
 
+// size of temperatures cache. Size is 2^CACHE_T_SIZE - value 6 means 64 records ~ 6°C
+#define CACHE_T_SIZE 6
+// size of PWM by temperature or PRM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
+#define CACHE_PWM_SIZE 2
+
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
@@ -229,7 +234,17 @@ void setTimers(){
   TCCR5A |= (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
 }
 
-void writePwmValue(byte fanNumber, int val) {
+//compensate non-lienarity of outputs
+byte countRealVal(unsigned int val){
+  byte realVal = (val * val + 324) / 325;
+  if(realVal >= 201){
+    return 255;
+  } else {
+    return realVal;
+  }
+}
+
+void writePwmValue(byte fanNumber, byte val) {
   switch(fanNumber) {
     case 0:
       OCR3A = 255 - val; // set pwm duty
@@ -262,12 +277,12 @@ void writePwmValue(byte fanNumber, int val) {
       OCR5B = 255 - val; // set pwm duty
       break;
     case 10:
-      OCR5C = val; // set pwm duty
+//      OCR5C = val; // set pwm duty
+      OCR5C = countRealVal(val); // set pwm duty
       break;
     case 11:
-      OCR5A = val; // set pwm duty
+//      OCR5A = val; // set pwm duty
+      OCR5A = countRealVal(val); // set pwm duty
       break;
   }
 }
-
-
