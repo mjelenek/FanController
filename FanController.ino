@@ -9,7 +9,8 @@
   #include "Definition_NanoV1.h"
 #endif
 #if HWversion == 2
-  #include "Definition_Meduino2560.h"
+//  #include "Definition_Meduino2560.h"
+  #include "Definition_Meduino2560v2.h"
 #endif
 
 #include "lib/PID_v1.cpp"

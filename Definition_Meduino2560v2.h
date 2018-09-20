@@ -1,4 +1,4 @@
-// Meduino version with MOSFETs driven by push pup resistor and transistor
+// Meduino version with MOSFETs driven by MOSFET driver
 #define NUMBER_OF_THERMISTORS 6
 #define NUMBER_OF_FANS 12
 #define NUMBER_OF_MAINBOARD_CONNECTORS 6
@@ -16,7 +16,7 @@
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 9960, 9980};
+const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9960, 9960, 9980, 9950, 9980, 9990};
 
 //define input pin
 #define RPMSENSOR0 18  //INT3/PD3
@@ -237,8 +237,12 @@ void setTimers(){
 
 //compensate non-lienarity of outputs
 byte countRealVal(unsigned int val){
-  byte realVal = (val * val + 255) >> 8;
-  return realVal;
+  byte realVal = (val * val + 324) / 325;
+  if(realVal >= 201){
+    return 255;
+  } else {
+    return realVal;
+  }
 }
 
 void writePwmValue(byte fanNumber, byte val) {
@@ -274,10 +278,10 @@ void writePwmValue(byte fanNumber, byte val) {
       OCR5B = 255 - val; // set pwm duty
       break;
     case 10:
-      OCR5C = countRealVal(val); // set pwm duty
+      OCR5C = 255 - val; // set pwm duty
       break;
     case 11:
-      OCR5A = countRealVal(val); // set pwm duty
+      OCR5A = 255 - val; // set pwm duty
       break;
   }
 }
