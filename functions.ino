@@ -390,7 +390,7 @@ void fillFreeMemoryByZeroes(){
 
 void freeMem(CommandParameter &parameters)
 {
-  int f = parameters.NextParameterAsInteger();
+  int f = parameters.NextParameterAsInteger( 0 );
   if(f > 0){
     Serial.print(F("fibbonacci: "));
     Serial.println(fibbonacci(f));
@@ -432,7 +432,7 @@ void freeMem(CommandParameter &parameters)
 }
 
 // function for increase stack test
-int fibbonacci(int input){
+int fibbonacci(unsigned long input){
   if(input <= 0)
     return 0;
   if(input == 1)

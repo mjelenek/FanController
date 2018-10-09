@@ -13,8 +13,6 @@
 // size of PWM by temperature or PRM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
 
-//by multimeter
-//#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
 const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9960, 9960, 9980, 9950, 9980, 9990};
 
@@ -233,16 +231,6 @@ void setTimers(){
   TCCR3A |= (1 << COM3A1);
   TCCR4A |= (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1);
   TCCR5A |= (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
-}
-
-//compensate non-lienarity of outputs
-byte countRealVal(unsigned int val){
-  byte realVal = (val * val + 324) / 325;
-  if(realVal >= 201){
-    return 255;
-  } else {
-    return realVal;
-  }
 }
 
 void writePwmValue(byte fanNumber, byte val) {
