@@ -22,14 +22,15 @@ inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastF
   }
 }
 
-double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[]){
+double countRPM(byte fanNumber){
   disableRpmIRS();
+  byte lastFanRpmSensorTimeIndex = lastFanRpmSensorTime[fanNumber];
   byte time1Pointer = lastFanRpmSensorTimeIndex + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;
   }
-  unsigned long time0 = fanRpmSensorTimes[lastFanRpmSensorTimeIndex];
-  unsigned long time1 = fanRpmSensorTimes[time1Pointer];
+  unsigned long time0 = fanRpmSensorTimes[fanNumber][lastFanRpmSensorTimeIndex];
+  unsigned long time1 = fanRpmSensorTimes[fanNumber][time1Pointer];
   enableRpmIRS();
   unsigned long now = micros();
   if((now - time0) > 240000 || (now - time1) > 840000){
@@ -40,7 +41,7 @@ double countRPM(byte lastFanRpmSensorTimeIndex, unsigned long fanRpmSensorTimes[
 
 void countRPMs(){
   for(byte x = 0; x < NUMBER_OF_FANS; x++){
-    rpm[x] = countRPM(lastFanRpmSensorTime[x], fanRpmSensorTimes[x]);
+    rpm[x] = countRPM(x);
   }
 }
 
