@@ -34,14 +34,15 @@ double countRPM(byte fanNumber){
   enableRpmIRS();
   unsigned long now = micros();
   if((now - time0) > 240000 || (now - time1) > 840000){
-    return 0;
+    rpm[fanNumber] = 0;
+  } else {
+    rpm[fanNumber] = (60000000 / (time0 - time1));
   }
-  return (60000000 / (time0 - time1));
 }
 
 void countRPMs(){
-  for(byte x = 0; x < NUMBER_OF_FANS; x++){
-    rpm[x] = countRPM(x);
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    countRPM(i);
   }
 }
 
