@@ -35,8 +35,12 @@ double countRPM(byte fanNumber){
   unsigned long now = micros();
   if((now - time0) > 240000 || (now - time1) > 840000){
     rpm[fanNumber] = 0;
+    lastFanRpmSensorTimeCounted[fanNumber] = lastFanRpmSensorTimeIndex;
   } else {
-    rpm[fanNumber] = (60000000 / (time0 - time1));
+    if(lastFanRpmSensorTimeCounted[fanNumber] != lastFanRpmSensorTimeIndex){
+      rpm[fanNumber] = (60000000 / (time0 - time1));
+      lastFanRpmSensorTimeCounted[fanNumber] = lastFanRpmSensorTimeIndex;
+    }
   }
 }
 

@@ -136,6 +136,7 @@ unsigned char tempNominal;
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
 volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
+byte lastFanRpmSensorTimeCounted[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
 // Define Variables PIDs will be connecting to
