@@ -127,6 +127,8 @@ void setPinsIO(){
 
 #define RT(P) RT_PGM[P]
 
+void writePwmValue(byte fanNumber, byte val);
+
 void init_extint()
 {
   EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
@@ -224,6 +226,11 @@ void setTimers(){
   //TCCR5B = TCCR5B & B11111000 | B00000011;    // set timer 5 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR5B = TCCR5B & B11111000 | B00000100;    // set timer 5 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR5B = TCCR5B & B11111000 | B00000101;    // set timer 5 divisor to  1024 for PWM frequency of    30.64 Hz
+
+  // set pwm outputs to zero
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    writePwmValue(i, 0);
+  }
 
   // connect timers to output pins
   TCCR1A |= (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);

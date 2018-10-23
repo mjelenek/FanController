@@ -80,12 +80,16 @@ void setPwm(byte fanNumber){
         pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  
         break;
       case 3:
-        pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
+        if(isTimeToComputePID(fanNumber)){
+          pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
+        }
         break;
       case 4:
-        setpointPid[fanNumber] = countExpectedRPM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);
-        if(pidCompute(fanNumber)){
-           pwm[fanNumber] = (byte)outputPid;
+        if(isTimeToComputePID(fanNumber)){
+          setpointPid[fanNumber] = countExpectedRPM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);
+          if(pidCompute(fanNumber)){
+            pwm[fanNumber] = (byte)outputPid;
+          }
         }
         break;
     }
@@ -105,6 +109,10 @@ byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
     return (byte)outputPid;
   }
   return pwmOld;
+}
+
+boolean isTimeToComputePID(byte fanNumber){
+  return ((i & 15) == fanNumber);   // every 80ms
 }
 
 byte getTemperaturePartSelect(byte temperatures[], unsigned int temperature, byte len){

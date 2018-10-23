@@ -53,7 +53,7 @@ public:
     kp = 40;
     ki = 30;
     kd = 5;
-    minPidPwm = 20;
+    minPidPwm = 25;
   }
 
   void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1, unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)

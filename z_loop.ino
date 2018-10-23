@@ -19,7 +19,7 @@ void loop(){
   }
 
   #ifdef CALIBRATE_THERMISTORS
-  if((i && 3) == 0){ // every 20ms
+  if((i & 15) == 0){ // every 80ms
     calibrateRNominal();
     calibrateB();
   }
@@ -44,7 +44,6 @@ void loop(){
   } else {
     printDelayThreshold();
     delay(100);       //wait for empty serial buffer and next pid iteration
-    init_pid();
     start = micros(); //too big delay, restart main loop timer
   }
 

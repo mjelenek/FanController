@@ -111,7 +111,7 @@ byte pwmDisabled[NUMBER_OF_FANS];
 
 unsigned long start;
 unsigned long now;
-unsigned short zpozdeni;
+unsigned long zpozdeni;
 byte gui = 0;  // enable gui
 byte i = 0;
 byte updatesRTToSend[NUMBER_OF_FANS];

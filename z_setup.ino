@@ -16,8 +16,6 @@ void setup() {
 
   setTimers();
 
-  setFanOutputsToZero();
-
   init_adc();
 
   init_thermistors();
@@ -41,12 +39,6 @@ void setup() {
   start = micros();
 }
 
-void setFanOutputsToZero(){
-  for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    writePwmValue(i, 0);
-  }
-}
- 
 void init_thermistors(){
   delay(20);  //wait for read values from ADC;
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
@@ -66,7 +58,7 @@ void init_thermistors(){
 void init_pid(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);
-    pid[i].SetSampleTime(98000);                     // will be computed every 100ms
+    pid[i].SetSampleTime(75000);                     // will be computed every 80ms (see isTimeToComputePID() function)
 
     switch (ConfigurationPWM(i).pwmDrive) {
     case 0:
@@ -79,7 +71,6 @@ void init_pid(){
       pid[i].SetMode(AUTOMATIC);
     }
     pid[i].Compute();    
-    delayMicroseconds(ITERATION_MICROSECONDS);
   }
 }
 
