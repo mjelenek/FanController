@@ -9,7 +9,7 @@
   #include "ISR_Meduino2560.h"
 #endif
 
-inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(byte *lastFanRpmSensorTime, unsigned long fanRpmSensorTimes[], unsigned long now){
+inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(volatile byte *lastFanRpmSensorTime, volatile unsigned long fanRpmSensorTimes[], unsigned long now){
   byte lastFanRpmSensorTimeIndex = *lastFanRpmSensorTime;
   unsigned long lastRecord = fanRpmSensorTimes[lastFanRpmSensorTimeIndex];
   if(now - lastRecord >= MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES){

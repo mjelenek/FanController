@@ -1,3 +1,7 @@
+void printVersionNumber(){
+  Serial.println(F(VERSION));
+}
+
 void printStatus(){
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     Serial.print(F(" T"));

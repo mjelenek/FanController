@@ -7,7 +7,7 @@ void serialWriteLong(unsigned long l){
   Serial.write(lowByte(l));
   Serial.write(lowByte(l >> 8));
   Serial.write(lowByte(l >> 16));
-  Serial.write(lowByte(l >> 32));
+  Serial.write(lowByte(l >> 24));
 }
 
 void configuration(){

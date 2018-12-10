@@ -1,3 +1,5 @@
+#define VERSION "1.00"
+
 #if defined(ARDUINO_AVR_NANO)
 #define HWversion 1
 #endif
@@ -199,9 +201,10 @@ void readRPMsensors();
 void init_pid();
 void measureInterrupts();
 
-CommandHandler<26, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 26 commands, 0 variables
+CommandHandler<26, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 27 commands, 0 variables
 
 void setSerialCommandHandler(){
+  SerialCommandHandler.AddCommand(F("version"), printVersionNumber);
   SerialCommandHandler.AddCommand(F("help"), printHelp);
   SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
   SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
