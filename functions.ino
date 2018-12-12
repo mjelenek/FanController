@@ -383,7 +383,7 @@ void fillFreeMemoryByZeroes(){
   int memPointer = getPointerToStartOfFreeMemory();
   int free_memory;
   free_memory = reinterpret_cast<int>(&free_memory) - memPointer;
-  while(memPointer < &free_memory) {
+  while(memPointer < reinterpret_cast<int>(&free_memory)) {
     (*(byte*)(memPointer++)) = 0;
   }
 }
@@ -407,7 +407,7 @@ void freeMem(CommandParameter &parameters)
     Serial.print(F("free memory address: "));
     Serial.println(reinterpret_cast<int>(&free_memory));
   }
-  while(memPointer < &free_memory) {
+  while(memPointer < reinterpret_cast<int>(&free_memory)) {
     if((*(byte*)(memPointer++)) == 0){
       notUsedMemory++;
     } else {

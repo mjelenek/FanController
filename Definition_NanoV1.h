@@ -3,9 +3,9 @@
 #define NUMBER_OF_MAINBOARD_CONNECTORS 5
 #define NUMBER_OF_RPM_TO_MAINBOARD 1
 
-#define CURVE_ANALOG_POINTS 4
-#define CURVE_PWM_POINTS 5
-#define CURVE_RPM_POINTS 5
+#define CURVE_ANALOG_POINTS 8
+#define CURVE_PWM_POINTS 8
+#define CURVE_RPM_POINTS 8
 
 // size of temperatures cache. Size is 2^CACHE_T_SIZE - value 6 means 64 records ~ 6°C
 #define CACHE_T_SIZE 6

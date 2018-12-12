@@ -203,6 +203,7 @@ void printHelp(){
   Serial.println(F("freemem - print lowest measured free memory over the stack"));
 #endif
   */
+  Serial.println(F("version - print version of firmware"));
   Serial.println(F("help - this help"));
 }
 
