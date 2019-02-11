@@ -1,4 +1,4 @@
-#define VERSION "1.00"
+#define VERSION "1.1"
 
 #if defined(ARDUINO_AVR_NANO)
 #define HWversion 1

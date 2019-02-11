@@ -70,7 +70,7 @@ void init_pid(){
     case 4:
       pid[i].SetMode(AUTOMATIC);
     }
-    pid[i].Compute();    
+    pid[i].Compute(false);    
   }
 }
 
