@@ -68,15 +68,15 @@ class PID
 	double dispKd;				//
 */  
 	double kp;                  // * (P)roportional Tuning Parameter
-  double ki;                  // * (I)ntegral Tuning Parameter
-  double kd;                  // * (D)erivative Tuning Parameter
+	double ki;                  // * (I)ntegral Tuning Parameter
+	double kd;                  // * (D)erivative Tuning Parameter
 
 	byte controllerDirection;
 	byte pOn;
 
-  double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
-  double *myOutput;             //   This creates a hard link between the variables and the 
-  double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
+	double *myInput;              // * Pointers to the Input, Output, and Setpoint variables
+	double *myOutput;             //   This creates a hard link between the variables and the 
+	double *mySetpoint;           //   PID, freeing the user from having to constantly tell us
                                 //   what these values are.  with pointers we'll just know.
 			  
 	unsigned long lastTime;

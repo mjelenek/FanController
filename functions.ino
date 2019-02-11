@@ -508,6 +508,24 @@ void calibrateB()
 }
 #endif
 
+#if HWversion == 2
+void setICRn(CommandParameter &parameters)
+{
+  //default PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  unsigned int parameter = parameters.NextParameterAsInteger( 321 );
+  // 800Hz - 80kHz
+  if(parameter >= 101 && parameter <= 10001){
+    setRatio((word)parameter);
+    for(byte i = 0; i < NUMBER_OF_FANS; i++){
+      #ifdef USE_PWM_CACHE
+      cacheFan[i].clear();
+      #endif
+      writePwmValue(i, pwm[i]);
+    }
+  }
+}
+#endif
+
 void Cmd_Unknown()
 {
   if(gui){

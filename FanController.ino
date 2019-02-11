@@ -59,11 +59,11 @@ byte timeCountingStartFlag = 0;
 
 #include "classes.h"
 
-typedef struct CEEPROMPWM
+typedef struct
 {
   uint16_t m_uChecksum;
   PWMConfiguration m_UserData;
-};
+} CEEPROMPWM;
 
 CEEPROMPWM EEMEM EEPROPWM[NUMBER_OF_FANS];
 
@@ -93,11 +93,11 @@ EEPROMStore<CEEPROMPWM> ConfigurationPWMHolder[] = {
 #endif
 #define ConfigurationPWM(i) ConfigurationPWMHolder[i].Data.m_UserData
 
-typedef struct CEEPROMC
+typedef struct
 {
   uint16_t m_uChecksum;
   ControllerConfiguration<NUMBER_OF_THERMISTORS, NUMBER_OF_RPM_TO_MAINBOARD> m_UserData;
-};
+} CEEPROMC;
 
 CEEPROMC EEMEM EEPROMConf;
 
@@ -200,43 +200,50 @@ byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf);
 void readRPMsensors();
 void init_pid();
 void measureInterrupts();
+#if HWversion == 2
+void setICRn(CommandParameter &parameters);
+#endif
 
-CommandHandler<26, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 27 commands, 0 variables
+CommandHandler<28, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 28 commands, 0 variables
 
 void setSerialCommandHandler(){
-  SerialCommandHandler.AddCommand(F("version"), printVersionNumber);
-  SerialCommandHandler.AddCommand(F("help"), printHelp);
-  SerialCommandHandler.AddCommand(F("guiE"), guiEnable);
-  SerialCommandHandler.AddCommand(F("guiD"), guiDisable);
-  SerialCommandHandler.AddCommand(F("setFan"), setFanConfiguration);
-  SerialCommandHandler.AddCommand(F("setPIn"), setPowerInCurve);
-  SerialCommandHandler.AddCommand(F("setPwm"), setPwmCurve);
-  SerialCommandHandler.AddCommand(F("setRpm"), setRpmCurve);
-  SerialCommandHandler.AddCommand(F("setConf"), setConfiguration);
-  SerialCommandHandler.AddCommand(F("setThermistor"), setThermistor);
-  SerialCommandHandler.AddCommand(F("setTemp"), setTemp);
-  SerialCommandHandler.AddCommand(F("s"), printStatus);
-  SerialCommandHandler.AddCommand(F("fs"), printFullStatus);
-  SerialCommandHandler.AddCommand(F("conf"), configuration);
-  SerialCommandHandler.AddCommand(F("guistat"), guistat);
-  SerialCommandHandler.AddCommand(F("guiUpdate"), guiUpdate);
-  SerialCommandHandler.AddCommand(F("load"), loadConfiguration);
-  SerialCommandHandler.AddCommand(F("save"), saveConfiguration);
-  SerialCommandHandler.AddCommand(F("disableFan"), disableFan);
-  SerialCommandHandler.AddCommand(F("pidU"), sendPidUpdates);
-  SerialCommandHandler.AddCommand(F("cacheStatus"), cacheStatus);
+  SerialCommandHandler.AddCommand(F("version"), (void (*)(CommandParameter&))printVersionNumber);
+  SerialCommandHandler.AddCommand(F("help"), (void (*)(CommandParameter&))printHelp);
+  SerialCommandHandler.AddCommand(F("guiE"), (void (*)(CommandParameter&))guiEnable);
+  SerialCommandHandler.AddCommand(F("guiD"), (void (*)(CommandParameter&))guiDisable);
+  SerialCommandHandler.AddCommand(F("setFan"), (void (*)(CommandParameter&))setFanConfiguration);
+  SerialCommandHandler.AddCommand(F("setPIn"), (void (*)(CommandParameter&))setPowerInCurve);
+  SerialCommandHandler.AddCommand(F("setPwm"), (void (*)(CommandParameter&))setPwmCurve);
+  SerialCommandHandler.AddCommand(F("setRpm"), (void (*)(CommandParameter&))setRpmCurve);
+  SerialCommandHandler.AddCommand(F("setConf"), (void (*)(CommandParameter&))setConfiguration);
+  SerialCommandHandler.AddCommand(F("setThermistor"), (void (*)(CommandParameter&))setThermistor);
+  SerialCommandHandler.AddCommand(F("setTemp"), (void (*)(CommandParameter&))setTemp);
+  SerialCommandHandler.AddCommand(F("s"), (void (*)(CommandParameter&))printStatus);
+  SerialCommandHandler.AddCommand(F("fs"), (void (*)(CommandParameter&))printFullStatus);
+  SerialCommandHandler.AddCommand(F("conf"), (void (*)(CommandParameter&))configuration);
+  SerialCommandHandler.AddCommand(F("guistat"), (void (*)(CommandParameter&))guistat);
+  SerialCommandHandler.AddCommand(F("guiUpdate"), (void (*)(CommandParameter&))guiUpdate);
+  SerialCommandHandler.AddCommand(F("load"), (void (*)(CommandParameter&))loadConfiguration);
+  SerialCommandHandler.AddCommand(F("save"), (void (*)(CommandParameter&))saveConfiguration);
+  SerialCommandHandler.AddCommand(F("disableFan"), (void (*)(CommandParameter&))disableFan);
+  SerialCommandHandler.AddCommand(F("pidU"), (void (*)(CommandParameter&))sendPidUpdates);
+  SerialCommandHandler.AddCommand(F("cacheStatus"), (void (*)(CommandParameter&))cacheStatus);
 #ifdef TIMING_DEBUG
-  SerialCommandHandler.AddCommand(F("time"), sendTime);
-  SerialCommandHandler.AddCommand(F("timing"), timing);
-  SerialCommandHandler.AddCommand(F("mi"), measureInterrupts);
+  SerialCommandHandler.AddCommand(F("time"), (void (*)(CommandParameter&))sendTime);
+  SerialCommandHandler.AddCommand(F("timing"), (void (*)(CommandParameter&))timing);
+  SerialCommandHandler.AddCommand(F("mi"), (void (*)(CommandParameter&))measureInterrupts);
 #endif
 #ifdef FREE_MEMORY_DEBUG
-  SerialCommandHandler.AddCommand(F("freemem"), freeMem);
+  SerialCommandHandler.AddCommand(F("freemem"), (void (*)(CommandParameter&))freeMem);
 #endif
 #ifdef CALIBRATE_THERMISTORS
-  SerialCommandHandler.AddCommand(F("calibrateRNominal"), setCalibrateRNominal);
-  SerialCommandHandler.AddCommand(F("calibrateB"), setCalibrateB);
+  SerialCommandHandler.AddCommand(F("calibrateRNominal"), (void (*)(CommandParameter&))setCalibrateRNominal);
+  SerialCommandHandler.AddCommand(F("calibrateB"), (void (*)(CommandParameter&))setCalibrateB);
 #endif
+#if HWversion == 2
+  SerialCommandHandler.AddCommand(F("setICRn"), (void (*)(CommandParameter&))setICRn);
+#endif
+
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }
 

@@ -146,7 +146,14 @@ void decrementPwmDisabled(){
 }
 
 boolean pidCompute(byte fanNumber){
+  PWMConfiguration &conf = ConfigurationPWM(fanNumber);
   inputPid = rpm[fanNumber];
+  if((unsigned int)rpm[fanNumber] == 0) {
+//  Prevention of integral windup
+    pid[fanNumber].SetTunings((double)conf.kp / 200, 0, (double)conf.kd / 200);
+  } else {
+    pid[fanNumber].SetTunings((double)conf.kp / 200, (double)conf.ki / 200, (double)conf.kd / 200);
+  }
   return pid[fanNumber].Compute();
 }
 

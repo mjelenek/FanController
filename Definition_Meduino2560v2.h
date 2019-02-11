@@ -90,6 +90,19 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9960, 9960, 9980, 9950, 998
 #define TACH5_0 PORTC &= ~_BV(PC4)
 #define TACH5_SET {TACH5_1;} else {TACH5_0;}
 
+//PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+word ICRn = 321;
+float RATIO = ((float)ICRn)/255;
+
+void setRatio(word parameter){
+  ICRn = parameter;
+  RATIO = ((float)ICRn)/255;
+  ICR1 = ICRn;
+  ICR3 = ICRn;
+  ICR4 = ICRn;
+  ICR5 = ICRn;
+}
+
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
   pinMode(RPMSENSOR1, INPUT);
@@ -191,12 +204,9 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T1 ------------------------------------
-  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
-  //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
-  //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
-  //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
-  delayMicroseconds(6);
+  ICR1 = ICRn;
+  TCCR1B = B00010001;    // set timer 3 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T2 ------------------------------------
   TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
@@ -205,78 +215,68 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000101;    // set timer 2 divisor to   128 for PWM frequency of   245.10 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000110;    // set timer 2 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
-  delayMicroseconds(6);
   //---------------------------------------------- Set PWM frequency for T3 ------------------------------------
-  TCCR3B = TCCR3B & B11111000 | B00000001;    // set timer 3 divisor to     1 for PWM frequency of 31372.55 Hz
-  //TCCR3B = TCCR3B & B11111000 | B00000010;    // set timer 3 divisor to     8 for PWM frequency of  3921.16 Hz
-  //TCCR3B = TCCR3B & B11111000 | B00000011;    // set timer 3 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  //TCCR3B = TCCR3B & B11111000 | B00000100;    // set timer 3 divisor to   256 for PWM frequency of   122.55 Hz
-  //TCCR3B = TCCR3B & B11111000 | B00000101;    // set timer 3 divisor to  1024 for PWM frequency of    30.64 Hz
-  delayMicroseconds(6);
+  ICR3 = ICRn;
+  TCCR3B = B00010001;    // set timer 3 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T4 ------------------------------------
-  TCCR4B = TCCR4B & B11111000 | B00000001;    // set timer 4 divisor to     1 for PWM frequency of 31372.55 Hz
-  //TCCR4B = TCCR4B & B11111000 | B00000010;    // set timer 4 divisor to     8 for PWM frequency of  3921.16 Hz
-  //TCCR4B = TCCR4B & B11111000 | B00000011;    // set timer 4 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  //TCCR4B = TCCR4B & B11111000 | B00000100;    // set timer 4 divisor to   256 for PWM frequency of   122.55 Hz
-  //TCCR4B = TCCR4B & B11111000 | B00000101;    // set timer 4 divisor to  1024 for PWM frequency of    30.64 Hz
-  delayMicroseconds(6);
+  ICR4 = ICRn;
+  TCCR4B = B00010001;    // set timer 4 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T5 ------------------------------------
-  TCCR5B = TCCR5B & B11111000 | B00000001;    // set timer 5 divisor to     1 for PWM frequency of 31372.55 Hz
-  //TCCR5B = TCCR5B & B11111000 | B00000010;    // set timer 5 divisor to     8 for PWM frequency of  3921.16 Hz
-  //TCCR5B = TCCR5B & B11111000 | B00000011;    // set timer 5 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
-  //TCCR5B = TCCR5B & B11111000 | B00000100;    // set timer 5 divisor to   256 for PWM frequency of   122.55 Hz
-  //TCCR5B = TCCR5B & B11111000 | B00000101;    // set timer 5 divisor to  1024 for PWM frequency of    30.64 Hz
+  ICR5 = ICRn;
+  TCCR5B = B00010001;    // set timer 5 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
 
   // set pwm outputs to zero
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     writePwmValue(i, 0);
   }
 
-  // connect timers to output pins
-  TCCR1A |= (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);
-  TCCR2A |= (1 << COM2A1) | (1 << COM2B1);
-  TCCR3A |= (1 << COM3A1);
-  TCCR4A |= (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1);
-  TCCR5A |= (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
+  // connect timers to output pins, set PWM mode
+  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1) | (1 << WGM11);
+  TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM20);
+  TCCR3A = (1 << COM3A1) | (1 << WGM31);
+  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1) | (1 << WGM41);
+  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1) | (1 << WGM51);
 }
 
 void writePwmValue(byte fanNumber, byte val) {
   switch(fanNumber) {
     case 0:
-      OCR3A = 255 - val; // set pwm duty
+      OCR3A = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 1:
-      OCR4B = 255 - val; // set pwm duty
+      OCR4B = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 2:
-      OCR4A = 255 - val; // set pwm duty
+      OCR4A = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 3:
       OCR2B = 255 - val; // set pwm duty
       break;
     case 4:
-      OCR4C = 255 - val; // set pwm duty
+      OCR4C = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 5:
-      OCR1A = 255 - val; // set pwm duty
+      OCR1A = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 6:
       OCR2A = 255 - val; // set pwm duty
       break;
     case 7:
-      OCR1B = 255 - val; // set pwm duty
+      OCR1B = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 8:
-      OCR1C = 255 - val; // set pwm duty
+      OCR1C = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 9:
-      OCR5B = 255 - val; // set pwm duty
+      OCR5B = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 10:
-      OCR5C = 255 - val; // set pwm duty
+      OCR5C = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 11:
-      OCR5A = 255 - val; // set pwm duty
+      OCR5A = ICRn - (word)(val*RATIO); // set pwm duty
       break;
   }
 }

@@ -92,8 +92,8 @@ volatile DataToStore bufferToStore[BUFF_STORE_SIZE];
 volatile byte bufferToStoreActual = 0;
 volatile byte bufferToStoreLast = 0;
 volatile byte eeprom_buffer_full = 0;
-volatile void* eeprom_dest;
-volatile void* eeprom_data;
+volatile unsigned char* eeprom_dest;
+volatile unsigned char* eeprom_data;
 volatile byte eeprom_data_size;
 volatile char eeprom_busy = 0;
 
@@ -165,8 +165,8 @@ ISR(EE_READY_vect){
       return;
     } else {
       // next data to store are ready in buffer
-      eeprom_dest = bufferToStore[bufferToStoreActual].eeprom_dest;             //point to the first location of data destination
-      eeprom_data = bufferToStore[bufferToStoreActual].eeprom_data;             //point to the first location of data source
+      eeprom_dest = (unsigned char*)bufferToStore[bufferToStoreActual].eeprom_dest;             //point to the first location of data destination
+      eeprom_data = (unsigned char*)bufferToStore[bufferToStoreActual].eeprom_data;             //point to the first location of data source
       eeprom_data_size = bufferToStore[bufferToStoreActual].eeprom_data_size;   //total bytes
       bufferToStoreActual = nextIndexInBuffer(bufferToStoreActual);
       eeprom_buffer_full = 0;
