@@ -284,10 +284,10 @@ void writePwmValue(byte fanNumber, byte val) {
       OCR5B = ICRn - (word)(val*RATIO); // set pwm duty
       break;
     case 10:
-      OCR5C = (word)(val*RATIO); // set pwm duty
+      OCR5C = countRealVal(val); // set pwm duty
       break;
     case 11:
-      OCR5A = (word)(val*RATIO); // set pwm duty
+      OCR5A = countRealVal(val); // set pwm duty
       break;
   }
 }
