@@ -94,13 +94,11 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 word ICRn = 321;
 float RATIO = ((float)ICRn)/255;
 unsigned long p = 100;
-// ICRn /(255 * (255 + p))
-float RATIO2 = ((float)ICRn /(255 * (255 + p)));
+unsigned long P = 255 * (255 + p);
 
 void setRatio(word parameter){
   ICRn = parameter;
   RATIO = ((float)ICRn)/255;
-  RATIO2 = ((float)ICRn /(255 * (255 + p)));
   ICR1 = ICRn;
   ICR3 = ICRn;
   ICR4 = ICRn;
@@ -247,8 +245,8 @@ void setTimers(){
 //compensate non-linearity of outputs
 // y=x*(x+p)*ymax/(xmax*(xmax+p))
 // y = x * (x + p) * ICRn /(255 * (255 + p))
-word countRealVal(byte val){
-  return val * (val + p) * RATIO2;
+word countRealVal(unsigned int val){
+  return (val * ((val + p) * ICRn)) / P;
 }
 
 void writePwmValue(byte fanNumber, byte val) {
