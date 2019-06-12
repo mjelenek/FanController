@@ -10,7 +10,7 @@
 
 // size of temperatures cache. Size is 2^CACHE_T_SIZE - value 6 means 64 records ~ 6°C
 #define CACHE_T_SIZE 6
-// size of PWM by temperature or PRM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
+// size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
 
 // resistance of resistor in series with thermistor(value measured by multimeter)
@@ -207,7 +207,7 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T1 ------------------------------------
   ICR1 = ICRn;
-  TCCR1B = B00010001;    // set timer 3 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  TCCR1B = B00010001;    // set timer 1 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T2 ------------------------------------
   TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
