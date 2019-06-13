@@ -81,7 +81,10 @@ void setPwm(byte fanNumber){
         break;
       case 3:
         if(isTimeToComputePID(fanNumber)){
-          pwm[fanNumber] = getNewPwmByConstRpm(conf, pwmOld, fanNumber);
+          setpointPid[fanNumber] = conf.constRpm;
+          if(pidCompute(fanNumber)){
+            pwm[fanNumber] = (byte)outputPid;
+          }
         }
         break;
       case 4:
@@ -101,14 +104,6 @@ void setPwm(byte fanNumber){
     writePwmValue(fanNumber, pwm[fanNumber]);
   }
   pidUpdate(fanNumber, ConfigurationPWM(fanNumber));
-}
-
-byte getNewPwmByConstRpm(PWMConfiguration &conf, byte pwmOld, byte fanNumber){
-  setpointPid[fanNumber] = conf.constRpm;
-  if(pidCompute(fanNumber)){
-    return (byte)outputPid;
-  }
-  return pwmOld;
 }
 
 boolean isTimeToComputePID(byte fanNumber){
@@ -147,7 +142,12 @@ void decrementPwmDisabled(){
 
 boolean pidCompute(byte fanNumber){
   inputPid = rpm[fanNumber];
-  return pid[fanNumber].Compute(!(unsigned int)rpm[fanNumber] == 0);
+  if((unsigned int)rpm[fanNumber] != 0){
+    return pid[fanNumber].Compute(true);
+  } else {
+    outputPid = i >= 165 ? 255 : 0;
+    return true;
+  }
 }
 
 
