@@ -131,7 +131,7 @@ unsigned char fakeTemp[NUMBER_OF_THERMISTORS];
 #ifdef CALIBRATE_THERMISTORS
 byte calibrateR[NUMBER_OF_THERMISTORS];
 byte calibrateBeta[NUMBER_OF_THERMISTORS];
-unsigned char tempNominal;
+int tempExpectedInt;
 #endif
 
 
@@ -220,7 +220,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("setTemp"), (void (*)(CommandParameter&))setTemp);
   SerialCommandHandler.AddCommand(F("s"), (void (*)(CommandParameter&))printStatus);
   SerialCommandHandler.AddCommand(F("fs"), (void (*)(CommandParameter&))printFullStatus);
-  SerialCommandHandler.AddCommand(F("conf"), (void (*)(CommandParameter&))configuration);
+  SerialCommandHandler.AddCommand(F("conf"), (void (*)(CommandParameter&))sendConfiguration);
   SerialCommandHandler.AddCommand(F("guistat"), (void (*)(CommandParameter&))guistat);
   SerialCommandHandler.AddCommand(F("guiUpdate"), (void (*)(CommandParameter&))guiUpdate);
   SerialCommandHandler.AddCommand(F("load"), (void (*)(CommandParameter&))loadConfiguration);

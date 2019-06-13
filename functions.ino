@@ -10,7 +10,7 @@ void serialWriteLong(unsigned long l){
   Serial.write(lowByte(l >> 24));
 }
 
-void configuration(){
+void sendConfiguration(){
   Serial.print(F("!"));
   Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 14);
   Serial.print(F("conf"));
@@ -321,12 +321,14 @@ void setThermistor(CommandParameter &parameters){
 }
 
 void setTemp(CommandParameter &parameters){
-  byte thermistorNumber = parameters.NextParameterAsInteger(255);
-  if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
-  
-  unsigned char fakeTemperature = parameters.NextParameterAsInteger(0);
-  if(fakeTemperature >= 0 && fakeTemperature <= MAX_ALLOWED_TEMP){
-    fakeTemp[thermistorNumber] = fakeTemperature;
+  while(1){
+    byte thermistorNumber = parameters.NextParameterAsInteger(255);
+    if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
+    
+    unsigned char fakeTemperature = parameters.NextParameterAsInteger(0);
+    if(fakeTemperature >= 0 && fakeTemperature <= MAX_ALLOWED_TEMP){
+      fakeTemp[thermistorNumber] = fakeTemperature;
+    }
   }
 }
 
@@ -444,11 +446,11 @@ int fibbonacci(unsigned long input){
 #ifdef CALIBRATE_THERMISTORS
 void setCalibrateRNominal(CommandParameter &parameters)
 {
-  tempNominal = parameters.NextParameterAsInteger( 255 );
+  tempExpectedInt = 10 * parameters.NextParameterAsInteger( 255 );
   while(1){
     byte thermistorNumber = parameters.NextParameterAsInteger( 255 );
 
-    if(tempNominal == 255 || thermistorNumber == 255)
+    if(tempExpectedInt == 2550 || thermistorNumber == 255)
       return;
 
     if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
@@ -459,11 +461,11 @@ void setCalibrateRNominal(CommandParameter &parameters)
 
 void setCalibrateB(CommandParameter &parameters)
 {
-  tempNominal = parameters.NextParameterAsInteger( 255 );
+  tempExpectedInt = 10 * parameters.NextParameterAsInteger( 255 );
   while(1){
     byte thermistorNumber = parameters.NextParameterAsInteger( 255 );
 
-    if(tempNominal == 255 || thermistorNumber == 255)
+    if(tempExpectedInt == 2550 || thermistorNumber == 255)
       return;
 
     if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
@@ -474,13 +476,13 @@ void setCalibrateB(CommandParameter &parameters)
 
 void calibrateRNominal()
 {
-  int tempExpectedInt = tempNominal * 10;
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     if(calibrateR[i] > 0){
       calibrateR[i]--;
       int deltaT = Tint[i] - tempExpectedInt;
       thermistors(i).resistanceNominal = thermistors(i).resistanceNominal - (10 * deltaT);
-      thermistors(i).tempNominal = tempNominal;
+      thermistors(i).tempNominal = (unsigned char)(tempExpectedInt / 10);
+      sendThermistorConfiguration(i);
 #ifdef USE_TEMP_CACHE
       cacheT[i].clear();
 #endif
@@ -490,21 +492,30 @@ void calibrateRNominal()
 
 void calibrateB()
 {
-  int tempExpectedInt = tempNominal * 10;
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     if(calibrateBeta[i] > 0){
       calibrateBeta[i]--;
       int deltaT = Tint[i] - tempExpectedInt;
-      if(tempNominal > thermistors(i).tempNominal){
+      if(((unsigned char)(tempExpectedInt / 10)) > thermistors(i).tempNominal){
         thermistors(i).bCoefficient = thermistors(i).bCoefficient + (10 * deltaT);
       } else {
         thermistors(i).bCoefficient = thermistors(i).bCoefficient - (10 * deltaT);
       }
+      sendThermistorConfiguration(i);
 #ifdef USE_TEMP_CACHE
       cacheT[i].clear();
 #endif
     }
   }
+}
+
+void sendThermistorConfiguration(byte numberOfThermistor){
+  Serial.print(F("!"));
+  Serial.write(11);
+  Serial.print(F("tConf"));
+  Serial.write(numberOfThermistor);
+  thermistors(numberOfThermistor).sendDefinition();
+  Serial.print(F("#"));
 }
 #endif
 
