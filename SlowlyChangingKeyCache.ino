@@ -95,3 +95,33 @@ SlowlyChangingKeyCache<int, CACHE_T_SIZE> cacheT[NUMBER_OF_THERMISTORS];
 SlowlyChangingKeyCache<unsigned short, CACHE_PWM_SIZE> cacheFan[NUMBER_OF_FANS];
 #endif
 
+void cacheStatus(){
+#ifdef USE_TEMP_CACHE
+if(gui){
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    cacheT[i].printStatus();
+  }
+} else {
+  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    Serial.print(F("cache T"));
+    Serial.println(i);
+    cacheT[i].printStatus();
+  }
+}
+#endif
+#ifdef USE_PWM_CACHE
+if(gui){
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    cacheFan[i].printStatus();
+  }
+} else {
+  for(byte i = 0; i < NUMBER_OF_FANS; i++){
+    Serial.print(F("cache RPMbyTemp["));
+    Serial.print(i);
+    Serial.println(F("]"));
+    cacheFan[i].printStatus();
+  }
+}
+#endif
+}
+

@@ -134,7 +134,6 @@ byte calibrateBeta[NUMBER_OF_THERMISTORS];
 int tempExpectedInt;
 #endif
 
-
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
 volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
