@@ -1,9 +1,18 @@
 // ADC conversion complete interrupt handler
+// One ADC conversion takes 128*25 = 3200 cycles. Frequency of ADC reading is 5kHz.
 static volatile char adcIndexStatic = 0;
 
 void init_adc()
 {
+#if HWversion == 1
   DIDR0 = B11011111;                                   // Disable digital input buffer for ADC pins
+#endif
+
+#if HWversion == 2
+  DIDR0 = B00111111;                                   // Disable digital input buffer for ADC pins
+  DIDR2 = B11111100;                                   // Disable digital input buffer for ADC pins
+#endif
+
   
   ADMUX = 0;                                          // VREF is EXTERNAL, channel 0
   ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) // prescaler to 128
