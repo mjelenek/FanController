@@ -147,7 +147,7 @@ char eeprom_interrupt_write_block (void* source, void* dest, byte num_bytes)
   eeprom_busy = 1; 
   
   //now the interrupt will do the rest of the job.
-  startWritingBufferByISR();
+  //    startWritingBufferByISR();
   return(0);
 }
 
@@ -179,9 +179,12 @@ ISR(EE_READY_vect){
   //process the next byte and move the pointers for the next, if any
   EEAR = (unsigned int)eeprom_dest;           //set the eeprom address
   EEDR = ((unsigned char*)eeprom_data)[0];    //enter the data byte
-    
+
+  char cSREG = SREG;        //store SREG value
+  cli();                    //disable interrupts during timed sequence
   EECR |= (1<<EEMPE);       //first enable master write
   EECR |= (1<<EEPE);        //now enable the actual write.  This sequence is required by the HW.
+  SREG = cSREG;             //restore SREG value (I-bit)
   
   eeprom_data_size--;       //decrement the number of bytes left
 }

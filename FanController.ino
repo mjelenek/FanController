@@ -111,6 +111,7 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 byte pwm[NUMBER_OF_FANS];
 byte pwmDisabled[NUMBER_OF_FANS];
 
+byte configurationToSave = 255;
 unsigned long start;
 unsigned long now;
 unsigned long zpozdeni;

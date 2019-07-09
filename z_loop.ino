@@ -3,7 +3,7 @@ void loop(){
   countT(i % NUMBER_OF_THERMISTORS);
   countRPMs();
   setPwm();
-  SerialCommandHandler.Process();
+  checkSave();
 
   if(i == 0 || i == 128){
     if(gui){
@@ -12,11 +12,11 @@ void loop(){
     decrementPwmDisabled();
   }
 
-  if(i == 0){
-    #ifdef TIMING_DEBUG
+  #ifdef TIMING_DEBUG
+    if(i == 0){
       timingDebugStart();
-    #endif
-  }
+    }
+  #endif
 
   #ifdef CALIBRATE_THERMISTORS
   if((i & 15) == 0){ // every 80ms
@@ -24,6 +24,8 @@ void loop(){
     calibrateB();
   }
   #endif
+
+  SerialCommandHandler.Process();
 
   now = micros();
   zpozdeni = now - start;
