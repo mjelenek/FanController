@@ -1,3 +1,4 @@
+
 #define VERSION "1.1"
 
 #if defined(ARDUINO_AVR_NANO)
@@ -20,7 +21,6 @@
 #include "CommandHandler.h"
 
 #define TIMING_DEBUG
-//#define SAVE_DEBUG
 #define FREE_MEMORY_DEBUG
 
 #define COUNT_MILLLIS_BY_DIVIDE_MICROS
@@ -117,6 +117,7 @@ unsigned long now;
 unsigned long zpozdeni;
 byte gui = 0;  // enable gui
 byte i = 0;
+byte j = 0;
 byte updatesRTToSend[NUMBER_OF_FANS];
 
 // ADC values from mainboard

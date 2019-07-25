@@ -141,13 +141,16 @@ void decrementPwmDisabled(){
 }
 
 boolean pidCompute(byte fanNumber){
-  inputPid = rpm[fanNumber];
-  if((unsigned int)rpm[fanNumber] != 0){
-    return pid[fanNumber].Compute(true);
-  } else {
-    outputPid = i >= 165 ? 255 : 0;
+  if ((unsigned short)setpointPid[fanNumber] == 0) {
+    outputPid = 0;
     return true;
   }
+  if((unsigned short)rpm[fanNumber] == 0){
+    outputPid = (j & 3) == 0 ? 255 : 0;
+    return true;
+  }
+  inputPid = rpm[fanNumber];
+  return pid[fanNumber].Compute(true);
 }
 
 

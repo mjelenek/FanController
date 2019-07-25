@@ -10,6 +10,9 @@ void loop(){
       guiUpdate();
     }
     decrementPwmDisabled();
+    if(i == 0){
+      j++;
+    }
   }
 
   #ifdef TIMING_DEBUG
