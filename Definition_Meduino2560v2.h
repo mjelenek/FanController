@@ -68,27 +68,21 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9960, 9960, 9980, 9950, 998
 
 #define TACH0_1 PORTL |= _BV(PL6)
 #define TACH0_0 PORTL &= ~_BV(PL6)
-#define TACH0_SET {TACH0_1;} else {TACH0_0;}
 
 #define TACH1_1 PORTG |= _BV(PG0)
 #define TACH1_0 PORTG &= ~_BV(PG0)
-#define TACH1_SET {TACH1_1;} else {TACH1_0;}
 
 #define TACH2_1 PORTG |= _BV(PG2)
 #define TACH2_0 PORTG &= ~_BV(PG2)
-#define TACH2_SET {TACH2_1;} else {TACH2_0;}
 
 #define TACH3_1 PORTC |= _BV(PC0)
 #define TACH3_0 PORTC &= ~_BV(PC0)
-#define TACH3_SET {TACH3_1;} else {TACH3_0;}
 
 #define TACH4_1 PORTC |= _BV(PC2)
 #define TACH4_0 PORTC &= ~_BV(PC2)
-#define TACH4_SET {TACH4_1;} else {TACH4_0;}
 
 #define TACH5_1 PORTC |= _BV(PC4)
 #define TACH5_0 PORTC &= ~_BV(PC4)
-#define TACH5_SET {TACH5_1;} else {TACH5_0;}
 
 //PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
 word ICRn = 321;

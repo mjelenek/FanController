@@ -15,7 +15,7 @@
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-const unsigned long PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
+const unsigned short PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -43,7 +43,6 @@ const unsigned long PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define TACH0 13
 #define TACH0_1 PORTB |= _BV(PB5)
 #define TACH0_0 PORTB &= ~_BV(PB5)
-#define TACH0_SET {TACH0_1;} else {TACH0_0;}
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
