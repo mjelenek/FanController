@@ -18,7 +18,7 @@
  *    reliable defaults, so we need to have the user set them.
  ***************************************************************************/
 PID::PID(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int POn, int ControllerDirection)
+        double Kp, double Ki, double Kd)
 {
     myOutput = Output;
     myInput = Input;
@@ -29,24 +29,10 @@ PID::PID(double* Input, double* Output, double* Setpoint,
 
     SampleTime = 100000L;							//default Controller Sample Time is 0.1 seconds
 
-    PID::SetControllerDirection(ControllerDirection);
-    PID::SetTunings(Kp, Ki, Kd, POn);
+    PID::SetTunings(Kp, Ki, Kd);
 
     lastTime = 0;
 }
-
-/*Constructor (...)*********************************************************
- *    To allow backwards compatability for v1.1, or for people that just want
- *    to use Proportional on Error without explicitly saying so
- ***************************************************************************/
-
-PID::PID(double* Input, double* Output, double* Setpoint,
-        double Kp, double Ki, double Kd, int ControllerDirection)
-    :PID::PID(Input, Output, Setpoint, Kp, Ki, Kd, P_ON_E, ControllerDirection)
-{
-
-}
-
 
 /* Compute() **********************************************************************
  *     This, as they say, is where the magic happens.  this function should be called
@@ -75,30 +61,20 @@ bool PID::Compute(bool withIntegration)
 		outputSum = 0;
 	  }
 
-      /*Add Proportional on Measurement, if P_ON_M is specified*/
-      if(!pOnE)
-	  {
-		outputSum-= kp * dInput;
-        if(outputSum > outMax) outputSum= outMax;
-        else if(outputSum < outMin) outputSum= outMin;
-	  }
-
-      /*Add Proportional on Error, if P_ON_E is specified*/
-	   double output;
-      if(pOnE) output = kp * error;
-      else output = 0;
+      /*Add Proportional on Error*/
+	  double output = kp * error;
 
       /*Compute Rest of PID Output*/
       output += outputSum - kd * dInput;
 
-	    if(output > outMax) output = outMax;
+	  if(output > outMax) output = outMax;
       else if(output < outMin) output = outMin;
-	    *myOutput = output;
+	  *myOutput = output;
 
       /*Remember some variables for next time*/
       lastInput = input;
       lastTime = now;
-	    return true;
+	  return true;
    }
    else return false;
 }
@@ -108,33 +84,15 @@ bool PID::Compute(bool withIntegration)
  * it's called automatically from the constructor, but tunings can also
  * be adjusted on the fly during normal operation
  ******************************************************************************/
-void PID::SetTunings(double Kp, double Ki, double Kd, int POn)
+void PID::SetTunings(double Kp, double Ki, double Kd)
 {
    if (Kp<0 || Ki<0 || Kd<0) return;
-
-   pOn = POn;
-   pOnE = POn == P_ON_E;
-
-//   dispKp = Kp; dispKi = Ki; dispKd = Kd;
 
    double SampleTimeInSec = ((double)SampleTime)/1000000;
    kp = Kp;
    ki = Ki * SampleTimeInSec;
    kd = Kd / SampleTimeInSec;
 
-  if(controllerDirection == REVERSE)
-   {
-      kp = (0 - kp);
-      ki = (0 - ki);
-      kd = (0 - kd);
-   }
-}
-
-/* SetTunings(...)*************************************************************
- * Set Tunings using the last-rembered POn setting
- ******************************************************************************/
-void PID::SetTunings(double Kp, double Ki, double Kd){
-    SetTunings(Kp, Ki, Kd, pOn); 
 }
 
 /* SetSampleTime(...) *********************************************************
@@ -203,23 +161,6 @@ void PID::Initialize()
    else if(outputSum < outMin) outputSum = outMin;
 }
 
-/* SetControllerDirection(...)*************************************************
- * The PID will either be connected to a DIRECT acting process (+Output leads
- * to +Input) or a REVERSE acting process(+Output leads to -Input.)  we need to
- * know which one, because otherwise we may increase the output when we should
- * be decreasing.  This is called from the constructor.
- ******************************************************************************/
-void PID::SetControllerDirection(int Direction)
-{
-   if(inAuto && Direction !=controllerDirection)
-   {
-	  kp = (0 - kp);
-      ki = (0 - ki);
-      kd = (0 - kd);
-   }
-   controllerDirection = Direction;
-}
-
 /* Status Funcions*************************************************************
  * Just because you set the Kp=-1 doesn't mean it actually happened.  these
  * functions query the internal state of the PID.  they're here for display
@@ -231,5 +172,4 @@ double PID::GetKi(){ return  dispKi;}
 double PID::GetKd(){ return  dispKd;}
 */
 int PID::GetMode(){ return  inAuto ? AUTOMATIC : MANUAL;}
-int PID::GetDirection(){ return controllerDirection;}
 
