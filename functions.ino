@@ -45,7 +45,7 @@ void guistat(CommandParameter &parameters){
     confToSend[i] = confNumber;
     numberOfConfigurationsToSend++;
     numberOfBytesToSend++;
-    numberOfBytesToSend += sizeof(PWMConfiguration);
+    numberOfBytesToSend += sizeof(PWMConfiguration) + 1;
   }
 
   Serial.print(F("!"));

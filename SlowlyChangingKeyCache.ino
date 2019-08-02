@@ -86,11 +86,11 @@ public:
 };
 
 #ifdef USE_TEMP_CACHE
-SlowlyChangingKeyCache<int, B00000001 << CACHE_T_SIZE, B00000001 << CACHE_T_SIZE - 1> cacheT[NUMBER_OF_THERMISTORS];
+SlowlyChangingKeyCache<int, B00000001 << CACHE_T_SIZE, (B00000001 << CACHE_T_SIZE) - 1> cacheT[NUMBER_OF_THERMISTORS];
 #endif
 
 #ifdef USE_PWM_CACHE
-SlowlyChangingKeyCache<unsigned short, B00000001 << CACHE_PWM_SIZE, B00000001 << CACHE_PWM_SIZE - 1> cacheFan[NUMBER_OF_FANS];
+SlowlyChangingKeyCache<unsigned short, B00000001 << CACHE_PWM_SIZE, (B00000001 << CACHE_PWM_SIZE) - 1> cacheFan[NUMBER_OF_FANS];
 #endif
 
 void cacheStatus(){
