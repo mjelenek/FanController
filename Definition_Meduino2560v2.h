@@ -9,7 +9,7 @@
 #define CURVE_RPM_POINTS 10
 
 // size of temperatures cache. Size is 2^CACHE_T_SIZE - value 6 means 64 records ~ 6°C
-#define CACHE_T_SIZE 6
+#define CACHE_T_SIZE 5
 // size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
 
