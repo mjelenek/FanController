@@ -2,11 +2,13 @@ void serialWriteInt(unsigned int i);
 
 class PWMConfiguration
 {
+
+  // BIIIIIDDD
+  // last 3 bites(D-bites): 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
+  // first 5 bites(I-bites): number of input connector from motherboard when pwmDrive == 0. Value must be between 0 and NUMBER_OF_MAINBOARD_CONNECTORS
+  byte powerInNumberAndPwmDrive;
+
 public:
-  // 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
-  byte pwmDrive;
-  // number of input connector from motherboard when pwmDrive == 0. Value must be between 0 and NUMBER_OF_MAINBOARD_CONNECTORS
-  byte powerInNumber;
   // settings when pwmDrive == 0: map input value to pwm
   unsigned short powerInValue[CURVE_ANALOG_POINTS];
   byte powerInPwm[CURVE_ANALOG_POINTS];
@@ -28,10 +30,26 @@ public:
   byte kd;
   byte minPidPwm; // minimal value of PWM when speed is driven by PID. Can not be 0, because fans with pwm power=0 instantly indicates 0rpm.
 
+  byte getPwmDrive(){
+    return powerInNumberAndPwmDrive & B00000111;
+  }
+
+  void setPwmDrive(byte pwmDrive){
+    powerInNumberAndPwmDrive = (powerInNumberAndPwmDrive & B11111000) | (pwmDrive & B00000111);
+  }
+
+  byte getPowerInNumber(){
+    return powerInNumberAndPwmDrive >> 3;
+  }
+
+  void setPowerInNumber(byte powerInNumber){
+    powerInNumberAndPwmDrive = (powerInNumberAndPwmDrive & B00000111) | (powerInNumber << 3);
+  }
+
   void Reset()
   {
-    pwmDrive = 1;
-    powerInNumber = 0;
+    setPwmDrive(1);
+    setPowerInNumber(0);
     tSelect = 1;
     powerInValue[0] = 0;
     powerInPwm[0] = 0;
@@ -59,10 +77,10 @@ public:
   void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1, unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
   {
     if(powerInNumber1 >= 0 && powerInNumber1 < NUMBER_OF_MAINBOARD_CONNECTORS){
-      powerInNumber = powerInNumber1;
+      setPowerInNumber(powerInNumber1);
     }
     if(pwmDrive1 >= 0 && pwmDrive1 <= 4){
-      pwmDrive = pwmDrive1;
+      setPwmDrive(pwmDrive1);
     }
     constPwm = constPwm1;
     if(tSelect1 >= 0 && tSelect1 < (1 << NUMBER_OF_THERMISTORS)){
@@ -125,8 +143,8 @@ public:
   }
 
   void guiStat(){
-    Serial.write(pwmDrive);
-    Serial.write(powerInNumber);
+    Serial.write(getPwmDrive());
+    Serial.write(getPowerInNumber());
     for(byte i = 0; i < CURVE_ANALOG_POINTS; i++){
       serialWriteInt(powerInValue[i]);
       Serial.write(powerInPwm[i]);

@@ -120,10 +120,10 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
   if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 1) + i) & B00011111) == 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
-      if(conf.pwmDrive == 3){
+      if(conf.getPwmDrive() == 3){
         expectedRpm = conf.constRpm;
       }
-      if(conf.pwmDrive == 4){
+      if(conf.getPwmDrive() == 4){
         expectedRpm = setpointPid[fanNumber];
       }
     }
@@ -143,10 +143,10 @@ byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
   if(updatesRTToSend[fanNumber] > 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
-      if(conf.pwmDrive == 3){
+      if(conf.getPwmDrive() == 3){
         expectedRpm = conf.constRpm;
       }
-      if(conf.pwmDrive == 4){
+      if(conf.getPwmDrive() == 4){
         expectedRpm = setpointPid[fanNumber];
       }
     }

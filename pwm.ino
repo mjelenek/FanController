@@ -1,5 +1,5 @@
 byte countPWM(PWMConfiguration &conf, unsigned int input){
-  if(conf.pwmDrive == 0){
+  if(conf.getPwmDrive() == 0){
     byte partSelect = getPowerInPartSelect(conf.powerInValue, input);
     unsigned short powerInMin = conf.powerInValue[partSelect];
     if(input <= powerInMin){
@@ -11,7 +11,7 @@ byte countPWM(PWMConfiguration &conf, unsigned int input){
     }
     return ((long)(input - powerInMin) * ((int)conf.powerInPwm[partSelect + 1] - (int)conf.powerInPwm[partSelect])) / (powerInMax - powerInMin) + conf.powerInPwm[partSelect];
   }
-  if(conf.pwmDrive == 2){
+  if(conf.getPwmDrive() == 2){
     byte partSelect = getTemperaturePartSelect(conf.tPwm, input, CURVE_PWM_POINTS);
     unsigned int temperatureTarget = conf.tPwm[partSelect] * 10;
     if(input <= temperatureTarget){
@@ -67,10 +67,10 @@ void setPwm(byte fanNumber){
   if(pwmDisabled[fanNumber] == 0){
     PWMConfiguration &conf = ConfigurationPWM(fanNumber);
     // pwmDrive: 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
-    switch (conf.pwmDrive) {
+    switch (conf.getPwmDrive()) {
       case 0:
         ADCSRA &= ~(1 << ADIE);               // Disable ADC conversion complete interrupt
-        sensorValue = powerInADCAveraged[conf.powerInNumber];
+        sensorValue = powerInADCAveraged[conf.getPowerInNumber()];
         ADCSRA |= (1 << ADIE);                // Enable ADC conversion complete interrupt
         
         pwm[fanNumber] = countPWM(conf, sensorValue USE_FAN_NUMBER);

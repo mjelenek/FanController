@@ -54,7 +54,7 @@ void printFullStatus(){
 
 void printlnPwmDrive(PWMConfiguration &conf){
   // 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
-  switch (conf.pwmDrive) {
+  switch (conf.getPwmDrive()) {
     case 0:
       Serial.println(F("analog input"));
       break;

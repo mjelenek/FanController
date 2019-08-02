@@ -60,7 +60,7 @@ void init_pid(){
     pid[i].SetOutputLimits(ConfigurationPWM(i).minPidPwm, 255);
     pid[i].SetSampleTime(75000);                     // will be computed every 80ms (see isTimeToComputePID() function)
 
-    switch (ConfigurationPWM(i).pwmDrive) {
+    switch (ConfigurationPWM(i).getPwmDrive()) {
     case 0:
     case 1:
     case 2:
