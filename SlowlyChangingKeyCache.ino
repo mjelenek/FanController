@@ -1,4 +1,4 @@
-
+#define SlowlyChangingKeyCacheMacro(dataType, shift, nameAndNumberOfItems) SlowlyChangingKeyCache<dataType, B00000001 << shift, (B00000001 << shift) - 1> nameAndNumberOfItems
 template <class TData, byte buffSize,  byte mask> class SlowlyChangingKeyCache
 {
   struct Record
@@ -86,11 +86,11 @@ public:
 };
 
 #ifdef USE_TEMP_CACHE
-SlowlyChangingKeyCache<int, B00000001 << CACHE_T_SIZE, (B00000001 << CACHE_T_SIZE) - 1> cacheT[NUMBER_OF_THERMISTORS];
+SlowlyChangingKeyCacheMacro(int, CACHE_T_SIZE, cacheT[NUMBER_OF_THERMISTORS]);
 #endif
 
 #ifdef USE_PWM_CACHE
-SlowlyChangingKeyCache<unsigned short, B00000001 << CACHE_PWM_SIZE, (B00000001 << CACHE_PWM_SIZE) - 1> cacheFan[NUMBER_OF_FANS];
+SlowlyChangingKeyCacheMacro(unsigned short, CACHE_PWM_SIZE, cacheFan[NUMBER_OF_FANS]);
 #endif
 
 void cacheStatus(){
