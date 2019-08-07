@@ -47,9 +47,7 @@ public:
   };
 
   void clear(){
-    for(byte i = 0; i < buffSize; i++){
-      buffer[i].value = 0;
-    }
+    memset(buffer, 0, buffSize * sizeof(TData));
     highLimit = 0;
     lowLimit = 0;
   }
