@@ -68,10 +68,6 @@ void guiDisable(){
 }
 
 #ifdef TIMING_DEBUG
-  void timing(){
-    timeCountingStartFlag = 1;
-  }
-
   void sendTime(){
     unsigned long us = micros();
     unsigned long ms = millis();

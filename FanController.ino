@@ -46,8 +46,7 @@ unsigned int to2000;
 unsigned int to2500;
 unsigned int to3000;
 unsigned int over3000;
-byte timeCounting = 0;
-byte timeCountingStartFlag = 0;
+unsigned short timeCounting = 0;
 #endif
 
 //one iteration microseconds

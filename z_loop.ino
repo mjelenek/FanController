@@ -10,16 +10,7 @@ void loop(){
       guiUpdate();
     }
     decrementPwmDisabled();
-    if(i == 0){
-      j++;
-    }
   }
-
-  #ifdef TIMING_DEBUG
-    if(i == 0){
-      timingDebugStart();
-    }
-  #endif
 
   #ifdef CALIBRATE_THERMISTORS
   if((i & 15) == 0){ // every 80ms
@@ -53,20 +44,14 @@ void loop(){
   }
 
   i++;
+  if(i == 0){
+    j++;
+  }
 }
 
 #ifdef TIMING_DEBUG
-void timingDebugStart(){
-  if(timeCounting > 0){
-    timeCounting--;
-    if(timeCounting == 0){
-      timeTotal = micros() - timeTotal;
-      printTimingResult();
-    }
-  }
-  if(timeCountingStartFlag > 0){
-    timeCounting = 1;
-    timeCountingStartFlag = 0;
+void timing(){
+    timeCounting = 256;
     timeInCode = 0;
     to1000 = 0;
     to1500 = 0;
@@ -74,12 +59,12 @@ void timingDebugStart(){
     to2500 = 0;
     to3000 = 0;
     over3000 = 0;
-    timeTotal = micros();
-  }
+    timeTotal = start;
 }
 
 void timingDebug(){
   if(timeCounting > 0){
+    timeCounting--;
     if(zpozdeni < 1000){
       to1000++;
     } else
@@ -105,6 +90,11 @@ void timingDebug(){
     timeInCode = timeInCode + zpozdeni;
     now = micros();
     zpozdeni = now - start;
+
+    if(timeCounting == 0){
+      timeTotal = micros() - timeTotal;
+      printTimingResult();
+    }
   }
 }
 #endif
