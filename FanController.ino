@@ -1,4 +1,3 @@
-
 #define VERSION "1.1"
 
 #if defined(ARDUINO_AVR_NANO)

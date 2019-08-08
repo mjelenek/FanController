@@ -25,7 +25,7 @@ public:
       Reset();
   }
 
-  bool Load()
+  __attribute__((noinline)) bool Load()
   {
     CEEPROMData WorkingCopy;
     if (Load(WorkingCopy))
@@ -37,7 +37,7 @@ public:
     return false;
   }
 
-  byte Save()
+  __attribute__((noinline)) byte Save()
   {
     // We only save if the current version in the eeprom doesn't match the Data we plan to save. 
     // This helps protect the eeprom against save called many times within the arduino loop,

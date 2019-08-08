@@ -1,5 +1,5 @@
 #ifdef FREE_MEMORY_DEBUG
-int getPointerToStartOfFreeMemory(){
+__attribute__((noinline)) int getPointerToStartOfFreeMemory(){
   extern int  __bss_end;
   extern int* __brkval;
   if (reinterpret_cast<int>(__brkval) == 0) {
@@ -17,13 +17,17 @@ int getPointerToStartOfFreeMemory(){
   }
 }
 
-void fillFreeMemoryByZeroes(){
+__attribute__((noinline)) void fillFreeMemoryByZeroes(){
+  char cSREG;
   int memPointer = getPointerToStartOfFreeMemory();
   int free_memory;
   free_memory = reinterpret_cast<int>(&free_memory) - memPointer;
+  cSREG = SREG;             //store SREG value
+  cli();                    //disable interrupts during timed sequence
   while(memPointer < reinterpret_cast<int>(&free_memory)) {
     (*(byte*)(memPointer++)) = 0;
   }
+  SREG = cSREG;
 }
 
 void freeMem(CommandParameter &parameters)
@@ -33,7 +37,10 @@ void freeMem(CommandParameter &parameters)
     Serial.print(F("fibbonacci: "));
     Serial.println(fibbonacci(f));
   }
-  
+  freemem();  
+}
+
+__attribute__((noinline)) void freemem(){
   int notUsedMemory = 0;
   int memPointer = getPointerToStartOfFreeMemory();
   int free_memory;
