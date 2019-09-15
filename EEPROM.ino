@@ -1,4 +1,4 @@
-void loadConfiguration(){
+inline __attribute__((always_inline)) void loadConfiguration(){
   ControllerConfigurationHolder.Load();
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     ConfigurationPWMHolder[i].Load();

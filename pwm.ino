@@ -76,6 +76,8 @@ void setPwm(byte fanNumber){
         pwm[fanNumber] = countPWM(conf, sensorValue USE_FAN_NUMBER);
         break;
       case 1:
+        pwm[fanNumber] = conf.constPwm;
+        break;
       case 2:
         pwm[fanNumber] = countPWM(conf, countEffectiveTemperature(conf.tSelect) USE_FAN_NUMBER);  
         break;
@@ -152,5 +154,3 @@ boolean pidCompute(byte fanNumber){
   inputPid = rpm[fanNumber];
   return pid[fanNumber].Compute(true);
 }
-
-

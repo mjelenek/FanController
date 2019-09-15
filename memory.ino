@@ -3,16 +3,8 @@ __attribute__((noinline)) int getPointerToStartOfFreeMemory(){
   extern int  __bss_end;
   extern int* __brkval;
   if (reinterpret_cast<int>(__brkval) == 0) {
-    // if no heap use from end of bss section
-    if(!gui){
-      Serial.println(F("from end of bss"));
-    }
     return reinterpret_cast<int>(&__bss_end);
   } else {
-    // use from top of stack to heap
-    if(!gui){
-      Serial.println(F("from top of stack to heap"));
-    }
     return reinterpret_cast<int>(__brkval);
   }
 }
@@ -61,11 +53,9 @@ __attribute__((noinline)) void freemem(){
   }
   if(!gui){
     Serial.print(F("actual free memory: "));
-    Serial.print(free_memory);
-    Serial.println(F(" Bytes"));
+    Serial.println(free_memory);
     Serial.print(F("not used memory: "));
-    Serial.print(notUsedMemory);
-    Serial.println(F(" Bytes"));
+    Serial.println(notUsedMemory);
   } else {
     Serial.print(F("!"));
     Serial.write(11);
