@@ -245,4 +245,3 @@ void setSerialCommandHandler(){
 
   SerialCommandHandler.SetDefaultHandler(Cmd_Unknown);
 }
-

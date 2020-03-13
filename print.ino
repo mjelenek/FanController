@@ -44,7 +44,7 @@ void printFullStatus(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     Serial.print(F(" pwm"));
     Serial.print(i);
-    Serial.print(F("Drive: "));
+    Serial.print(F(" Drive: "));
     printlnPwmDrive(ConfigurationPWMHolder[i].Data.m_UserData);
   }
   Serial.print(F(" hysteresis: "));
@@ -53,6 +53,7 @@ void printFullStatus(){
   
 
 void printlnPwmDrive(PWMConfiguration &conf){
+  byte i = 0;
   // 0 - analogInput, 1 - constPWM, 2 - PWM by temperatures, 3 - constRPM, 4 - RPM by temperatures
   switch (conf.getPwmDrive()) {
     case 0:
@@ -63,52 +64,40 @@ void printlnPwmDrive(PWMConfiguration &conf){
       Serial.println(conf.constPwm);
       break;
     case 2:
-      Serial.print(F("PWM by temperature, t0="));
-      Serial.print(conf.tPwm[0]);
-      Serial.print(F(" pwm0="));
-      Serial.print(conf.pwm[0]);
-      Serial.print(F(", t1="));
-      Serial.print(conf.tPwm[1]);
-      Serial.print(F(" pwm1="));
-      Serial.print(conf.pwm[1]);
-      Serial.print(F(", t2="));
-      Serial.print(conf.tPwm[2]);
-      Serial.print(F(" pwm2="));
-      Serial.print(conf.pwm[2]);
-      Serial.print(F(", t3="));
-      Serial.print(conf.tPwm[3]);
-      Serial.print(F(" pwm3="));
-      Serial.print(conf.pwm[3]);
-      Serial.print(F(", t4="));
-      Serial.print(conf.tPwm[4]);
-      Serial.print(F(" pwm4="));
-      Serial.println(conf.pwm[4]);
+      Serial.print(F("PWM by temperature"));
+      i = 0;
+      while(i < CURVE_PWM_POINTS && (i < 2 || conf.tPwm[i] != 0)){
+        Serial.print(F(", t"));
+        Serial.print(i);
+        Serial.print(F("="));
+        Serial.print(conf.tPwm[i]);
+        Serial.print(F(" pwm"));
+        Serial.print(i);
+        Serial.print(F("="));
+        Serial.print(conf.pwm[i]);
+        i++;
+      }
+      Serial.println();
       break;
     case 3:
       Serial.print(F("constant speed, expected RPM="));
       Serial.println(conf.constRpm);
       break;
     case 4:
-      Serial.print(F("RPM by temperature, t0="));
-      Serial.print(conf.tRpm[0]);
-      Serial.print(F(" rpm0="));
-      Serial.print(conf.rpm[0]);
-      Serial.print(F(", t1="));
-      Serial.print(conf.tRpm[1]);
-      Serial.print(F(" rpm1="));
-      Serial.print(conf.rpm[1]);
-      Serial.print(F(", t2="));
-      Serial.print(conf.tRpm[2]);
-      Serial.print(F(" rpm2="));
-      Serial.print(conf.rpm[2]);
-      Serial.print(F(", t3="));
-      Serial.print(conf.tRpm[3]);
-      Serial.print(F(" rpm3="));
-      Serial.print(conf.rpm[3]);
-      Serial.print(F(", t4="));
-      Serial.print(conf.tRpm[4]);
-      Serial.print(F(" rpm4="));
-      Serial.println(conf.rpm[4]);
+      Serial.print(F("RPM by temperature"));
+      i = 0;
+      while(i < CURVE_RPM_POINTS && (i < 2 || conf.tRpm[i] != 0)){
+        Serial.print(F(", t"));
+        Serial.print(i);
+        Serial.print(F("="));
+        Serial.print(conf.tRpm[i]);
+        Serial.print(F(" rpm"));
+        Serial.print(i);
+        Serial.print(F("="));
+        Serial.print(conf.rpm[i]);
+        i++;
+      }
+      Serial.println();
       break;
   }
 }
@@ -141,7 +130,7 @@ void printDelayThreshold(){
 }
 
 void printHelp(){
-  /*
+#if HWversion == 2
   Serial.println(F("Available commands:"));
   Serial.println(F("s - print status in human readable format"));
   Serial.println(F("fs - print full status in human readable format"));
@@ -202,7 +191,7 @@ void printHelp(){
 #ifdef FREE_MEMORY_DEBUG
   Serial.println(F("freemem - print lowest measured free memory over the stack"));
 #endif
-  */
+#endif
   Serial.println(F("version - print version of firmware"));
   Serial.println(F("help - this help"));
 }
@@ -249,5 +238,3 @@ void printTimingResult(){
   }
 }
 #endif
-
-

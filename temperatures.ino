@@ -183,5 +183,3 @@ void sendThermistorConfiguration(byte numberOfThermistor){
   Serial.print(F("#"));
 }
 #endif
-
-

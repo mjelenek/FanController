@@ -15,7 +15,7 @@
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
 // resistance of resistor in series with thermistor(value measured by multimeter)
-const unsigned short PROGMEM RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
+const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -62,7 +62,7 @@ void setPinsIO(){
   pinMode(PWM5, OUTPUT);
 }
 
-#define RT(P) ( pgm_read_dword( RT_PGM + (P) ) )
+#define RT(P) RT_PGM[P]
 
 void writePwmValue(byte fanNumber, byte val);
 
@@ -176,5 +176,3 @@ void writePwmValue(byte fanNumber, byte val) {
       break;
   }
 }
-
-
