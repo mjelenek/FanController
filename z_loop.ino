@@ -33,7 +33,7 @@ void loop(){
     printDelay(i, zpozdeni);
   }
   if(zpozdeni < ITERATION_MICROSECONDS){
-    delayMicroseconds(ITERATION_MICROSECONDS - zpozdeni);  //wait for next iteration
+    delayMicrosecondsIncludingInterrupts(ITERATION_MICROSECONDS - zpozdeni);
   }
 
   if(zpozdeni < DELAY_THRESHOLD){
@@ -47,6 +47,19 @@ void loop(){
   i++;
   if(i == 0){
     j++;
+  }
+}
+
+void delayMicrosecondsIncludingInterrupts(unsigned int us)
+{
+  unsigned long stopWaitingTime = micros() + us;
+  unsigned long now;
+  while(micros() < stopWaitingTime - 50 ){
+    delayMicroseconds(20);  //partial wait for next iteration
+  }
+  now = micros();
+  if(now < stopWaitingTime - 10){
+    delayMicroseconds(stopWaitingTime - now - 4);  //wait for next iteration
   }
 }
 
@@ -99,4 +112,3 @@ void timingDebug(){
   }
 }
 #endif
-
