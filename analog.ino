@@ -1,5 +1,5 @@
 // ADC conversion complete interrupt handler
-// One ADC conversion takes 128*25 = 3200 cycles. Frequency of ADC reading is 5kHz.
+// One ADC conversion takes 128*25 = 3200 cycles.
 static volatile char adcIndexStatic = 0;
 
 void init_adc()
@@ -16,13 +16,16 @@ void init_adc()
   
   ADMUX = 0;                                          // VREF is EXTERNAL, channel 0
   ADCSRA = (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) // prescaler to 128
-         | (1 << ADATE)                               // ADC Auto Trigger Enable
          | (1 << ADIE)                                // Enable ADC conversion complete interrupt
          | (1 << ADEN)                                // Enable ADC
          | (1 << ADSC);                               // Start conversion
 }
 
-#if HWversion == 1
+void startNextADC()
+{
+  ADCSRA |= (1 << ADSC);             // Start next ADC conversion
+}
+
 ISR(ADC_vect)
 {
   // copy these to local variables so they can be stored in registers
@@ -32,47 +35,34 @@ ISR(ADC_vect)
   // Read the AD conversion result
   uint16_t sensorValue = ADC;
   
+#if HWversion == 1
   // Process value and select next ADC input
   switch (adcIndex) {
     case 0:
-      break;
-    case 1:
       powerInADCAveraged[4] = ((powerInADCAveraged[4] + sensorValue) >> 1);
       ADMUX = 1;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 2:
-      break;
-    case 3:
+    case 1:
       powerInADCAveraged[3] = ((powerInADCAveraged[3] + sensorValue) >> 1);
       ADMUX = 2;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 4:
-      break;
-    case 5:
+    case 2:
       powerInADCAveraged[2] = ((powerInADCAveraged[2] + sensorValue) >> 1);
       ADMUX = 3;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 6:
-      break;
-    case 7:
+    case 3:
       powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
       ADMUX = 4;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 8:
-      break;
-    case 9:
+    case 4:
       powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 6;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 10:
-      break;
-    case 11:
+    case 5:
       thermistorADCAveraged[0] = ((thermistorADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 7;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 12:
-      break;
-    case 13:
+    case 6:
       thermistorADCAveraged[1] = ((thermistorADCAveraged[1] + sensorValue) >> 1);
       adcIndex = -1;
       ADMUX = 0;                    // select next ADC channel, VREF is EXTERNAL
@@ -80,99 +70,57 @@ ISR(ADC_vect)
     default:
       adcIndex = -1;
   }
-  adcIndex++;
-  adcIndexStatic = adcIndex;
-
-  // slow down ADC conversions
-  ADCSRA &= ~(1 << ADEN);            // Disable ADC
-  ADCSRA |= (1 << ADEN);             // Enable ADC
-
-  ADCSRA |= (1 << ADSC);             // Start next conversion
-}
 #endif
 
 #if HWversion == 2
-ISR(ADC_vect)
-{
-  // copy these to local variables so they can be stored in registers
-  // (volatile variables must be read from memory on every access)
-  char adcIndex = adcIndexStatic;
- 
-  // Read the AD conversion result
-  uint16_t sensorValue = ADC;
-  
   // Process value and select next ADC input
   switch (adcIndex) {
     case 0:
-      break;
-    case 1:
       thermistorADCAveraged[5] = ((thermistorADCAveraged[5] + sensorValue) >> 1);
       ADMUX = 1;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 2:
-      break;
-    case 3:
+    case 1:
       thermistorADCAveraged[4] = ((thermistorADCAveraged[4] + sensorValue) >> 1);
       ADMUX = 2;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 4:
-      break;
-    case 5:
+    case 2:
       thermistorADCAveraged[3] = ((thermistorADCAveraged[3] + sensorValue) >> 1);
       ADMUX = 3;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 6:
-      break;
-    case 7:
+    case 3:
       thermistorADCAveraged[2] = ((thermistorADCAveraged[2] + sensorValue) >> 1);
       ADMUX = 4;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 8:
-      break;
-    case 9:
+    case 4:
       thermistorADCAveraged[1] = ((thermistorADCAveraged[1] + sensorValue) >> 1);
       ADMUX = 5;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 10:
-      break;
-    case 11:
+    case 5:
       thermistorADCAveraged[0] = ((thermistorADCAveraged[0] + sensorValue) >> 1);
       ADCSRB = (1 << MUX5);
       ADMUX = 6;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 12:
-      break;
-    case 13:
+    case 6:
       powerInADCAveraged[0] = ((powerInADCAveraged[0] + sensorValue) >> 1);
       ADMUX = 7;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 14:
-      break;
-    case 15:
+    case 7:
       powerInADCAveraged[1] = ((powerInADCAveraged[1] + sensorValue) >> 1);
       ADMUX = 4;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 16:
-      break;
-    case 17:
+    case 8:
       powerInADCAveraged[2] = ((powerInADCAveraged[2] + sensorValue) >> 1);
       ADMUX = 5;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 18:
-      break;
-    case 19:
+    case 9:
       powerInADCAveraged[3] = ((powerInADCAveraged[3] + sensorValue) >> 1);
       ADMUX = 3;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 20:
-      break;
-    case 21:
+    case 10:
       powerInADCAveraged[4] = ((powerInADCAveraged[4] + sensorValue) >> 1);
       ADMUX = 2;                    // select next ADC channel, VREF is EXTERNAL
       break;
-    case 22:
-      break;
-    case 23:
+    case 11:
       powerInADCAveraged[5] = ((powerInADCAveraged[5] + sensorValue) >> 1);
       adcIndex = -1;
       ADCSRB = 0;
@@ -181,14 +129,13 @@ ISR(ADC_vect)
     default:
       adcIndex = -1;
   }
+#endif
   adcIndex++;
   adcIndexStatic = adcIndex;
 
-  // slow down ADC conversions
-  ADCSRA &= ~(1 << ADEN);            // Disable ADC
-  ADCSRA |= (1 << ADEN);             // Enable ADC
+// slow down ADC conversions
+//  ADCSRA &= ~(1 << ADEN);            // Disable ADC
+//  ADCSRA |= (1 << ADEN);             // Enable ADC
 
-  ADCSRA |= (1 << ADSC);             // Start next conversion
+//  ADCSRA |= (1 << ADSC);             // Start next conversion
 }
-#endif
-

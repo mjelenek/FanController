@@ -4,6 +4,7 @@ void loop(){
   countRPMs();
   setPwm();
   checkSave();
+  startNextADC();
 
   if(i == 0 || i == 128){
     if(gui){
