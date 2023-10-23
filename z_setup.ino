@@ -31,7 +31,6 @@ void setup() {
   init_pid();
 
 //  printTempProfile();
-//  measureInterrupts();
 
   Serial.println(F("System started. Type !help for more informations."));
   delay(1);
@@ -124,4 +123,3 @@ unsigned int doSomeMath(unsigned int x){
   }
   return result;
 }
-

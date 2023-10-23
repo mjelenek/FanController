@@ -60,4 +60,3 @@ ISR(PCINT2_vect){
 
   lastState = state;
 }
-
