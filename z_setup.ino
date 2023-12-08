@@ -39,18 +39,18 @@ void setup() {
 }
 
 void init_thermistors(){
-  delay(20);  //wait for read values from ADC;
-  for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
-    countT(i);  
+  for(byte i = 0; i <= NUMBER_OF_THERMISTORS + NUMBER_OF_MAINBOARD_CONNECTORS; i++){
+    delay(1);  //wait for read values from ADC;
+    startNextADC();
   }
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
+    countT(i);  
     Serial.print(F("T"));
     Serial.print(i);
-    if(TConnected[i]){
-      Serial.println(F(" connected"));
-    } else {
-      Serial.println(F(" not connected"));
+    if(! TConnected[i]){
+      Serial.print(F(" not"));
     }
+    Serial.println(F(" connected"));
   }
 }
 
