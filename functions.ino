@@ -1,4 +1,4 @@
-void serialWriteInt(unsigned int i){
+void serialWriteShort(unsigned short i){
   Serial.write(lowByte(i));
   Serial.write(highByte(i));
 }
@@ -94,26 +94,26 @@ void guiUpdate(){
 
   Serial.write(NUMBER_OF_FANS);
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    serialWriteInt(rpm[i]);
+    serialWriteShort(rpm[i]);
   }
   Serial.write(NUMBER_OF_THERMISTORS);
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     if(fakeTemp[i] > 0){
-      serialWriteInt(Tint[i] + 10000);
+      serialWriteShort(Tint[i] + 10000);
     } else {
-      serialWriteInt(Tint[i]);
+      serialWriteShort(Tint[i]);
     }
-    serialWriteInt(TWithHysteresisInt[i]);
+    serialWriteShort(TWithHysteresisInt[i]);
   }
   Serial.write(NUMBER_OF_MAINBOARD_CONNECTORS);
   for(byte i = 0; i < NUMBER_OF_MAINBOARD_CONNECTORS; i++){
-    serialWriteInt(powerInADCAveraged[i]);
+    serialWriteShort(powerInADCAveraged[i]);
   }
   Serial.print(F("#"));
 }
 
-byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
-  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 1) + i) & B00011111) == 0){
+void pidUpdate(byte fanNumber, PWMConfiguration &conf){
+  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 1) + i) & B00111111) == 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
       if(conf.getPwmDrive() == 3){
@@ -127,15 +127,15 @@ byte pidUpdate(byte fanNumber, PWMConfiguration &conf){
     Serial.write(8);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
-    serialWriteInt(expectedRpm);
-    serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
+    serialWriteShort(expectedRpm);
+    serialWriteShort((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
     Serial.print(F("#"));
     updatesRTToSend[fanNumber]--;
   }
 }
 
-byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
+void pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
   if(updatesRTToSend[fanNumber] > 0){
     unsigned short expectedRpm = rpm[fanNumber];
     if(pwmDisabled[fanNumber] == 0){
@@ -150,8 +150,8 @@ byte pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
     Serial.write(8);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
-    serialWriteInt(expectedRpm);
-    serialWriteInt((unsigned int) (rpm[fanNumber] + 0.5));
+    serialWriteShort(expectedRpm);
+    serialWriteShort((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
     Serial.print(F("#"));
     updatesRTToSend[fanNumber]--;

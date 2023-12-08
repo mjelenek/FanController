@@ -60,8 +60,8 @@ __attribute__((noinline)) void freemem(){
     Serial.print(F("!"));
     Serial.write(11);
     Serial.print(F("freemem"));
-    serialWriteInt(free_memory);
-    serialWriteInt(notUsedMemory);
+    serialWriteShort(free_memory);
+    serialWriteShort(notUsedMemory);
     Serial.println(F("#"));
   }
 }

@@ -1,4 +1,4 @@
-void serialWriteInt(unsigned int i);
+void serialWriteShort(unsigned short i);
 
 class PWMConfiguration
 {
@@ -146,7 +146,7 @@ public:
     Serial.write(getPwmDrive());
     Serial.write(getPowerInNumber());
     for(byte i = 0; i < CURVE_ANALOG_POINTS; i++){
-      serialWriteInt(powerInValue[i]);
+      serialWriteShort(powerInValue[i]);
       Serial.write(powerInPwm[i]);
     }
     Serial.write(constPwm);
@@ -155,10 +155,10 @@ public:
       Serial.write(tPwm[i]);
       Serial.write(pwm[i]);
     }
-    serialWriteInt(constRpm);
+    serialWriteShort(constRpm);
     for(byte i = 0; i < CURVE_RPM_POINTS; i++){
       Serial.write(tRpm[i]);
-      serialWriteInt(rpm[i]);
+      serialWriteShort(rpm[i]);
     }
     Serial.write(kp);
     Serial.write(ki);
@@ -195,8 +195,8 @@ class ThermistorDefinition
 
   void sendDefinition(){
     Serial.write(tempNominal);
-    serialWriteInt(resistanceNominal);
-    serialWriteInt(bCoefficient);
+    serialWriteShort(resistanceNominal);
+    serialWriteShort(bCoefficient);
   }
 };
 

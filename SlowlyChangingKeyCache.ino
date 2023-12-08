@@ -65,9 +65,9 @@ public:
       Serial.write(2 * buffSize + 8);
       Serial.print(F("cache"));
       Serial.write(buffSize);
-      serialWriteInt(lowLimit);
+      serialWriteShort(lowLimit);
       for(short i = lowLimit; i < lowLimit + buffSize; i++){
-        serialWriteInt(get(i));
+        serialWriteShort(get(i));
       }
       Serial.print(F("#"));
     } else {

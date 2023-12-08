@@ -226,14 +226,14 @@ void printTimingResult(){
     Serial.print(F("!"));
     Serial.write(24);
     Serial.print(F("timing"));
-    serialWriteInt((unsigned int)(10000 * (float)timeInCode / (float)timeTotal));
+    serialWriteShort((unsigned int)(10000 * (float)timeInCode / (float)timeTotal));
     serialWriteLong((unsigned long)timeInCode >> 8);
-    serialWriteInt(to1000);
-    serialWriteInt(to1500);
-    serialWriteInt(to2000);
-    serialWriteInt(to2500);
-    serialWriteInt(to3000);
-    serialWriteInt(over3000);
+    serialWriteShort(to1000);
+    serialWriteShort(to1500);
+    serialWriteShort(to2000);
+    serialWriteShort(to2500);
+    serialWriteShort(to3000);
+    serialWriteShort(over3000);
     Serial.print(F("#"));
   }
 }
