@@ -1,7 +1,7 @@
 void loop(){
   // tasks executed every iteration (5ms)
   countT(i % NUMBER_OF_THERMISTORS);
-  countRPMs();
+  calculateRPMs();
   setPwm();
   checkSave();
   startNextADC();

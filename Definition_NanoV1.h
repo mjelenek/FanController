@@ -25,12 +25,12 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 #define RPMSENSOR5 19   // A5
 
 //define input pin int -> rpm
-#define RPMSENSOR_INT0 0
-#define RPMSENSOR_PCINT0 3
-#define RPMSENSOR_PCINT4 4
-#define RPMSENSOR_PCINT13 5
-#define RPMSENSOR_PCINT20 1
-#define RPMSENSOR_PCINT23 2
+#define RPMSENSOR_INT0 0     //PIND2
+#define RPMSENSOR_PCINT0 3   //PINB0
+#define RPMSENSOR_PCINT4 4   //PINB4
+#define RPMSENSOR_PCINT13 5  //PINC5
+#define RPMSENSOR_PCINT20 1  //PIND4
+#define RPMSENSOR_PCINT23 2  //PIND7
 
 //PWM output pins
 #define PWM0 3  //OC2B
@@ -95,6 +95,56 @@ void disableRpmIRS(){
 void enableRpmIRS(){
   EIMSK |= (1 << INT0);                               // enable external interrupt
   PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+}
+
+void disableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK &= ~(1 << INT0);
+      break;
+    case 1:
+      PCMSK2 &= ~(1 << PCINT20);
+      break;
+    case 2:
+      PCMSK2 &= ~(1 << PCINT23);
+      break;
+    case 3:
+      PCMSK0 &= ~(1 << PCINT0);
+      break;
+    case 4:
+      PCMSK0 &= ~(1 << PCINT4);
+      break;
+    case 5:
+      PCMSK1 &= ~(1 << PCINT13);
+      break;
+    default:
+    ;
+  }
+}
+
+void enableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK |= (1 << INT0);
+      break;
+    case 1:
+      PCMSK2 |= (1 << PCINT20);
+      break;
+    case 2:
+      PCMSK2 |= (1 << PCINT23);
+      break;
+    case 3:
+      PCMSK0 |= (1 << PCINT0);
+      break;
+    case 4:
+      PCMSK0 |= (1 << PCINT4);
+      break;
+    case 5:
+      PCMSK1 |= (1 << PCINT13);
+      break;
+    default:
+    ;
+  }
 }
 
 void setTimers(){

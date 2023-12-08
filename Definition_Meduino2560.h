@@ -8,7 +8,7 @@
 #define CURVE_PWM_POINTS 10
 #define CURVE_RPM_POINTS 10
 
-// size of temperatures cache. Size is 2^CACHE_T_SIZE - value 6 means 64 records ~ 6°C
+// size of temperatures cache. Size is 2^CACHE_T_SIZE - value 5 means 32 records ~ 3°C
 #define CACHE_T_SIZE 5
 // size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
@@ -17,14 +17,14 @@
 const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 9960, 9980};
 
 //define input pin
-#define RPMSENSOR0 18  //INT3/PD3
-#define RPMSENSOR1 14  //PCINT10/PJ1
-#define RPMSENSOR2 15  //PCINT9/PJ0
-#define RPMSENSOR3 2   //INT4/PE4
-#define RPMSENSOR4 3   //INT5/PE5
-#define RPMSENSOR5 21  //INT0/PD0
-#define RPMSENSOR6 20  //INT1/PD1
-#define RPMSENSOR7 19  //INT2/PD2
+#define RPMSENSOR0 18  //INT5/PE5
+#define RPMSENSOR1 14  //INT4/PE4
+#define RPMSENSOR2 15  //PCINT10/PJ1
+#define RPMSENSOR3 2   //PCINT9/PJ0
+#define RPMSENSOR4 3   //INT2/PD2
+#define RPMSENSOR5 21  //INT3/PD3
+#define RPMSENSOR6 20  //INT0/PD0
+#define RPMSENSOR7 19  //INT1/PD1
 #define RPMSENSOR8 51  //PCINT2/PB2
 #define RPMSENSOR9 50  //PCINT3/PB3
 #define RPMSENSOR10 53 //PCINT0/PB0
@@ -165,7 +165,93 @@ void disableRpmIRS(){
 
 void enableRpmIRS(){
   EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
-  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+  PCICR = (1 << PCIE0) | (1 << PCIE1); // enable pin change interrupts
+}
+
+void disableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK &= ~(1 << INT5);
+      break;
+    case 1:
+      EIMSK &= ~(1 << INT4);
+      break;
+    case 2:
+      PCICR &= ~(1 << PCIE1);
+      break;
+    case 3:
+      PCICR &= ~(1 << PCIE1);
+      break;
+    case 4:
+      EIMSK &= ~(1 << INT3);
+      break;
+    case 5:
+      EIMSK &= ~(1 << INT4);
+      break;
+    case 6:
+      EIMSK &= ~(1 << INT0);
+      break;
+    case 7:
+      EIMSK &= ~(1 << INT1);
+      break;
+    case 8:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 9:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 10:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 11:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    default:
+    ;
+  }
+}
+
+void enableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK |= (1 << INT5);
+      break;
+    case 1:
+      EIMSK |= (1 << INT4);
+      break;
+    case 2:
+      PCICR |= (1 << PCIE1);
+      break;
+    case 3:
+      PCICR |= (1 << PCIE1);
+      break;
+    case 4:
+      EIMSK |= (1 << INT3);
+      break;
+    case 5:
+      EIMSK |= (1 << INT4);
+      break;
+    case 6:
+      EIMSK |= (1 << INT0);
+      break;
+    case 7:
+      EIMSK |= (1 << INT1);
+      break;
+    case 8:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 9:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 10:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 11:
+      PCICR |= (1 << PCIE0);
+      break;
+    default:
+    ;
+  }
 }
 
 void setTimers(){
@@ -229,11 +315,11 @@ void setTimers(){
   }
 
   // connect timers to output pins, set PWM mode
-  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1) | (1 << WGM11);
+  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);
   TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM20);
-  TCCR3A = (1 << COM3A1) | (1 << WGM31);
-  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1) | (1 << WGM41);
-  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1) | (1 << WGM51);
+  TCCR3A = (1 << COM3A1);
+  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1);
+  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
 }
 
 //compensate non-linearity of outputs

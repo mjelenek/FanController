@@ -1,6 +1,6 @@
 #define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);
-// max 15000rpm
-#define MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES 1000
+// max 10000rpm
+#define MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES 1500
 
 #if HWversion == 1
   #include "ISR_Nano.h"
@@ -22,8 +22,8 @@ inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(volatile by
   }
 }
 
-double countRPM(byte fanNumber){
-  disableRpmIRS();
+void calculateRPM(byte fanNumber){
+  disableRpmIRS(fanNumber);
   byte lastFanRpmSensorTimeIndex = lastFanRpmSensorTime[fanNumber];
   byte time1Pointer = lastFanRpmSensorTimeIndex + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
@@ -31,21 +31,22 @@ double countRPM(byte fanNumber){
   }
   unsigned long time0 = fanRpmSensorTimes[fanNumber][lastFanRpmSensorTimeIndex];
   unsigned long time1 = fanRpmSensorTimes[fanNumber][time1Pointer];
-  enableRpmIRS();
+  enableRpmIRS(fanNumber);
   unsigned long now = micros();
-  if((now - time0) > 240000 || (now - time1) > 840000){
+  if((now - time0) > 300000 || (now - time1) > 900000){
     rpm[fanNumber] = 0;
     lastFanRpmSensorTimeCounted[fanNumber] = lastFanRpmSensorTimeIndex;
   } else {
     if(lastFanRpmSensorTimeCounted[fanNumber] != lastFanRpmSensorTimeIndex){
       rpm[fanNumber] = (60000000 / (time0 - time1));
       lastFanRpmSensorTimeCounted[fanNumber] = lastFanRpmSensorTimeIndex;
+      pidUpdateDirect(fanNumber, ConfigurationPWM(fanNumber));
     }
   }
 }
 
-void countRPMs(){
+void calculateRPMs(){
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
-    countRPM(i);
+    calculateRPM(i);
   }
 }

@@ -17,14 +17,14 @@
 const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9960, 9960, 9980, 9950, 9980, 9990};
 
 //define input pin
-#define RPMSENSOR0 18  //INT3/PD3
-#define RPMSENSOR1 14  //PCINT10/PJ1
-#define RPMSENSOR2 15  //PCINT9/PJ0
-#define RPMSENSOR3 2   //INT4/PE4
-#define RPMSENSOR4 3   //INT5/PE5
-#define RPMSENSOR5 21  //INT0/PD0
-#define RPMSENSOR6 20  //INT1/PD1
-#define RPMSENSOR7 19  //INT2/PD2
+#define RPMSENSOR0 18  //INT5/PE5
+#define RPMSENSOR1 14  //INT4/PE4
+#define RPMSENSOR2 15  //PCINT10/PJ1
+#define RPMSENSOR3 2   //PCINT9/PJ0
+#define RPMSENSOR4 3   //INT2/PD2
+#define RPMSENSOR5 21  //INT3/PD3
+#define RPMSENSOR6 20  //INT0/PD0
+#define RPMSENSOR7 19  //INT1/PD1
 #define RPMSENSOR8 51  //PCINT2/PB2
 #define RPMSENSOR9 50  //PCINT3/PB3
 #define RPMSENSOR10 53 //PCINT0/PB0
@@ -138,9 +138,9 @@ void writePwmValue(byte fanNumber, byte val);
 
 void init_extint()
 {
-  EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
-  EICRB |= (1 << ISC40) | (1 << ISC50);
-  EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
+  EICRA = (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
+  EICRB = (1 << ISC40) | (1 << ISC50);
+  EIMSK = (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
 }
 
 void init_pcint()
@@ -152,7 +152,7 @@ void init_pcint()
   PCMSK1 = (1 << PCINT9) | (1 << PCINT10);
 
   // PORTB, PORTJ
-  PCICR = (1 << PCIE0) | (1 << PCIE1); // enable pin change interrupts
+  PCICR = (1 << PCIE0) | (1 << PCIE1);  // enable pin change interrupts
 
 }
 
@@ -162,8 +162,94 @@ void disableRpmIRS(){
 }
 
 void enableRpmIRS(){
-  EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
-  PCICR = (1 << PCIE0) | (1 << PCIE1) | (1 << PCIE2); // enable pin change interrupts
+  EIMSK = (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
+  PCICR = (1 << PCIE0) | (1 << PCIE1);  // enable pin change interrupts
+}
+
+void disableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK &= ~(1 << INT5);
+      break;
+    case 1:
+      EIMSK &= ~(1 << INT4);
+      break;
+    case 2:
+      PCICR &= ~(1 << PCIE1);
+      break;
+    case 3:
+      PCICR &= ~(1 << PCIE1);
+      break;
+    case 4:
+      EIMSK &= ~(1 << INT3);
+      break;
+    case 5:
+      EIMSK &= ~(1 << INT4);
+      break;
+    case 6:
+      EIMSK &= ~(1 << INT0);
+      break;
+    case 7:
+      EIMSK &= ~(1 << INT1);
+      break;
+    case 8:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 9:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 10:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    case 11:
+      PCICR &= ~(1 << PCIE0);
+      break;
+    default:
+    ;
+  }
+}
+
+void enableRpmIRS(byte fanNumber){
+switch (fanNumber) {
+    case 0:
+      EIMSK |= (1 << INT5);
+      break;
+    case 1:
+      EIMSK |= (1 << INT4);
+      break;
+    case 2:
+      PCICR |= (1 << PCIE1);
+      break;
+    case 3:
+      PCICR |= (1 << PCIE1);
+      break;
+    case 4:
+      EIMSK |= (1 << INT3);
+      break;
+    case 5:
+      EIMSK |= (1 << INT4);
+      break;
+    case 6:
+      EIMSK |= (1 << INT0);
+      break;
+    case 7:
+      EIMSK |= (1 << INT1);
+      break;
+    case 8:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 9:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 10:
+      PCICR |= (1 << PCIE0);
+      break;
+    case 11:
+      PCICR |= (1 << PCIE0);
+      break;
+    default:
+    ;
+  }
 }
 
 void setTimers(){
@@ -227,11 +313,11 @@ void setTimers(){
   }
 
   // connect timers to output pins, set PWM mode
-  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1) | (1 << WGM11);
+  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);
   TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM20);
-  TCCR3A = (1 << COM3A1) | (1 << WGM31);
-  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1) | (1 << WGM41);
-  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1) | (1 << WGM51);
+  TCCR3A = (1 << COM3A1);
+  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1);
+  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
 }
 
 void writePwmValue(byte fanNumber, byte val) {
