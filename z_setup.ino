@@ -1,5 +1,11 @@
 void setup() {
 
+if(MCUSR & (1<<WDRF)){
+   // a watchdog reset occurred
+  watchdogCounter++;
+  MCUSR = 0;
+}
+
 //  wdt_disable();
  //serial port configuration
   Serial.begin(115200);
@@ -14,6 +20,8 @@ void setup() {
 
   setPinsIO();
 
+  watchdogSetup();
+  
   setTimers();
 
   init_adc();
@@ -71,6 +79,33 @@ void init_pid(){
     }
     pid[i].Compute(false);    
   }
+}
+
+void watchdogSetup() {
+  cli();        // disable all interrupts
+  wdt_reset();  // reset the WDT timer
+  /*
+    WDTCSR configuration:
+    WDIE = 1: Interrupt Enable
+    WDE = 1 :Reset Enable
+    Timeout
+    WDP3 WDP2 WDP1 WDP0 Timeout(ms)
+     0    0    0    0    16
+     0    0    0    1    32
+     0    0    1    0    64
+     0    0    1    1   128
+     0    1    0    0   256
+     0    1    0    1   512
+     0    1    1    0  1024
+     0    1    1    1  2048
+     1    0    0    0  4096
+     1    0    0    1  8192
+  */
+  // Enter Watchdog Configuration mode:
+  WDTCSR |= (1<<WDCE) | (1<<WDE);
+  // Set Watchdog settings:
+  WDTCSR = (1<<WDE) | (1<<WDP3) | (0<<WDP2) | (0<<WDP1) | (0<<WDP0);
+  sei();
 }
 
 void printTempProfile(){

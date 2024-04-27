@@ -1,5 +1,6 @@
 void loop(){
   // tasks executed every iteration (5ms)
+  wdt_reset();  // reset the WDT timer
   countT(i % NUMBER_OF_THERMISTORS);
   calculateRPMs();
   setPwm();

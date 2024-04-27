@@ -1,6 +1,6 @@
-#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTime[i], fanRpmSensorTimes[i], now);
-// max 10000rpm
-#define MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES 1500
+#define writeLastFanRpmSensorTimeMacro(i) writeLastFanRpmSensorTime(&lastFanRpmSensorTimeIndexes[i], fanRpmSensorTimes[i], now);
+// max 6000rpm
+#define MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES 2500
 
 #if HWversion == 1
   #include "ISR_Nano.h"
@@ -9,8 +9,8 @@
   #include "ISR_Meduino2560.h"
 #endif
 
-inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(volatile byte *lastFanRpmSensorTime, volatile unsigned long fanRpmSensorTimes[], unsigned long now){
-  byte lastFanRpmSensorTimeIndex = *lastFanRpmSensorTime;
+inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(volatile byte *lastFanRpmSensorTimeIndexPointer, volatile unsigned long fanRpmSensorTimes[], unsigned long now){
+  byte lastFanRpmSensorTimeIndex = *lastFanRpmSensorTimeIndexPointer;
   unsigned long lastRecord = fanRpmSensorTimes[lastFanRpmSensorTimeIndex];
   if(now - lastRecord >= MINIMAL_DELAY_BETWEEN_RPM_SIGNAL_CHANGES){
     lastFanRpmSensorTimeIndex++;
@@ -18,13 +18,13 @@ inline __attribute__((always_inline)) void writeLastFanRpmSensorTime(volatile by
       lastFanRpmSensorTimeIndex = 0;
     }
     fanRpmSensorTimes[lastFanRpmSensorTimeIndex] = now;
-    *lastFanRpmSensorTime = lastFanRpmSensorTimeIndex;
+    *lastFanRpmSensorTimeIndexPointer = lastFanRpmSensorTimeIndex;
   }
 }
 
 void calculateRPM(byte fanNumber){
   disableRpmIRS(fanNumber);
-  byte lastFanRpmSensorTimeIndex = lastFanRpmSensorTime[fanNumber];
+  byte lastFanRpmSensorTimeIndex = lastFanRpmSensorTimeIndexes[fanNumber];
   byte time1Pointer = lastFanRpmSensorTimeIndex + 1;
   if(time1Pointer >= FAN_RPM_SENSOR_TIMES_FIELD){
     time1Pointer = 0;

@@ -140,9 +140,9 @@ void writePwmValue(byte fanNumber, byte val);
 
 void init_extint()
 {
-  EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
-  EICRB |= (1 << ISC40) | (1 << ISC50);
-  EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
+  EICRA = (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
+  EICRB = (1 << ISC40) | (1 << ISC50);
+  EIMSK = (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
 }
 
 void init_pcint()
@@ -154,7 +154,7 @@ void init_pcint()
   PCMSK1 = (1 << PCINT9) | (1 << PCINT10);
 
   // PORTB, PORTJ
-  PCICR = (1 << PCIE0) | (1 << PCIE1); // enable pin change interrupts
+  PCICR = (1 << PCIE0) | (1 << PCIE1);  // enable pin change interrupts
 
 }
 
@@ -164,8 +164,8 @@ void disableRpmIRS(){
 }
 
 void enableRpmIRS(){
-  EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
-  PCICR = (1 << PCIE0) | (1 << PCIE1); // enable pin change interrupts
+  EIMSK = (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
+  PCICR = (1 << PCIE0) | (1 << PCIE1);  // enable pin change interrupts
 }
 
 void disableRpmIRS(byte fanNumber){
@@ -256,23 +256,13 @@ switch (fanNumber) {
 
 void setTimers(){
 
-  TCCR1B = TCCR1B & B11111000;
-  TCCR2B = TCCR2B & B11111000;
-  TCCR3B = TCCR3B & B11111000;
-  TCCR4B = TCCR4B & B11111000;
-  TCCR5B = TCCR5B & B11111000;
-
-  TCNT1 = 0;
-  TCNT2 = 0;
-  TCNT3 = 0;
-  TCNT4 = 0;
-  TCNT5 = 0;
+  TCCR1B = TCCR2B = TCCR3B = TCCR4B = TCCR5B = 0;
+  TCNT1 = TCNT2 = TCNT3 = TCNT4 = TCNT5 = 0;
   
   //---------------------------------------------- Set PWM frequency for T0 -------------------------------
   // put timer 0 in 8-bit fast hardware pwm mode
-  TCCR0A |= (1 << WGM00);
-  TCCR0A |= (1 << WGM01);
- 
+  TCCR0A = (1 << WGM00) | (1 << WGM01);
+
   // timer 0 is in 8-bit fast hardware pwm mode
   //TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
@@ -287,7 +277,7 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T1 ------------------------------------
   ICR1 = ICRn;
-  TCCR1B = B00010001;    // set timer 1 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  TCCR1B = B00010001;    // set timer 1 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T2 ------------------------------------
   TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
@@ -299,22 +289,22 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T3 ------------------------------------
   ICR3 = ICRn;
-  TCCR3B = B00010001;    // set timer 3 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  TCCR3B = B00010001;    // set timer 3 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T4 ------------------------------------
   ICR4 = ICRn;
-  TCCR4B = B00010001;    // set timer 4 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  TCCR4B = B00010001;    // set timer 4 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T5 ------------------------------------
   ICR5 = ICRn;
-  TCCR5B = B00010001;    // set timer 5 divisor to 1 for PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
+  TCCR5B = B00010001;    // set timer 5 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
 
   // set pwm outputs to zero
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     writePwmValue(i, 0);
   }
 
-  // connect timers to output pins, set PWM mode
+  // connect timers to output pins, set timer 2 PWM mode
   TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);
   TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM20);
   TCCR3A = (1 << COM3A1);

@@ -7,11 +7,11 @@
 
 #define TACH_SET(RPMSENSOR, PIN, PIN_NUM, RPM_NUM, TACH_NUM)   if(rmpToMainboard(RPM_NUM) == RPMSENSOR){\
     byte state = PIN;\
-    TACH_NUM(PIN_NUM);\
+    TACH_NUM(PIN_NUM)\
   }
 
 #define TACH_SET_STATE(RPMSENSOR, PIN_NUM, RPM_NUM, TACH_NUM)   if(rmpToMainboard(RPM_NUM) == RPMSENSOR){\
-    TACH_NUM(PIN_NUM);\
+    TACH_NUM(PIN_NUM)\
   }
 
 #define writeTachMacro(RPMSENSOR, PIN, PIN_NUM)  TACH_SET(RPMSENSOR, PIN, PIN_NUM, 0, TACH0_SET)\

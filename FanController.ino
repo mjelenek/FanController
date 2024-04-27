@@ -18,6 +18,7 @@
 #include "lib/PID_v1.cpp"
 #include "lib/EEPROMStoreISR.h"
 #include "CommandHandler.h"
+#include <avr/wdt.h>
 
 #define TIMING_DEBUG
 #define FREE_MEMORY_DEBUG
@@ -117,6 +118,7 @@ byte gui = 0;  // enable gui
 byte i = 0;
 byte j = 0;
 byte updatesRTToSend[NUMBER_OF_FANS];
+byte watchdogCounter;
 
 // ADC values from mainboard
 volatile uint16_t powerInADCAveraged[NUMBER_OF_MAINBOARD_CONNECTORS];
@@ -136,7 +138,7 @@ int tempExpectedInt;
 
 #define FAN_RPM_SENSOR_TIMES_FIELD 5
 volatile unsigned long fanRpmSensorTimes[NUMBER_OF_FANS][FAN_RPM_SENSOR_TIMES_FIELD];
-volatile byte lastFanRpmSensorTime[NUMBER_OF_FANS];
+volatile byte lastFanRpmSensorTimeIndexes[NUMBER_OF_FANS];
 byte lastFanRpmSensorTimeCounted[NUMBER_OF_FANS];
 double rpm[NUMBER_OF_FANS];
 
@@ -203,7 +205,7 @@ void measureInterrupts();
 void setICRn(CommandParameter &parameters);
 #endif
 
-CommandHandler<28, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 28 commands, 0 variables
+CommandHandler<29, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 29 commands, 0 variables
 
 void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("version"), (void (*)(CommandParameter&))printVersionNumber);
@@ -227,6 +229,7 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("disableFan"), (void (*)(CommandParameter&))disableFan);
   SerialCommandHandler.AddCommand(F("pidU"), (void (*)(CommandParameter&))sendPidUpdates);
   SerialCommandHandler.AddCommand(F("cacheStatus"), (void (*)(CommandParameter&))cacheStatus);
+  SerialCommandHandler.AddCommand(F("wd"), (void (*)(CommandParameter&))wd);
 #ifdef TIMING_DEBUG
   SerialCommandHandler.AddCommand(F("time"), (void (*)(CommandParameter&))sendTime);
   SerialCommandHandler.AddCommand(F("timing"), (void (*)(CommandParameter&))timing);

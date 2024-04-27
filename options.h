@@ -16,7 +16,7 @@ in my case this is:
 
 #if defined(ARDUINO_AVR_MEGA2560)
   #define SERIAL_TX_BUFFER_SIZE 1024
-  #define SERIAL_RX_BUFFER_SIZE 256
+  #define SERIAL_RX_BUFFER_SIZE 512
 #else
   #define SERIAL_TX_BUFFER_SIZE 256
   #define SERIAL_RX_BUFFER_SIZE 128

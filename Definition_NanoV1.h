@@ -149,13 +149,8 @@ switch (fanNumber) {
 
 void setTimers(){
 
-  TCCR0B = TCCR0B & B11111000;
-  TCCR1B = TCCR1B & B11111000;
-  TCCR2B = TCCR2B & B11111000;
-
-  TCNT0 = 0;
-  TCNT1 = 0;
-  TCNT2 = 0;
+  TCCR0B = TCCR1B = TCCR2B = 0;
+  TCNT0 = TCNT1 = TCNT2 = 0;
   
   //---------------------------------------------- Set PWM frequency for D5 & D6 -------------------------------
   // put timer 0 in 8-bit fast hardware pwm mode

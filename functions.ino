@@ -180,6 +180,7 @@ void setFanConfiguration(CommandParameter &parameters){
     ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, constRPM, kp, ki, kd, minPidPwm);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
     pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
+    pwmDisabled[pwmChannel] = 0;
     switch (pwmDrive) {
     case 0:
     case 1:
@@ -317,6 +318,15 @@ void setICRn(CommandParameter &parameters)
   }
 }
 #endif
+
+void wd(CommandParameter &parameters){
+  Serial.print(F("WatchDogReset "));
+  if (watchdogCounter > 0){
+    Serial.println(F("YES"));
+  } else {
+    Serial.println(F("NO"));
+  }
+}
 
 void Cmd_Unknown()
 {
