@@ -124,9 +124,10 @@ void pidUpdate(byte fanNumber, PWMConfiguration &conf){
       }
     }
     Serial.print(F("!"));
-    Serial.write(8);
+    Serial.write(9);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
+    Serial.write(updatesRTToSend[fanNumber]);
     serialWriteShort(expectedRpm);
     serialWriteShort((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
@@ -147,9 +148,10 @@ void pidUpdateDirect(byte fanNumber, PWMConfiguration &conf){
       }
     }
     Serial.print(F("!"));
-    Serial.write(8);
+    Serial.write(9);
     Serial.print(F("pU"));
     Serial.write(fanNumber);
+    Serial.write(updatesRTToSend[fanNumber]);
     serialWriteShort(expectedRpm);
     serialWriteShort((unsigned int) (rpm[fanNumber] + 0.5));
     Serial.write(pwm[fanNumber]);
@@ -320,12 +322,16 @@ void setICRn(CommandParameter &parameters)
 #endif
 
 void wd(CommandParameter &parameters){
+  Serial.print(F("!"));
+  Serial.write(22);
   Serial.print(F("WatchDogReset "));
   if (watchdogCounter > 0){
-    Serial.println(F("YES"));
+    Serial.print(F("YES "));
   } else {
-    Serial.println(F("NO"));
+    Serial.print(F("NO  "));
   }
+  serialWriteLong(seconds());
+  Serial.print(F("#"));
 }
 
 void Cmd_Unknown()

@@ -53,14 +53,20 @@ void loop(){
 
 void delayMicrosecondsIncludingInterrupts(unsigned int us)
 {
-  unsigned long stopWaitingTime = micros() + us;
+  unsigned long startWaitingTime = micros();
+  unsigned long stopWaitingTime = startWaitingTime + us;
   unsigned long now;
-  while(micros() < stopWaitingTime - 50 ){
-    delayMicroseconds(20);  //partial wait for next iteration
-  }
-  now = micros();
-  if(now < stopWaitingTime - 10){
-    delayMicroseconds(stopWaitingTime - now - 4);  //wait for next iteration
+
+  if (us < 20) return;
+
+  if (startWaitingTime < stopWaitingTime) {
+    do{
+      now = micros();
+    } while(startWaitingTime < now && now < stopWaitingTime);
+  } else {
+    do{
+      now = micros();
+    } while(startWaitingTime < now || now < stopWaitingTime);
   }
 }
 
