@@ -154,44 +154,20 @@ unsigned long seconds() {
 
 // end of settings for Timer0 set to frequency 31372.55 Hz
 #else
-// the prescaler is set so that timer0 ticks every 64 clock cycles, and the
-// the overflow handler is called every 256 ticks.
-#define MICROSECONDS_PER_TIMER0_OVERFLOW (clockCyclesToMicroseconds(64 * 256))
 
-// the whole number of milliseconds per timer0 overflow
-#define MILLIS_INC (MICROSECONDS_PER_TIMER0_OVERFLOW / 1000)
-
-// the fractional number of milliseconds per timer0 overflow. we shift right
-// by three to fit these numbers into a byte. (for the clock speeds we care
-// about - 8 and 16 MHz - this doesn't lose precision.)
-#define FRACT_INC ((MICROSECONDS_PER_TIMER0_OVERFLOW % 1000) >> 3)
-#define FRACT_MAX (1000 >> 3)
-
-volatile unsigned long timer0_overflow_count = 0;
 volatile unsigned long timer0_millis = 0;
-static unsigned char timer0_fract = 0;
+volatile unsigned char timer0_millis_extra_byte = 0;
 
-#if defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
-ISR(TIM0_OVF_vect)
-#else
-ISR(TIMER0_OVF_vect)
-#endif
+ISR(TIMER0_COMPA_vect)
 {
   // copy these to local variables so they can be stored in registers
   // (volatile variables must be read from memory on every access)
   unsigned long m = timer0_millis;
-  unsigned char f = timer0_fract;
-
-  m += MILLIS_INC;
-  f += FRACT_INC;
-  if (f >= FRACT_MAX) {
-    f -= FRACT_MAX;
-    m += 1;
+  m++;
+  if (m == 0) {
+    timer0_millis_extra_byte++;
   }
-
-  timer0_fract = f;
   timer0_millis = m;
-  timer0_overflow_count++;
 }
 
 unsigned long millis()
@@ -213,7 +189,7 @@ unsigned long micros() {
   uint8_t oldSREG = SREG, t;
   
   cli();
-  m = timer0_overflow_count;
+  m = timer0_millis;
 #if defined(TCNT0)
   t = TCNT0;
 #elif defined(TCNT0L)
@@ -223,20 +199,35 @@ unsigned long micros() {
 #endif
 
 #ifdef TIFR0
-  if ((TIFR0 & _BV(TOV0)) && (t < 255))
+  if ((TIFR0 & _BV(OCF0A)) && (t < OCR0A))
     m++;
 #else
-  if ((TIFR & _BV(TOV0)) && (t < 255))
+  if ((TIFR & _BV(OCF0A)) && (t < OCR0A))
     m++;
 #endif
 
   SREG = oldSREG;
   
-  return ((m << 8) + t) * (64 / clockCyclesPerMicrosecond());
+  return m * 1000 + t * 4;
 }
 
 unsigned long seconds() {
-  return millis() / 1000;
+  unsigned long m;
+  unsigned char e;
+  uint8_t oldSREG = SREG;
+
+  cli();
+  m = timer0_millis;
+  e = timer0_millis_extra_byte;
+  SREG = oldSREG;
+
+  m = (e << 22) | (m >> 10);
+//  128 * m          192 * (m >> 6)                     134 * (m >> 7)                               144 * (m >> 11)                                           152 * (m >> 14)                                                       216 * (m >> 17)                                                                   182 * (m >> 18)
+// --------- = m + ----------------- = m + (m >> 6) + ----------------- = m + (m >> 6) + (m >> 7) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + (m >> 17) + -----------------
+//   125                 125                                125                                           125                                                        125                                                                   125                                                                              125
+  long seconds = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + (m >> 17) + (m >> 18);
+//  short microsecondPerSecond = -515;
+  return seconds + ((seconds >> 6) * microsecondPerSecond) / 15625;
 }
 
 #endif
@@ -415,7 +406,7 @@ void myInit()
 #else
   #error Timer 0 prescale factor 64 not set correctly
 #endif
-
+/*
   // enable timer 0 overflow interrupt
 #if defined(TIMSK) && defined(TOIE0)
   sbi(TIMSK, TOIE0);
@@ -424,7 +415,7 @@ void myInit()
 #else
   #error  Timer 0 overflow interrupt not set correctly
 #endif
-
+*/
   // timers 1 and 2 are used for phase-correct hardware pwm
   // this is better for motors as it ensures an even waveform
   // note, however, that fast pwm mode can achieve a frequency of up

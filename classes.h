@@ -170,6 +170,8 @@ public:
 class ThermistorDefinition
 {
   public:
+  // resistance of resistor on board in series with thermistor, measured by multimeter
+  unsigned short resistanceOnBoard;
   // temp. for nominal resistance (almost always 25 C)
   unsigned char tempNominal;
   // resistance at nominal temperature
@@ -179,15 +181,18 @@ class ThermistorDefinition
 
   void Reset()
   {
+    resistanceOnBoard = 10000;
     tempNominal = 25;
     resistanceNominal = 10000;
     bCoefficient = 3850;
   }
 
-  void Set(unsigned char t, unsigned short r, unsigned short b){
+  void Set(unsigned short rb, unsigned char t, unsigned short r, unsigned short b){
+    if(rb < 9000 || rb >= 11000) return;
     if(t < 0 || t >= 100) return;
     if(r < 3000 || r >= 50000) return;
     if(b < 1000 || b >= 10000) return;
+    resistanceOnBoard = rb;
     tempNominal = t;
     resistanceNominal = r;
     bCoefficient = b;
@@ -211,11 +216,14 @@ public:
   byte hysteresis;
   //Thermistor definitions
   ThermistorDefinition thermistors[numberOfThermistors];
-  
+  //how much microsecons add to every second to get exact time from last restart
+  short microsecondPerSecond;
+
   void Reset()
   {
     profile = 0;
     hysteresis = 10;
+    microsecondPerSecond = 0;
     for(byte i = 0; i < numberOfRpmToMainboard; i++){
       rmpToMainboard[i] = i;
     }

@@ -14,8 +14,6 @@
 
 //by multimeter
 //#define ANALOGREFERENCEVOLTAGE 3.3
-// resistance of resistor in series with thermistor(value measured by multimeter)
-const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9990};
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -61,8 +59,6 @@ void setPinsIO(){
   pinMode(PWM4, OUTPUT);
   pinMode(PWM5, OUTPUT);
 }
-
-#define RT(P) RT_PGM[P]
 
 void writePwmValue(byte fanNumber, byte val);
 
@@ -169,6 +165,9 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
+  // enable timer 0 overflow interrupt
+  TIMSK0 |= (1 << TOIE0);
+
   delayMicroseconds(10);
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------

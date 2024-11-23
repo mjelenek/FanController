@@ -110,7 +110,7 @@ void watchdogSetup() {
 
 void printTempProfile(){
   for(int i = 0; i <= 1024; i++){
-      unsigned long RT = RT(0);
+      unsigned long RT = thermistors(0).resistanceOnBoard;
       unsigned long RTkoeficient = (RT << 10) - RT;
       unsigned int t = countTemperature(RTkoeficient / i - RT, thermistors(0));
       short tShort = (short)t;

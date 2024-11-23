@@ -20,6 +20,8 @@
 #include "CommandHandler.h"
 #include <avr/wdt.h>
 
+//#define PID_UPDATE_WHEN_RPM_COUNT
+
 #define TIMING_DEBUG
 #define FREE_MEMORY_DEBUG
 
@@ -105,6 +107,7 @@ EEPROMStore<CEEPROMC> ControllerConfigurationHolder(&EEPROMConf);
 #define rmpToMainboard(i) ControllerConfigurationHolder.Data.m_UserData.rmpToMainboard[i]
 #define hysteresis ControllerConfigurationHolder.Data.m_UserData.hysteresis
 #define profile ControllerConfigurationHolder.Data.m_UserData.profile
+#define microsecondPerSecond ControllerConfigurationHolder.Data.m_UserData.microsecondPerSecond
 #define thermistors(i) ControllerConfigurationHolder.Data.m_UserData.thermistors[i]
 
 byte pwm[NUMBER_OF_FANS];

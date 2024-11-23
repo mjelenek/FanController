@@ -13,9 +13,6 @@
 // size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
 
-// resistance of resistor in series with thermistor(value measured by multimeter)
-const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 9960, 9980};
-
 //define input pin
 #define RPMSENSOR0 18  //INT5/PE5
 #define RPMSENSOR1 14  //INT4/PE4
@@ -29,6 +26,7 @@ const unsigned short RT_PGM[NUMBER_OF_THERMISTORS] ={9990, 9980, 9970, 9960, 996
 #define RPMSENSOR9 50  //PCINT3/PB3
 #define RPMSENSOR10 53 //PCINT0/PB0
 #define RPMSENSOR11 52 //PCINT1/PB1
+//dalsi pouzitelne PCINT16/PK0, PCINT17/PK1, pri uvolneni OC2A PCINT4/PB4
 
 //define input pin int -> rpm
 #define RPMSENSOR_INT0 6
@@ -133,8 +131,6 @@ void setPinsIO(){
   pinMode(PWM10, OUTPUT);
   pinMode(PWM11, OUTPUT);
 }
-
-#define RT(P) RT_PGM[P]
 
 void writePwmValue(byte fanNumber, byte val);
 
@@ -260,13 +256,18 @@ void setTimers(){
   TCNT1 = TCNT2 = TCNT3 = TCNT4 = TCNT5 = 0;
   
   //---------------------------------------------- Set PWM frequency for T0 -------------------------------
-  // put timer 0 in 8-bit fast hardware pwm mode
-  TCCR0A = (1 << WGM00) | (1 << WGM01);
+  // put timer 0 in CTC mode
+  TCCR0A = (1 << WGM01);
 
+  OCR0A = 249;
+  TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of 1000 Hz (16000000 / (64 * (OCR0A+1)))
+  TIMSK0 = (1 << OCIE0A);
+  // put timer 0 in 8-bit fast hardware pwm mode
+  //TCCR0A = (1 << WGM00) | (1 << WGM01);
   // timer 0 is in 8-bit fast hardware pwm mode
   //TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 0 divisor to     1 for PWM frequency of 62500.00 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 0 divisor to     8 for PWM frequency of  7812.50 Hz
-  TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz (The DEFAULT)
+  //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of   976.56 Hz (The DEFAULT)
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
   // timer 0 is in 8-bit phase correct pwm mode

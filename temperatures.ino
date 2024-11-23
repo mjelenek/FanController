@@ -16,7 +16,7 @@ void countT(byte tNumber){
     Tint[tNumber] = cacheT[tNumber].get(sensorValueAveraged);
     if(Tint[tNumber] == 0){
 #endif
-      unsigned long RT = RT(tNumber);
+      unsigned long RT = thermistors(tNumber).resistanceOnBoard;
       unsigned long RTkoeficient = (RT << 10) - RT;
       Tint[tNumber] = countTemperature(RTkoeficient / sensorValueAveraged - RT, thermistors(tNumber));
 #ifdef USE_TEMP_CACHE
@@ -82,10 +82,11 @@ void setThermistor(CommandParameter &parameters){
   byte thermistorNumber = parameters.NextParameterAsInteger();
   if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
   
+  unsigned short resistanceOnBoard = parameters.NextParameterAsInteger(10000);
   byte tempNominal = parameters.NextParameterAsInteger(25);
   unsigned short resistanceNominal = parameters.NextParameterAsInteger(10000);
   unsigned short bCoefficient = parameters.NextParameterAsInteger(3950);
-  (thermistors(thermistorNumber)).Set(tempNominal, resistanceNominal, bCoefficient);
+  (thermistors(thermistorNumber)).Set(resistanceOnBoard, tempNominal, resistanceNominal, bCoefficient);
 
  #ifdef USE_TEMP_CACHE
     cacheT[thermistorNumber].clear();

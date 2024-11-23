@@ -40,7 +40,9 @@ void calculateRPM(byte fanNumber){
     if(lastFanRpmSensorTimeCounted[fanNumber] != lastFanRpmSensorTimeIndex){
       rpm[fanNumber] = (60000000 / (time0 - time1));
       lastFanRpmSensorTimeCounted[fanNumber] = lastFanRpmSensorTimeIndex;
+#ifdef PID_UPDATE_WHEN_RPM_COUNT
       pidUpdateDirect(fanNumber, ConfigurationPWM(fanNumber));
+#endif
     }
   }
 }

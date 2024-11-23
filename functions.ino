@@ -12,7 +12,7 @@ void serialWriteLong(unsigned long l){
 
 void sendConfiguration(){
   Serial.print(F("!"));
-  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 14);
+  Serial.write(NUMBER_OF_RPM_TO_MAINBOARD + NUMBER_OF_THERMISTORS * 5 + 16);
   Serial.print(F("conf"));
   Serial.write((byte)HWversion);
   Serial.write(NUMBER_OF_FANS);
@@ -26,6 +26,8 @@ void sendConfiguration(){
     Serial.write(rmpToMainboard(i));
   }
   Serial.write(hysteresis);
+  Serial.write(lowByte(microsecondPerSecond));
+  Serial.write(highByte(microsecondPerSecond));
   for(byte i = 0; i < NUMBER_OF_THERMISTORS; i++){
     thermistors(i).sendDefinition();
   }
@@ -113,26 +115,12 @@ void guiUpdate(){
 }
 
 void pidUpdate(byte fanNumber, PWMConfiguration &conf){
-  if(updatesRTToSend[fanNumber] > 0 && (((fanNumber << 1) + i) & B00111111) == 0){
-    unsigned short expectedRpm = rpm[fanNumber];
-    if(pwmDisabled[fanNumber] == 0){
-      if(conf.getPwmDrive() == 3){
-        expectedRpm = conf.constRpm;
-      }
-      if(conf.getPwmDrive() == 4){
-        expectedRpm = setpointPid[fanNumber];
-      }
-    }
-    Serial.print(F("!"));
-    Serial.write(9);
-    Serial.print(F("pU"));
-    Serial.write(fanNumber);
-    Serial.write(updatesRTToSend[fanNumber]);
-    serialWriteShort(expectedRpm);
-    serialWriteShort((unsigned int) (rpm[fanNumber] + 0.5));
-    Serial.write(pwm[fanNumber]);
-    Serial.print(F("#"));
-    updatesRTToSend[fanNumber]--;
+#ifdef PID_UPDATE_WHEN_RPM_COUNT
+  if((((fanNumber << 1) + i) & B00111111) == 0){
+#else
+  if((((fanNumber << 1) + i) & B00001111) == 0){
+#endif
+    pidUpdateDirect(fanNumber, conf);
   }
 }
 
@@ -288,8 +276,14 @@ void setConfiguration(CommandParameter &parameters){
 
   byte h = parameters.NextParameterAsInteger( 10 );
 
+  short ups = parameters.NextParameterAsInteger( 0 );
+
   if(h >= 0 && h <= 100){
     hysteresis = h;
+  }
+
+  if(ups >= -10000 && ups <= 10000){
+    microsecondPerSecond = ups;
   }
 
   byte i = 0;
