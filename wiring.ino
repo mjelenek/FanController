@@ -90,29 +90,23 @@ unsigned long micros() {
   uint8_t oldSREG = SREG, t, t2;
   
   cli();
-  t = TCNT0;
-  do{
-    t2 = TCNT0;
-  } while (t == t2);
   m = timer0_overflow_count3;
   m = (m << 8) + timer0_overflow_count2;
   m = (m << 8) + timer0_overflow_count1;
   m = (m << 8) + timer0_overflow_count0;
 
-#ifdef TIFR0
-  if ((TIFR0 & _BV(TOV0)) && (t == 0))
-    m++;
-#else
-  if ((TIFR & _BV(TOV0)) && (t == 0))
-    m++;
-#endif
+  t = TCNT0;
+  t2 = TCNT0;
 
-  if(t2 < t) {
-    //value t read when decrement counter
-    t = 254 - ((t - 1) >> 1);    
+  if (t > t2 || (t == t2 && t > 127)) {
+    //value read when decrement counter
+    t = 254 - ((t2 - 1) >> 1);
   } else {
-    //value t read when increment counter
-    t = t >> 1;    
+    //value read when increment counter
+    if (TIFR0 & _BV(TOV0)){
+      m++;
+    }
+    t = t2 >> 1;
   }
 
   SREG = oldSREG;

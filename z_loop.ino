@@ -51,7 +51,7 @@ void loop(){
   }
 }
 
-void delayMicrosecondsIncludingInterrupts(unsigned int us)
+void delayMicrosecondsIncludingInterrupts(unsigned long us)
 {
   unsigned long startWaitingTime = micros();
   unsigned long stopWaitingTime = startWaitingTime + us;
@@ -62,11 +62,11 @@ void delayMicrosecondsIncludingInterrupts(unsigned int us)
   if (startWaitingTime < stopWaitingTime) {
     do{
       now = micros();
-    } while(startWaitingTime < now && now < stopWaitingTime);
+    } while(startWaitingTime <= now && now < stopWaitingTime);
   } else {
     do{
       now = micros();
-    } while(startWaitingTime < now || now < stopWaitingTime);
+    } while(startWaitingTime <= now || now < stopWaitingTime);
   }
 }
 
@@ -109,13 +109,14 @@ void timingDebug(){
     }
 
     timeInCode = timeInCode + zpozdeni;
-    now = micros();
-    zpozdeni = now - start;
 
     if(timeCounting == 0){
       timeTotal = micros() - timeTotal;
       printTimingResult();
     }
+
+    now = micros();
+    zpozdeni = now - start;
   }
 }
 #endif

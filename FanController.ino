@@ -150,30 +150,31 @@ double outputPid;
 double inputPid;
 double setpointPid[NUMBER_OF_FANS];
 //Specify the links and initial tuning parameters
+#define Definition_PID(i) PID(&inputPid, &outputPid, &setpointPid[i], (double)ConfigurationPWM(i).kp / 200, (double)ConfigurationPWM(i).ki / 200, (double)ConfigurationPWM(i).kd / 200)
 #if HWversion == 1
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM(0).kp / 200, (double)ConfigurationPWM(0).ki / 200, (double)ConfigurationPWM(0).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM(1).kp / 200, (double)ConfigurationPWM(1).ki / 200, (double)ConfigurationPWM(1).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM(2).kp / 200, (double)ConfigurationPWM(2).ki / 200, (double)ConfigurationPWM(2).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM(3).kp / 200, (double)ConfigurationPWM(3).ki / 200, (double)ConfigurationPWM(3).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM(4).kp / 200, (double)ConfigurationPWM(4).ki / 200, (double)ConfigurationPWM(4).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200)
+  Definition_PID(0),
+  Definition_PID(1),
+  Definition_PID(2),
+  Definition_PID(3),
+  Definition_PID(4),
+  Definition_PID(5)
 };
 #endif
 #if HWversion == 2
 PID pid[] = {
-  PID(&inputPid, &outputPid, &setpointPid[0], (double)ConfigurationPWM(0).kp / 200, (double)ConfigurationPWM(0).ki / 200, (double)ConfigurationPWM(0).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[1], (double)ConfigurationPWM(1).kp / 200, (double)ConfigurationPWM(1).ki / 200, (double)ConfigurationPWM(1).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[2], (double)ConfigurationPWM(2).kp / 200, (double)ConfigurationPWM(2).ki / 200, (double)ConfigurationPWM(2).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[3], (double)ConfigurationPWM(3).kp / 200, (double)ConfigurationPWM(3).ki / 200, (double)ConfigurationPWM(3).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[4], (double)ConfigurationPWM(4).kp / 200, (double)ConfigurationPWM(4).ki / 200, (double)ConfigurationPWM(4).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[5], (double)ConfigurationPWM(5).kp / 200, (double)ConfigurationPWM(5).ki / 200, (double)ConfigurationPWM(5).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[6], (double)ConfigurationPWM(6).kp / 200, (double)ConfigurationPWM(6).ki / 200, (double)ConfigurationPWM(6).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[7], (double)ConfigurationPWM(7).kp / 200, (double)ConfigurationPWM(7).ki / 200, (double)ConfigurationPWM(7).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[8], (double)ConfigurationPWM(8).kp / 200, (double)ConfigurationPWM(8).ki / 200, (double)ConfigurationPWM(8).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[9], (double)ConfigurationPWM(9).kp / 200, (double)ConfigurationPWM(9).ki / 200, (double)ConfigurationPWM(9).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[10], (double)ConfigurationPWM(10).kp / 200, (double)ConfigurationPWM(10).ki / 200, (double)ConfigurationPWM(10).kd / 200),
-  PID(&inputPid, &outputPid, &setpointPid[11], (double)ConfigurationPWM(11).kp / 200, (double)ConfigurationPWM(11).ki / 200, (double)ConfigurationPWM(11).kd / 200)
+  Definition_PID(0),
+  Definition_PID(1),
+  Definition_PID(2),
+  Definition_PID(3),
+  Definition_PID(4),
+  Definition_PID(5),
+  Definition_PID(6),
+  Definition_PID(7),
+  Definition_PID(8),
+  Definition_PID(9),
+  Definition_PID(10),
+  Definition_PID(11)
 };
 #endif
 
