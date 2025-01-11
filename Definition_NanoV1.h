@@ -7,8 +7,8 @@
 #define CURVE_PWM_POINTS 8
 #define CURVE_RPM_POINTS 8
 
-// size of temperatures cache. Size is 2^CACHE_T_SIZE - value 5 means 32 records ~ 3°C
-#define CACHE_T_SIZE 5
+// size of temperatures cache. Size is 2^CACHE_T_SIZE - value 4 means 16 records ~ 1.5°C
+#define CACHE_T_SIZE 4
 // size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
 
@@ -41,6 +41,9 @@
 #define TACH0 13
 #define TACH0_1 PORTB |= _BV(PB5)
 #define TACH0_0 PORTB &= ~_BV(PB5)
+
+#define ICRn 320
+float RATIO = ((float)ICRn)/255;
 
 void setPinsIO(){
   pinMode(RPMSENSOR0, INPUT);
@@ -171,7 +174,10 @@ void setTimers(){
   delayMicroseconds(10);
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-  TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+   ICR1 = 320;
+   TCCR1A = (1 << WGM11);
+   TCCR1B = B00010001;                          // set timer 1 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
+  //TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
@@ -193,30 +199,30 @@ void setTimers(){
   }
 
   // connect timers to output pins
-  TCCR0A |= (1 << COM0A1) | (1 << COM0B1);
-  TCCR1A |= (1 << COM1A1) | (1 << COM1B1);
-  TCCR2A |= (1 << COM2A1) | (1 << COM2B1);
+  TCCR0A |= (1 << COM0A0) | (1 << COM0B0) | (1 << COM0A1) | (1 << COM0B1);
+  TCCR1A |= (1 << COM1A0) | (1 << COM1B0) | (1 << COM1A1) | (1 << COM1B1);
+  TCCR2A |= (1 << COM2A0) | (1 << COM2B0) | (1 << COM2A1) | (1 << COM2B1);
 }
 
 void writePwmValue(byte fanNumber, byte val) {
   switch(fanNumber) {
     case 0:
-      OCR2B = 255 - val; // set pwm duty
+      OCR2B = val; // set pwm duty
       break;
     case 1:
-      OCR0B = 255 - val; // set pwm duty
+      OCR0B = val; // set pwm duty
       break;
     case 2:
-      OCR0A = 255 - val; // set pwm duty
+      OCR0A = val; // set pwm duty
       break;
     case 3:
-      OCR1A = 255 - val; // set pwm duty
+      OCR1A = (word)(val*RATIO); // set pwm duty
       break;
     case 4:
-      OCR1B = 255 - val; // set pwm duty
+      OCR1B = (word)(val*RATIO); // set pwm duty
       break;
     case 5:
-      OCR2A = 255 - val; // set pwm duty
+      OCR2A = val; // set pwm duty
       break;
   }
 }
