@@ -57,7 +57,7 @@ void delayMicrosecondsIncludingInterrupts(unsigned long us)
   unsigned long stopWaitingTime = startWaitingTime + us;
   unsigned long now;
 
-  if (us < 20) return;
+  if (us < 10) return;
 
   if (startWaitingTime < stopWaitingTime) {
     do{

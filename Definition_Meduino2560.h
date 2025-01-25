@@ -1,4 +1,4 @@
-// Meduino version with MOSFETs driven by push pup resistor and transistor
+// Arduino Meduino 2560
 #define NUMBER_OF_THERMISTORS 6
 #define NUMBER_OF_FANS 12
 #define NUMBER_OF_MAINBOARD_CONNECTORS 6
@@ -82,11 +82,9 @@
 #define TACH5_1 PORTC |= _BV(PC4)
 #define TACH5_0 PORTC &= ~_BV(PC4)
 
-//PWM frequency of 25000Hz (16000000 / (ICRn*2-2))
-word ICRn = 321;
+//PWM frequency of 25000Hz (16000000 / (ICRn*2))
+word ICRn = 320;
 float RATIO = ((float)ICRn)/255;
-unsigned long p = 100;
-unsigned long P = 255 * (255 + p);
 
 void setRatio(word parameter){
   ICRn = parameter;
@@ -252,16 +250,16 @@ switch (fanNumber) {
 
 void setTimers(){
 
-  TCCR1B = TCCR2B = TCCR3B = TCCR4B = TCCR5B = 0;
+  TCCR0A = TCCR1A = TCCR2A = TCCR3A = TCCR4A = TCCR5A = 0;
+  TCCR0B = TCCR1B = TCCR2B = TCCR3B = TCCR4B = TCCR5B = 0;
   TCNT1 = TCNT2 = TCNT3 = TCNT4 = TCNT5 = 0;
   
   //---------------------------------------------- Set PWM frequency for T0 -------------------------------
-  // put timer 0 in CTC mode
-  TCCR0A = (1 << WGM01);
+  TCCR0A = (1 << WGM01);                        // put timer 0 in CTC mode
 
   OCR0A = 249;
-  TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 0 divisor to    64 for PWM frequency of 1000 Hz (16000000 / (64 * (OCR0A+1)))
-  TIMSK0 = (1 << OCIE0A);
+  TCCR0B = B00000011;                           // set timer 0 divisor to    64 for PWM frequency of 1000 Hz (16000000 / (64 * (OCR0A+1)))
+  TIMSK0 = (1 << OCIE0A);                       // enable TIMER0_COMPA interrupt
   // put timer 0 in 8-bit fast hardware pwm mode
   //TCCR0A = (1 << WGM00) | (1 << WGM01);
   // timer 0 is in 8-bit fast hardware pwm mode
@@ -278,10 +276,11 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T1 ------------------------------------
   ICR1 = ICRn;
-  TCCR1B = B00010001;    // set timer 1 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
+  TCCR1B = B00010001;    // set timer 1 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T2 ------------------------------------
-  TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR2A = (1 << WGM20);                        // put timer 2 in 8-bit phase correct pwm mode
+  TCCR2B = TCCR2B & B11111000 | B00000001;      // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000011;    // set timer 2 divisor to    32 for PWM frequency of   980.39 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000100;    // set timer 2 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
@@ -290,73 +289,25 @@ void setTimers(){
   //TCCR2B = TCCR2B & B11111000 | B00000111;    // set timer 2 divisor to  1024 for PWM frequency of    30.64 Hz
   //---------------------------------------------- Set PWM frequency for T3 ------------------------------------
   ICR3 = ICRn;
-  TCCR3B = B00010001;    // set timer 3 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
+  TCCR3B = B00010001;    // set timer 3 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T4 ------------------------------------
   ICR4 = ICRn;
-  TCCR4B = B00010001;    // set timer 4 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
+  TCCR4B = B00010001;    // set timer 4 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
   delayMicroseconds(8);
   //---------------------------------------------- Set PWM frequency for T5 ------------------------------------
   ICR5 = ICRn;
-  TCCR5B = B00010001;    // set timer 5 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2-2))
+  TCCR5B = B00010001;    // set timer 5 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
 
   // set pwm outputs to zero
   for(byte i = 0; i < NUMBER_OF_FANS; i++){
     writePwmValue(i, 0);
   }
 
-  // connect timers to output pins, set timer 2 PWM mode
-  TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << COM1C1);
-  TCCR2A = (1 << COM2A1) | (1 << COM2B1) | (1 << WGM20);
-  TCCR3A = (1 << COM3A1);
-  TCCR4A = (1 << COM4A1) | (1 << COM4B1) | (1 << COM4C1);
-  TCCR5A = (1 << COM5A1) | (1 << COM5B1) | (1 << COM5C1);
-}
-
-//compensate non-linearity of outputs
-// y=x*(x+p)*ymax/(xmax*(xmax+p))
-// y = x * (x + p) * ICRn /(255 * (255 + p))
-word countRealVal(unsigned int val){
-  return (val * ((val + p) * ICRn)) / P;
-}
-
-void writePwmValue(byte fanNumber, byte val) {
-  switch(fanNumber) {
-    case 0:
-      OCR3A = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 1:
-      OCR4B = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 2:
-      OCR4A = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 3:
-      OCR2B = 255 - val; // set pwm duty
-      break;
-    case 4:
-      OCR4C = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 5:
-      OCR1A = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 6:
-      OCR2A = 255 - val; // set pwm duty
-      break;
-    case 7:
-      OCR1B = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 8:
-      OCR1C = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 9:
-      OCR5B = ICRn - (word)(val*RATIO); // set pwm duty
-      break;
-    case 10:
-      OCR5C = countRealVal(val); // set pwm duty
-      break;
-    case 11:
-      OCR5A = countRealVal(val); // set pwm duty
-      break;
-  }
+  // connect timers to output pins
+  TCCR1A = (1 << COM1A0) | (1 << COM1A1) | (1 << COM1B0) | (1 << COM1B1) | (1 << COM1C0) | (1 << COM1C1);
+  TCCR2A |= (1 << COM2A0) | (1 << COM2A1) | (1 << COM2B0) | (1 << COM2B1);
+  TCCR3A = (1 << COM3A0) | (1 << COM3A1);
+  TCCR4A = (1 << COM4A0) | (1 << COM4A1) | (1 << COM4B0) | (1 << COM4B1) | (1 << COM4C0) | (1 << COM4C1);
+  TCCR5A = (1 << COM5A0) | (1 << COM5A1) | (1 << COM5B0) | (1 << COM5B1) | (1 << COM5C0)| (1 << COM5C1);
 }

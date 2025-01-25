@@ -146,7 +146,7 @@ void measureInterrupts(){
   Serial.print(F("m2:"));
   Serial.print(m2);
   Serial.println(F("us"));
-  Serial.print(F("Interrupts(except TIMER0_OVF) occupy "));
+  Serial.print(F("Interrupts occupy "));
   Serial.print(percentage, 2);
   Serial.println(F("% of processor time"));
 }

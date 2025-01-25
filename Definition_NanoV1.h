@@ -1,3 +1,4 @@
+// Arduino NANO
 #define NUMBER_OF_THERMISTORS 2
 #define NUMBER_OF_FANS 6
 #define NUMBER_OF_MAINBOARD_CONNECTORS 5
@@ -11,9 +12,6 @@
 #define CACHE_T_SIZE 4
 // size of PWM by temperature or RPM by temperature cache. Size is 2^CACHE_PWM_SIZE - value 2 means 4 records
 #define CACHE_PWM_SIZE 2
-
-//by multimeter
-//#define ANALOGREFERENCEVOLTAGE 3.3
 
 #define RPMSENSOR0 7
 #define RPMSENSOR1 8
@@ -42,7 +40,7 @@
 #define TACH0_1 PORTB |= _BV(PB5)
 #define TACH0_0 PORTB &= ~_BV(PB5)
 
-#define ICRn 320
+#define ICRn 639
 float RATIO = ((float)ICRn)/255;
 
 void setPinsIO(){
@@ -147,7 +145,7 @@ switch (fanNumber) {
 }
 
 void setTimers(){
-
+  TCCR0A = TCCR1A = TCCR2A = 0;
   TCCR0B = TCCR1B = TCCR2B = 0;
   TCNT0 = TCNT1 = TCNT2 = 0;
   
@@ -162,30 +160,31 @@ void setTimers(){
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 0 divisor to   256 for PWM frequency of   244.14 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 0 divisor to  1024 for PWM frequency of    61.04 Hz
 
+  TCCR0A = (1 << WGM00);                           // put timer 0 in 8-bit phase correct pwm mode
   // timer 0 is in 8-bit phase correct pwm mode
-  TCCR0B = TCCR0B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR0B = B00000001;                           // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR0B = TCCR0B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
-  // enable timer 0 overflow interrupt
-  TIMSK0 |= (1 << TOIE0);
 
   delayMicroseconds(10);
    
   //---------------------------------------------- Set PWM frequency for D9 & D10 ------------------------------
-   ICR1 = 320;
+   ICR1 = ICRn;
    TCCR1A = (1 << WGM11);
-   TCCR1B = B00010001;                          // set timer 1 divisor to 1 for PWM, Phase and Frequency Correct, frequency 25000Hz (16000000 / (ICRn*2))
+   TCCR1B = B00011001;                          // set timer 1 divisor to 1 for fast PWM, frequency 25000Hz (16000000 / (ICR1 + 1))
   //TCCR1B = TCCR1B & B11111000 | B00000001;    // set timer 1 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000010;    // set timer 1 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000011;    // set timer 1 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)
   //TCCR1B = TCCR1B & B11111000 | B00000100;    // set timer 1 divisor to   256 for PWM frequency of   122.55 Hz
   //TCCR1B = TCCR1B & B11111000 | B00000101;    // set timer 1 divisor to  1024 for PWM frequency of    30.64 Hz
+  TIMSK1 |= (1 << TOIE1);                       // enable timer 1 overflow interrupt
+
   delayMicroseconds(10);
-   
   //---------------------------------------------- Set PWM frequency for D3 & D11 ------------------------------
-  TCCR2B = TCCR2B & B11111000 | B00000001;    // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
+  TCCR2A = (1 << WGM20);                        // put timer 2 in 8-bit phase correct pwm mode
+  TCCR2B = B00000001;                           // set timer 2 divisor to     1 for PWM frequency of 31372.55 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000010;    // set timer 2 divisor to     8 for PWM frequency of  3921.16 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000011;    // set timer 2 divisor to    32 for PWM frequency of   980.39 Hz
   //TCCR2B = TCCR2B & B11111000 | B00000100;    // set timer 2 divisor to    64 for PWM frequency of   490.20 Hz (The DEFAULT)

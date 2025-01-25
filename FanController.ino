@@ -11,8 +11,8 @@
   #include "Definition_NanoV1.h"
 #endif
 #if HWversion == 2
-//  #include "Definition_Meduino2560.h"
-  #include "Definition_Meduino2560v2.h"
+  #include "Definition_Meduino2560_push_up.h"
+//  #include "Definition_Meduino2560_MOSFET.h"
 #endif
 
 #include "lib/PID_v1.cpp"
@@ -25,7 +25,6 @@
 #define TIMING_DEBUG
 #define FREE_MEMORY_DEBUG
 
-#define COUNT_MILLLIS_BY_DIVIDE_MICROS
 #define USE_TEMP_CACHE
 #define USE_PWM_CACHE
 #define CALIBRATE_THERMISTORS
@@ -209,7 +208,7 @@ void measureInterrupts();
 void setICRn(CommandParameter &parameters);
 #endif
 
-CommandHandler<29, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 29 commands, 0 variables
+CommandHandler<29, 10 + CURVE_RPM_POINTS * 8, 0> SerialCommandHandler; // 28 commands, 0 variables
 
 void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("version"), (void (*)(CommandParameter&))printVersionNumber);
@@ -235,7 +234,6 @@ void setSerialCommandHandler(){
   SerialCommandHandler.AddCommand(F("cacheStatus"), (void (*)(CommandParameter&))cacheStatus);
   SerialCommandHandler.AddCommand(F("wd"), (void (*)(CommandParameter&))wd);
 #ifdef TIMING_DEBUG
-  SerialCommandHandler.AddCommand(F("time"), (void (*)(CommandParameter&))sendTime);
   SerialCommandHandler.AddCommand(F("timing"), (void (*)(CommandParameter&))timing);
   SerialCommandHandler.AddCommand(F("mi"), (void (*)(CommandParameter&))measureInterrupts);
 #endif
