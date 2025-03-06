@@ -38,16 +38,19 @@ unsigned long millis() {
 
 unsigned long seconds() {
   unsigned long m;
+  unsigned long e;
   uint8_t oldSREG = SREG;
   
   cli();
-  m = (timer1_overflow_count_extra_byte << 24) | (timer1_overflow_count >> 8);
-
+  m = timer1_overflow_count;
+  e = timer1_overflow_count_extra_byte;
   SREG = oldSREG;
+
+  m = (e << 24) | (m >> 8);
   //     32 * m
   // ~ ---------
-  //      3125
-  long seconds =  ((m >> 7) + (m >> 9) + (m >> 11) - (m >> 16));
+  //      3125  
+  long seconds =  (m >> 7) + (m >> 9) + (m >> 11) - (m >> 16);
   return seconds + ((seconds >> 6) * microsecondPerSecond) / 15625;
 }
 
@@ -98,7 +101,7 @@ unsigned long micros() {
 
 unsigned long seconds() {
   unsigned long m;
-  unsigned char e;
+  unsigned long e;
   uint8_t oldSREG = SREG;
 
   cli();
@@ -106,11 +109,11 @@ unsigned long seconds() {
   e = timer0_millis_extra_byte;
   SREG = oldSREG;
 
-  m = (e << 22) | (m >> 10);
-//    128 * m          192 * (m >> 6)                     134 * (m >> 7)                               144 * (m >> 11)                                           152 * (m >> 14)                                                       216 * (m >> 17)                                                                   182 * (m >> 18)
-// ~ --------- = m + ----------------- = m + (m >> 6) + ----------------- = m + (m >> 6) + (m >> 7) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + ----------------- = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + (m >> 17) + -----------------
-//     125                 125                                125                                           125                                                        125                                                                   125                                                                              125
-  long seconds = m + (m >> 6) + (m >> 7) + (m >> 11) + (m >> 14) + (m >> 17) + (m >> 18);
+  m = (e << 24) | (m >> 8);
+//    32 * m      125 * (m >> 2) + 3 * (m >> 2)                192 * (m >> 8)                            134 * (m >> 9)                                       144 * (m >> 13)                                                 152 * (m >> 16)
+// ~ --------- = ------------------------------ = (m >> 2) + ----------------  = (m >> 2) + (m >> 8) + ----------------- = (m >> 2) + (m >> 8) + (m >> 9) + ----------------- = (m >> 2) + (m >> 8) + (m >> 9) + (m >> 13) + -----------------
+//     125                125                                      125                                       125                                                  125                                                              125
+  long seconds = (m >> 2) + (m >> 8) + (m >> 9) + (m >> 13);
   return seconds + ((seconds >> 6) * microsecondPerSecond) / 15625;
 }
 
