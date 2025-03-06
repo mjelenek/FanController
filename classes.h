@@ -76,14 +76,14 @@ public:
 
   void set(byte pwmDrive1, byte powerInNumber1, byte constPwm1, byte tSelect1, unsigned short constRpm1, byte kp1, byte ki1, byte kd1, byte minPidPwm1)
   {
-    if(powerInNumber1 >= 0 && powerInNumber1 < NUMBER_OF_MAINBOARD_CONNECTORS){
+    if(powerInNumber1 < NUMBER_OF_MAINBOARD_CONNECTORS){
       setPowerInNumber(powerInNumber1);
     }
-    if(pwmDrive1 >= 0 && pwmDrive1 <= 4){
+    if(pwmDrive1 <= 4){
       setPwmDrive(pwmDrive1);
     }
     constPwm = constPwm1;
-    if(tSelect1 >= 0 && tSelect1 < (1 << NUMBER_OF_THERMISTORS)){
+    if(tSelect1 < (1 << NUMBER_OF_THERMISTORS)){
       tSelect = tSelect1;
     }
     constRpm = constRpm1;
@@ -189,7 +189,7 @@ class ThermistorDefinition
 
   void Set(unsigned short rb, unsigned char t, unsigned short r, unsigned short b){
     if(rb < 9000 || rb >= 11000) return;
-    if(t < 0 || t >= 100) return;
+    if(t >= 100) return;
     if(r < 3000 || r >= 50000) return;
     if(b < 1000 || b >= 10000) return;
     resistanceOnBoard = rb;

@@ -166,7 +166,7 @@ void setFanConfiguration(CommandParameter &parameters){
   byte ki = parameters.NextParameterAsInteger();
   byte kd = parameters.NextParameterAsInteger();
   byte minPidPwm = parameters.NextParameterAsInteger();
-  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+  if(pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).set(pwmDrive, powerInNumber, constPwm, tSelect, constRPM, kp, ki, kd, minPidPwm);
     pid[pwmChannel].SetTunings((double) kp / 200, (double) ki / 200, (double) kd / 200);
     pid[pwmChannel].SetOutputLimits(ConfigurationPWM(pwmChannel).minPidPwm, 255);
@@ -197,7 +197,7 @@ void setPowerInCurve(CommandParameter &parameters){
     powerIn[i] = parameters.NextParameterAsInteger( 0 );
     pwm[i] = parameters.NextParameterAsInteger( 0 );
   }
-  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+  if(pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).setPowerInCurve(CURVE_ANALOG_POINTS, powerIn, pwm);
 #ifdef USE_PWM_CACHE
     cacheFan[pwmChannel].clear();
@@ -215,7 +215,7 @@ void setPwmCurve(CommandParameter &parameters){
     t[i] = parameters.NextParameterAsInteger( 0 );
     pwm[i] = parameters.NextParameterAsInteger( 0 );
   }
-  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+  if(pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).setPWMCurve(CURVE_PWM_POINTS, t, pwm);
 #ifdef USE_PWM_CACHE
     cacheFan[pwmChannel].clear();
@@ -233,7 +233,7 @@ void setRpmCurve(CommandParameter &parameters){
     t[i] = parameters.NextParameterAsInteger( 0 );
     rpm[i] = parameters.NextParameterAsInteger( 0 );
   }
-  if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+  if(pwmChannel < NUMBER_OF_FANS){
     ConfigurationPWM(pwmChannel).setRPMCurve(CURVE_RPM_POINTS, t, rpm);
 #ifdef USE_PWM_CACHE
     cacheFan[pwmChannel].clear();
@@ -249,7 +249,7 @@ void disableFan(CommandParameter &parameters){
     if(pwmChannel == 255 || delayParam == 255)
       return;
 
-    if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+    if(pwmChannel < NUMBER_OF_FANS){
       pwmDisabled[pwmChannel] = delayParam;
     }
   }
@@ -263,7 +263,7 @@ void sendPidUpdates(CommandParameter &parameters){
     if(pwmChannel == 255 || numberOfUpdates == 255)
       return;
 
-    if(pwmChannel >= 0 && pwmChannel < NUMBER_OF_FANS){
+    if(pwmChannel < NUMBER_OF_FANS){
       updatesRTToSend[pwmChannel] = numberOfUpdates;
     }
   }
@@ -278,7 +278,7 @@ void setConfiguration(CommandParameter &parameters){
 
   short ups = parameters.NextParameterAsInteger( 0 );
 
-  if(h >= 0 && h <= 100){
+  if(h <= 100){
     hysteresis = h;
   }
 
@@ -289,7 +289,7 @@ void setConfiguration(CommandParameter &parameters){
   byte i = 0;
   while(1){
     byte select = parameters.NextParameterAsInteger( 255 );
-    if(select >= 0 && select < NUMBER_OF_FANS && i < NUMBER_OF_RPM_TO_MAINBOARD){
+    if(select < NUMBER_OF_FANS && i < NUMBER_OF_RPM_TO_MAINBOARD){
       rmpToMainboard(i++) = select;
     } else {
       return;

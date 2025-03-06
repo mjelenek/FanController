@@ -80,7 +80,7 @@ void setThermistor(CommandParameter &parameters){
   if(eeprom_busy) return;   //update not allowed during save configuration to EEPROM
 
   byte thermistorNumber = parameters.NextParameterAsInteger();
-  if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
+  if(thermistorNumber >= NUMBER_OF_THERMISTORS) return;
   
   unsigned short resistanceOnBoard = parameters.NextParameterAsInteger(10000);
   byte tempNominal = parameters.NextParameterAsInteger(25);
@@ -96,10 +96,10 @@ void setThermistor(CommandParameter &parameters){
 void setTemp(CommandParameter &parameters){
   while(1){
     byte thermistorNumber = parameters.NextParameterAsInteger(255);
-    if(thermistorNumber < 0 || thermistorNumber >= NUMBER_OF_THERMISTORS) return;
+    if(thermistorNumber >= NUMBER_OF_THERMISTORS) return;
     
     unsigned char fakeTemperature = parameters.NextParameterAsInteger(0);
-    if(fakeTemperature >= 0 && fakeTemperature <= MAX_ALLOWED_TEMP){
+    if(fakeTemperature <= MAX_ALLOWED_TEMP){
       fakeTemp[thermistorNumber] = fakeTemperature;
     }
   }
@@ -115,7 +115,7 @@ void setCalibrateRNominal(CommandParameter &parameters)
     if(tempExpectedInt == 2550 || thermistorNumber == 255)
       return;
 
-    if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
+    if(thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
       calibrateR[thermistorNumber] = 20;
     }
   }
@@ -130,7 +130,7 @@ void setCalibrateB(CommandParameter &parameters)
     if(tempExpectedInt == 2550 || thermistorNumber == 255)
       return;
 
-    if(thermistorNumber >= 0 && thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
+    if(thermistorNumber < NUMBER_OF_THERMISTORS && TConnected[thermistorNumber]){
       calibrateBeta[thermistorNumber] = 20;
     }
   }
